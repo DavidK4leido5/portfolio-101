@@ -5,7 +5,7 @@ import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
 import { QUALITY } from '../lib/quality'
-import { CAM_BASE, clusterState, hotspotWorld, rotateY, uniforms } from './shared'
+import { CAM_BASE, clusterState, dofState, hotspotWorld, rotateY, uniforms } from './shared'
 
 // time-accurate transitions even when the frame rate tanks
 gsap.ticker.lagSmoothing(0)
@@ -49,6 +49,8 @@ export function CameraRig() {
         .to(look, { x: 0, y: 0, z: 0, duration: dur * 0.8, ease: 'power2.inOut' }, '<')
         .to(uniforms.uTravel, { value: 0, duration: dur * 0.6, ease: 'power2.out' }, '<')
         .to(uniforms.uDim, { value: 0, duration: 0.9, ease: 'power2.out' }, '<')
+        .to(uniforms.uConstel, { value: 0, duration: 0.5, ease: 'power2.in' }, 0)
+        .to(dofState, { bokeh: 0, duration: 0.8, ease: 'power2.out' }, 0)
       tl.eventCallback('onUpdate', () => camera.lookAt(look))
       tlRef.current = tl
       return
@@ -60,11 +62,14 @@ export function CameraRig() {
       const lookT = hotspotWorld(i, new Vector3())
       const dest = lookT.clone().add(rotateY(sections[i].cameraOffset, tmpOff))
       const tl = gsap.timeline({ onComplete: () => useSceneStore.getState().arrive() })
+      dofState.focus = dest.distanceTo(lookT)
       tl.to(camera.position, { z: `+=${reduced ? 0 : 0.9}`, duration: reduced ? 0.01 : 0.5, ease: 'power2.out' })
         .to(camera.position, { x: dest.x, y: dest.y, z: dest.z, duration: dur, ease: 'power4.inOut' })
         .to(look, { x: lookT.x, y: lookT.y, z: lookT.z, duration: dur * 0.85, ease: 'power3.inOut' }, '<')
         .to(uniforms.uTravel, { value: 1, duration: dur * 0.7, ease: 'power2.in' }, '<')
         .to(uniforms.uDim, { value: 0.85, duration: 0.8, ease: 'power2.out' }, '<')
+        .to(uniforms.uConstel, { value: 1, duration: 1.1, ease: 'power2.out' }, 0.5 + dur * 0.55)
+      if (cfg.dof) tl.to(dofState, { bokeh: cfg.dofBokeh, duration: 1.2, ease: 'power2.out' }, 0.5 + dur * 0.5)
       tl.eventCallback('onUpdate', () => camera.lookAt(look))
       tlRef.current = tl
     }

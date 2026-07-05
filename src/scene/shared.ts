@@ -18,6 +18,14 @@ export const uniforms = {
   uHovered: { value: -1 },
   uActive: { value: -1 },
   uSize: { value: 1 },
+  uConstel: { value: 0 },
+  uSectionColors: { value: sections.map((s) => new Color(s.color)) },
+}
+
+export const dofState = { focus: 3, bokeh: 0 }
+
+if (import.meta.env.DEV) {
+  ;(window as unknown as Record<string, unknown>).__scene = { uniforms, dofState }
 }
 
 export function hotspotWorld(i: number, out: Vector3): Vector3 {

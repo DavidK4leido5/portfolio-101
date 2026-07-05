@@ -1,7 +1,21 @@
-import { AdditiveBlending } from 'three'
+import { useEffect, useMemo } from 'react'
+import { AdditiveBlending, ShaderMaterial } from 'three'
 import { sections } from '../data/sections'
 import { uniforms } from './shared'
 import { particleVert, particleFrag } from './shaders'
+
+// new ShaderMaterial({ uniforms }) shares the object by reference;
+// the R3F uniforms prop clones holders, silently disconnecting shared updates.
+export function makeMaterial(vertexShader: string, fragmentShader: string): ShaderMaterial {
+  return new ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms,
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+  })
+}
 
 export interface Cloud {
   positions: Float32Array
@@ -59,21 +73,15 @@ export function makeCloud(count: number): Cloud {
 }
 
 export function NeuralCluster({ cloud }: { cloud: Cloud }) {
+  const material = useMemo(() => makeMaterial(particleVert, particleFrag), [])
+  useEffect(() => () => material.dispose(), [material])
   return (
-    <points frustumCulled={false}>
+    <points frustumCulled={false} material={material}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[cloud.positions, 3]} />
         <bufferAttribute attach="attributes-aSeed" args={[cloud.seeds, 1]} />
         <bufferAttribute attach="attributes-aAffinity" args={[cloud.affinity, 1]} />
       </bufferGeometry>
-      <shaderMaterial
-        vertexShader={particleVert}
-        fragmentShader={particleFrag}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={AdditiveBlending}
-      />
     </points>
   )
 }

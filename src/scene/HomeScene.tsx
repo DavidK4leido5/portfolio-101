@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Group, Vector2, Vector3, Color } from 'three'
+import { Group, Mesh, Vector2, Vector3, Color } from 'three'
 import { QUALITY } from '../lib/quality'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
 import { uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
 import { NeuralCluster, makeCloud } from './NeuralCluster'
-import { ConnectionSystem } from './ConnectionSystem'
+import { ConnectionSystem, Constellation } from './ConnectionSystem'
 import { CameraRig } from './CameraRig'
 import { PostProcessing } from './PostProcessing'
 
@@ -24,8 +24,8 @@ function SceneUniforms() {
     uniforms.uHovered.value = s.hoveredSection ? SECTION_IDS.indexOf(s.hoveredSection) : -1
     uniforms.uActive.value = s.activeSection ? SECTION_IDS.indexOf(s.activeSection) : -1
     if (s.phase === 'idle') {
-      const target = s.hoveredSection ? 0.6 : 0
-      uniforms.uDim.value += (target - uniforms.uDim.value) * 0.06
+      const target = s.hoveredSection ? 0.72 : 0
+      uniforms.uDim.value += (target - uniforms.uDim.value) * 0.08
     }
     if ((frame++ & 31) === 0) document.documentElement.style.setProperty('--accent', accentHex(t))
   })
@@ -57,6 +57,27 @@ function ClusterGroup({ children }: { children: React.ReactNode }) {
     if (ref.current) ref.current.rotation.y = clusterState.rotation
   })
   return <group ref={ref}>{children}</group>
+}
+
+// Every scene material is depthWrite:false, so the depth buffer is empty and DoF
+// would blur uniformly. This invisible camera-facing disc writes depth exactly at
+// the hotspot distance, giving DepthOfField a sharp region. colorWrite:false = never visible.
+function DepthProxy() {
+  const active = useSceneStore((s) => s.activeSection)
+  const camera = useThree((s) => s.camera)
+  const ref = useRef<Mesh>(null)
+  useFrame(() => {
+    if (!ref.current || !active) return
+    hotspotWorld(SECTION_IDS.indexOf(active), ref.current.position)
+    ref.current.quaternion.copy(camera.quaternion)
+  })
+  if (!active) return null
+  return (
+    <mesh ref={ref} renderOrder={999}>
+      <circleGeometry args={[2.0, 24]} />
+      <meshBasicMaterial colorWrite={false} />
+    </mesh>
+  )
 }
 
 function Dust({ count }: { count: number }) {
@@ -105,7 +126,9 @@ export function HomeScene() {
       <ClusterGroup>
         <NeuralCluster cloud={cloud} />
         <ConnectionSystem cloud={cloud} />
+        <Constellation cloud={cloud} />
       </ClusterGroup>
+      <DepthProxy />
       <Dust count={cfg.dust} />
       <gridHelper args={[36, 48, '#1c2033', '#151827']} position={[0, -3.4, 0]} material-transparent material-opacity={0.35} />
       <CameraRig />

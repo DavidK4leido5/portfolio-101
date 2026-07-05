@@ -37,6 +37,28 @@ const fps = await desktop.evaluate(
   }),
 )
 console.log(`desktop fps (headless, software GL): ~${fps}`)
+
+// One desktop navigation: constellation reveal + DoF must engage on arrival
+const readFx = () => desktop.evaluate(() => ({
+  constel: window.__scene?.uniforms.uConstel.value ?? -1,
+  bokeh: window.__scene?.dofState.bokeh ?? -1,
+}))
+await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: 30000 })
+await desktop.click('[data-section="projects"]', { force: true })
+await desktop.waitForSelector('[data-testid="overlay-title"]', { timeout: 90000 })
+await desktop.waitForTimeout(300)
+let fx = await readFx()
+if (!(fx.constel > 0.95)) fail(`desktop arrived: uConstel=${fx.constel}, expected >0.95`)
+else console.log('ok: constellation revealed on arrival')
+if (!(fx.bokeh > 0.5)) fail(`desktop arrived: dof bokeh=${fx.bokeh}, expected >0.5`)
+else console.log('ok: DoF engaged on arrival')
+await desktop.keyboard.press('Escape')
+await desktop.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: 90000 })
+await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: 90000 })
+fx = await readFx()
+if (!(fx.constel < 0.05)) fail(`desktop returned: uConstel=${fx.constel}, expected <0.05`)
+if (!(fx.bokeh < 0.05)) fail(`desktop returned: dof bokeh=${fx.bokeh}, expected <0.05`)
+if (fx.constel < 0.05 && fx.bokeh < 0.05) console.log('ok: constellation + DoF dissolved on return')
 await desktop.close()
 
 // Mobile tier: full navigation loop (light enough for software GL to animate in real time)
@@ -59,6 +81,13 @@ for (let loop = 1; loop <= LOOPS; loop++) {
     const title = (await page.textContent('[data-testid="overlay-title"]'))?.trim().toLowerCase()
     if (title !== s) fail(`section ${s}: overlay title was "${title}"`)
     else console.log(`ok: ${s} overlay shown`)
+    await page.waitForTimeout(200)
+    const mfx = await page.evaluate(() => ({
+      constel: window.__scene?.uniforms.uConstel.value ?? -1,
+      bokeh: window.__scene?.dofState.bokeh ?? -1,
+    }))
+    if (!(mfx.constel > 0.95)) fail(`section ${s}: uConstel=${mfx.constel}, expected >0.95`)
+    if (mfx.bokeh !== 0) fail(`section ${s}: mobile tier dof bokeh=${mfx.bokeh}, expected 0`)
     await page.click('[data-testid="overlay-back"]')
     await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: 30000 })
   }

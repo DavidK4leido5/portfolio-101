@@ -53,6 +53,9 @@ uniform float uDim;
 uniform float uTravel;
 uniform float uHovered;
 uniform float uActive;
+uniform float uConstel;
+uniform vec3 uAccent;
+uniform vec3 uSectionColors[5];
 attribute float aSeed;
 attribute float aAffinity;
 
@@ -64,11 +67,19 @@ vec3 displace(vec3 pos, float seed){
     snoise(pos*0.32+vec3(0.0,t+37.2,7.1)),
     snoise(pos*0.32+vec3(29.3,0.0,t+91.7))
   );
+  // 2nd octave: large-scale slow swell, small weight
+  p+=0.12*vec3(
+    snoise(pos*0.07+vec3(uTime*0.03,5.0,0.0)),
+    snoise(pos*0.07+vec3(0.0,uTime*0.03+11.0,3.0)),
+    snoise(pos*0.07+vec3(7.0,0.0,uTime*0.03+23.0))
+  );
   p+=0.035*vec3(
     sin(uTime*(1.2+seed*1.6)+seed*6.2831853),
     sin(uTime*(1.0+seed*1.3)+seed*4.7),
     sin(uTime*(1.4+seed*1.1)+seed*2.3)
   );
+  // radial breathing: +-1.5%, ripples outward from the core
+  p*=1.0+0.015*sin(uTime*0.35-length(pos)*0.4);
   p.x+=uMouse.x*0.12*(0.3+seed*0.7);
   p.y+=uMouse.y*0.12*(0.3+seed*0.7);
   return p;
@@ -79,12 +90,17 @@ float targetMix(float affinity){
   if(sel<0.0) return -1.0;
   return step(abs(affinity-sel),0.5);
 }
+
+vec3 sectionColor(float affinity){
+  return affinity>=0.0?uSectionColors[int(affinity+0.5)]:uAccent;
+}
 `
 
 export const particleVert = /* glsl */ `
 uniform float uSize;
 varying float vGlow;
 varying float vAlpha;
+varying vec3 vColor;
 ${NOISE}
 ${MOTION}
 void main(){
@@ -97,7 +113,12 @@ void main(){
   float pulse=0.72+0.28*sin(uTime*2.5+aSeed*6.2831853);
   float hotspotBoost=aAffinity>=0.0?1.2:1.0;
   vGlow=bright*hotspotBoost;
-  vAlpha=(0.3+0.7*aSeed)*pulse*travelFade*0.7;
+  // recede the focused section's own particles while its constellation is revealed
+  vAlpha=(0.3+0.7*aSeed)*pulse*travelFade*0.7*(1.0-uConstel*0.35*isT);
+  vec3 secCol=sectionColor(aAffinity);
+  vec3 base=mix(uAccent,secCol,aAffinity>=0.0?0.5:0.0);
+  float lit=isT*hasSel*min(uDim*1.6,1.0);
+  vColor=mix(base,secCol*1.5,lit);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   gl_PointSize=uSize*(1.2+aSeed*2.2)*(0.85+0.3*pulse)*(34.0/-mv.z);
   gl_Position=projectionMatrix*mv;
@@ -106,13 +127,13 @@ void main(){
 
 export const particleFrag = /* glsl */ `
 precision highp float;
-uniform vec3 uAccent;
 varying float vGlow;
 varying float vAlpha;
+varying vec3 vColor;
 void main(){
   float d=length(gl_PointCoord-0.5)*2.0;
   float a=pow(max(0.0,1.0-d),2.6);
-  vec3 col=mix(uAccent,vec3(1.0),pow(a,3.0)*0.55);
+  vec3 col=mix(vColor,vec3(1.0),pow(a,3.0)*0.55);
   gl_FragColor=vec4(col*vGlow,a*vAlpha);
   if(gl_FragColor.a<0.01) discard;
 }
@@ -120,6 +141,7 @@ void main(){
 
 export const connectionVert = /* glsl */ `
 varying float vAlpha;
+varying vec3 vColor;
 ${NOISE}
 ${MOTION}
 void main(){
@@ -130,16 +152,82 @@ void main(){
   float bright=mix(1.0,mix(0.12,1.4,isT),uDim*hasSel);
   float travelFade=1.0-uTravel*0.9*(1.0-isT);
   float pulse=0.5+0.5*sin(uTime*1.3+aSeed*6.2831853);
-  vAlpha=0.085*(0.35+0.65*pulse)*bright*travelFade;
+  // damp focused-section lines while arrived so the constellation reads clearly
+  vAlpha=0.085*(0.35+0.65*pulse)*bright*travelFade*(1.0-uConstel*0.9*isT);
+  vec3 secCol=sectionColor(aAffinity);
+  vec3 base=mix(uAccent,secCol,aAffinity>=0.0?0.25:0.0);
+  float lit=isT*hasSel*min(uDim*1.6,1.0);
+  vColor=mix(base,secCol*1.25,lit)*1.15;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
 }
 `
 
 export const connectionFrag = /* glsl */ `
 precision highp float;
-uniform vec3 uAccent;
 varying float vAlpha;
+varying vec3 vColor;
 void main(){
-  gl_FragColor=vec4(uAccent*1.15,vAlpha);
+  gl_FragColor=vec4(vColor,vAlpha);
+}
+`
+
+export const constellationLineVert = /* glsl */ `
+attribute float aOrder;
+varying float vAlpha;
+varying vec3 vColor;
+${NOISE}
+${MOTION}
+void main(){
+  vec3 p=displace(position,aSeed);
+  float sec=uActive>=0.0?step(abs(aAffinity-uActive),0.5):0.0;
+  float reveal=smoothstep(aOrder,aOrder+0.08,uConstel);
+  vAlpha=sec*reveal*0.9;
+  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.45);
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
+}
+`
+
+export const constellationLineFrag = /* glsl */ `
+precision highp float;
+varying float vAlpha;
+varying vec3 vColor;
+void main(){
+  gl_FragColor=vec4(vColor*3.0,vAlpha);
+}
+`
+
+export const constellationStarVert = /* glsl */ `
+uniform float uSize;
+attribute float aOrder;
+varying float vAlpha;
+varying vec3 vColor;
+${NOISE}
+${MOTION}
+void main(){
+  vec3 p=displace(position,aSeed);
+  float sec=uActive>=0.0?step(abs(aAffinity-uActive),0.5):0.0;
+  float reveal=smoothstep(aOrder-0.06,aOrder+0.1,uConstel);
+  vAlpha=sec*reveal;
+  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.65);
+  vec4 mv=modelViewMatrix*vec4(p,1.0);
+  float pop=reveal*(1.6-0.6*reveal);
+  gl_PointSize=min(uSize*5.2*pop*(34.0/-mv.z),72.0);
+  gl_Position=projectionMatrix*mv;
+}
+`
+
+export const constellationStarFrag = /* glsl */ `
+precision highp float;
+varying float vAlpha;
+varying vec3 vColor;
+void main(){
+  vec2 c=gl_PointCoord-0.5;
+  float d=length(c)*2.0;
+  float core=pow(max(0.0,1.0-d),3.0);
+  float fx=pow(max(0.0,1.0-abs(c.x)*4.0),6.0)*max(0.0,1.0-abs(c.y)*3.0);
+  float fy=pow(max(0.0,1.0-abs(c.y)*4.0),6.0)*max(0.0,1.0-abs(c.x)*3.0);
+  float a=min(core+0.7*(fx+fy),1.0);
+  gl_FragColor=vec4(mix(vColor,vec3(1.0),core)*(1.8+1.0*core),a*vAlpha);
+  if(gl_FragColor.a<0.01) discard;
 }
 `
