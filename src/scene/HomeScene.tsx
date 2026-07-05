@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Group, Mesh, Vector2, Vector3, Color } from 'three'
+import { Group, Vector2, Vector3, Color } from 'three'
 import { QUALITY } from '../lib/quality'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
@@ -51,33 +51,30 @@ function Projection() {
   return null
 }
 
+// The whole core moves as one body: layered incommensurate sines give a
+// non-repeating organic sway/bob/breath. Per-node motion stays in the shader.
 function ClusterGroup({ children }: { children: React.ReactNode }) {
   const ref = useRef<Group>(null)
+  useEffect(() => {
+    clusterState.group = ref.current
+    return () => { clusterState.group = null }
+  }, [])
   useFrame(() => {
-    if (ref.current) ref.current.rotation.y = clusterState.rotation
+    const g = ref.current
+    if (!g) return
+    const t = uniforms.uTime.value
+    g.rotation.y = clusterState.rotation
+    g.rotation.x = Math.sin(t * 0.13) * 0.02 + Math.sin(t * 0.071 + 2.0) * 0.012
+    g.rotation.z = Math.sin(t * 0.094 + 1.2) * 0.016
+    g.position.set(
+      Math.sin(t * 0.16 + 0.7) * 0.05,
+      Math.sin(t * 0.21) * 0.08 + Math.sin(t * 0.34 + 1.5) * 0.03,
+      0,
+    )
+    g.scale.setScalar(1 + Math.sin(t * 0.24) * 0.012 + Math.sin(t * 0.11 + 3.0) * 0.008)
+    g.updateMatrixWorld()
   })
   return <group ref={ref}>{children}</group>
-}
-
-// Every scene material is depthWrite:false, so the depth buffer is empty and DoF
-// would blur uniformly. This invisible camera-facing disc writes depth exactly at
-// the hotspot distance, giving DepthOfField a sharp region. colorWrite:false = never visible.
-function DepthProxy() {
-  const active = useSceneStore((s) => s.activeSection)
-  const camera = useThree((s) => s.camera)
-  const ref = useRef<Mesh>(null)
-  useFrame(() => {
-    if (!ref.current || !active) return
-    hotspotWorld(SECTION_IDS.indexOf(active), ref.current.position)
-    ref.current.quaternion.copy(camera.quaternion)
-  })
-  if (!active) return null
-  return (
-    <mesh ref={ref} renderOrder={999}>
-      <circleGeometry args={[2.0, 24]} />
-      <meshBasicMaterial colorWrite={false} />
-    </mesh>
-  )
 }
 
 function Dust({ count }: { count: number }) {
@@ -128,7 +125,6 @@ export function HomeScene() {
         <ConnectionSystem cloud={cloud} />
         <Constellation cloud={cloud} />
       </ClusterGroup>
-      <DepthProxy />
       <Dust count={cfg.dust} />
       <gridHelper args={[36, 48, '#1c2033', '#151827']} position={[0, -3.4, 0]} material-transparent material-opacity={0.35} />
       <CameraRig />

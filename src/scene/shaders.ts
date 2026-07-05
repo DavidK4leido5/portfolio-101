@@ -54,6 +54,7 @@ uniform float uTravel;
 uniform float uHovered;
 uniform float uActive;
 uniform float uConstel;
+uniform float uFocus;
 uniform vec3 uAccent;
 uniform vec3 uSectionColors[5];
 attribute float aSeed;
@@ -67,19 +68,11 @@ vec3 displace(vec3 pos, float seed){
     snoise(pos*0.32+vec3(0.0,t+37.2,7.1)),
     snoise(pos*0.32+vec3(29.3,0.0,t+91.7))
   );
-  // 2nd octave: large-scale slow swell, small weight
-  p+=0.12*vec3(
-    snoise(pos*0.07+vec3(uTime*0.03,5.0,0.0)),
-    snoise(pos*0.07+vec3(0.0,uTime*0.03+11.0,3.0)),
-    snoise(pos*0.07+vec3(7.0,0.0,uTime*0.03+23.0))
-  );
   p+=0.035*vec3(
     sin(uTime*(1.2+seed*1.6)+seed*6.2831853),
     sin(uTime*(1.0+seed*1.3)+seed*4.7),
     sin(uTime*(1.4+seed*1.1)+seed*2.3)
   );
-  // radial breathing: +-1.5%, ripples outward from the core
-  p*=1.0+0.015*sin(uTime*0.35-length(pos)*0.4);
   p.x+=uMouse.x*0.12*(0.3+seed*0.7);
   p.y+=uMouse.y*0.12*(0.3+seed*0.7);
   return p;
@@ -108,17 +101,19 @@ void main(){
   float tm=targetMix(aAffinity);
   float hasSel=tm>=0.0?1.0:0.0;
   float isT=max(tm,0.0);
-  float bright=mix(1.0,mix(0.28,1.55,isT),uDim*hasSel);
-  float travelFade=1.0-uTravel*0.85*(1.0-isT);
+  float emphasis=max(uDim,uFocus);
+  float bright=mix(1.0,mix(0.42,1.7,isT),emphasis*hasSel);
   float pulse=0.72+0.28*sin(uTime*2.5+aSeed*6.2831853);
   float hotspotBoost=aAffinity>=0.0?1.2:1.0;
-  vGlow=bright*hotspotBoost;
-  // recede the focused section's own particles while its constellation is revealed
-  vAlpha=(0.3+0.7*aSeed)*pulse*travelFade*0.7*(1.0-uConstel*0.35*isT);
+  vGlow=bright*hotspotBoost*(1.0+uFocus*0.15*isT);
+  vAlpha=(0.3+0.7*aSeed)*pulse*0.7;
+  vAlpha*=mix(1.0,0.38,uFocus*(1.0-isT)*hasSel);
   vec3 secCol=sectionColor(aAffinity);
   vec3 base=mix(uAccent,secCol,aAffinity>=0.0?0.5:0.0);
-  float lit=isT*hasSel*min(uDim*1.6,1.0);
-  vColor=mix(base,secCol*1.5,lit);
+  float lit=isT*hasSel*min(emphasis*1.6,1.0);
+  vColor=mix(base,secCol*1.65,lit);
+  float grey=(1.0-isT)*hasSel*uFocus;
+  vColor=mix(vColor,vec3(0.38,0.4,0.48),grey*0.55);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   gl_PointSize=uSize*(1.2+aSeed*2.2)*(0.85+0.3*pulse)*(34.0/-mv.z);
   gl_Position=projectionMatrix*mv;
@@ -149,15 +144,17 @@ void main(){
   float tm=targetMix(aAffinity);
   float hasSel=tm>=0.0?1.0:0.0;
   float isT=max(tm,0.0);
-  float bright=mix(1.0,mix(0.12,1.4,isT),uDim*hasSel);
-  float travelFade=1.0-uTravel*0.9*(1.0-isT);
+  float emphasis=max(uDim,uFocus);
+  float bright=mix(1.0,mix(0.38,1.4,isT),emphasis*hasSel);
   float pulse=0.5+0.5*sin(uTime*1.3+aSeed*6.2831853);
-  // damp focused-section lines while arrived so the constellation reads clearly
-  vAlpha=0.085*(0.35+0.65*pulse)*bright*travelFade*(1.0-uConstel*0.9*isT);
+  vAlpha=0.085*(0.35+0.65*pulse)*bright;
+  vAlpha*=mix(1.0,0.32,uFocus*(1.0-isT)*hasSel);
   vec3 secCol=sectionColor(aAffinity);
   vec3 base=mix(uAccent,secCol,aAffinity>=0.0?0.25:0.0);
-  float lit=isT*hasSel*min(uDim*1.6,1.0);
-  vColor=mix(base,secCol*1.25,lit)*1.15;
+  float lit=isT*hasSel*min(emphasis*1.5,1.0);
+  vColor=mix(base,secCol*1.3,lit)*1.15;
+  float grey=(1.0-isT)*hasSel*uFocus;
+  vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
   gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
 }
 `
@@ -181,18 +178,20 @@ void main(){
   vec3 p=displace(position,aSeed);
   float sec=uActive>=0.0?step(abs(aAffinity-uActive),0.5):0.0;
   float reveal=smoothstep(aOrder,aOrder+0.08,uConstel);
-  vAlpha=sec*reveal*0.9;
-  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.45);
+  float shine=1.0+uFocus*0.85;
+  vAlpha=sec*reveal*(0.95+0.35*uFocus);
+  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.45+0.4*uFocus)*shine;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
 }
 `
 
 export const constellationLineFrag = /* glsl */ `
 precision highp float;
+uniform float uFocus;
 varying float vAlpha;
 varying vec3 vColor;
 void main(){
-  gl_FragColor=vec4(vColor*3.0,vAlpha);
+  gl_FragColor=vec4(vColor*(3.2+uFocus*2.5),vAlpha);
 }
 `
 
@@ -207,17 +206,19 @@ void main(){
   vec3 p=displace(position,aSeed);
   float sec=uActive>=0.0?step(abs(aAffinity-uActive),0.5):0.0;
   float reveal=smoothstep(aOrder-0.06,aOrder+0.1,uConstel);
-  vAlpha=sec*reveal;
-  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.65);
+  float shine=1.0+uFocus*0.9;
+  vAlpha=sec*reveal*(1.0+0.25*uFocus);
+  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.65+0.25*uFocus)*shine;
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   float pop=reveal*(1.6-0.6*reveal);
-  gl_PointSize=min(uSize*5.2*pop*(34.0/-mv.z),72.0);
+  gl_PointSize=clamp(uSize*(5.2+2.5*uFocus)*(34.0/-mv.z),14.0,80.0)*pop;
   gl_Position=projectionMatrix*mv;
 }
 `
 
 export const constellationStarFrag = /* glsl */ `
 precision highp float;
+uniform float uFocus;
 varying float vAlpha;
 varying vec3 vColor;
 void main(){
@@ -227,7 +228,7 @@ void main(){
   float fx=pow(max(0.0,1.0-abs(c.x)*4.0),6.0)*max(0.0,1.0-abs(c.y)*3.0);
   float fy=pow(max(0.0,1.0-abs(c.y)*4.0),6.0)*max(0.0,1.0-abs(c.x)*3.0);
   float a=min(core+0.7*(fx+fy),1.0);
-  gl_FragColor=vec4(mix(vColor,vec3(1.0),core)*(1.8+1.0*core),a*vAlpha);
+  gl_FragColor=vec4(mix(vColor,vec3(1.0),core)*(2.0+1.2*core+uFocus),a*vAlpha);
   if(gl_FragColor.a<0.01) discard;
 }
 `

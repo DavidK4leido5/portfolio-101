@@ -1,9 +1,9 @@
-import { Color, Vector2, Vector3 } from 'three'
+import { Color, Vector2, Vector3, type Group } from 'three'
 import { sections } from '../data/sections'
 
 export const CAM_BASE = new Vector3(0, 0.5, 8.5)
 
-export const clusterState = { rotation: 0 }
+export const clusterState: { rotation: number; group: Group | null } = { rotation: 0, group: null }
 
 export const mouse = { x: 0, y: 0 }
 
@@ -19,17 +19,17 @@ export const uniforms = {
   uActive: { value: -1 },
   uSize: { value: 1 },
   uConstel: { value: 0 },
+  uFocus: { value: 0 },
   uSectionColors: { value: sections.map((s) => new Color(s.color)) },
 }
 
-export const dofState = { focus: 3, bokeh: 0 }
-
 if (import.meta.env.DEV) {
-  ;(window as unknown as Record<string, unknown>).__scene = { uniforms, dofState }
+  ;(window as unknown as Record<string, unknown>).__scene = { uniforms }
 }
 
 export function hotspotWorld(i: number, out: Vector3): Vector3 {
   const [x, y, z] = sections[i].position
+  if (clusterState.group) return clusterState.group.localToWorld(out.set(x, y, z))
   const a = clusterState.rotation
   return out.set(x * Math.cos(a) + z * Math.sin(a), y, -x * Math.sin(a) + z * Math.cos(a))
 }

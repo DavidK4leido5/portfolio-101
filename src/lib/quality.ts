@@ -12,23 +12,21 @@ export interface TierConfig {
   bloomIntensity: number
   ca: boolean
   grain: boolean
-  dof: boolean
-  dofBokeh: number
   travelSec: number
 }
 
 export const QUALITY: Record<Tier, TierConfig> = {
   desktop: {
     particles: 4000, maxConnections: 5000, neighbors: 5, maxDist: 1.15, rebuildMs: 600,
-    dust: 180, dpr: 2, bloom: true, bloomIntensity: 0.55, ca: true, grain: true, dof: true, dofBokeh: 3.5, travelSec: 2.8,
+    dust: 180, dpr: 2, bloom: true, bloomIntensity: 0.55, ca: true, grain: true, travelSec: 2.8,
   },
   tablet: {
     particles: 2200, maxConnections: 2600, neighbors: 4, maxDist: 1.25, rebuildMs: 800,
-    dust: 100, dpr: 1.5, bloom: true, bloomIntensity: 0.45, ca: false, grain: false, dof: false, dofBokeh: 0, travelSec: 2.4,
+    dust: 100, dpr: 1.5, bloom: true, bloomIntensity: 0.45, ca: false, grain: false, travelSec: 2.4,
   },
   mobile: {
     particles: 1100, maxConnections: 1200, neighbors: 3, maxDist: 1.35, rebuildMs: 1000,
-    dust: 0, dpr: 1, bloom: false, bloomIntensity: 0, ca: false, grain: false, dof: false, dofBokeh: 0, travelSec: 2.0,
+    dust: 0, dpr: 1, bloom: false, bloomIntensity: 0, ca: false, grain: false, travelSec: 2.0,
   },
 }
 

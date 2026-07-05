@@ -13,8 +13,9 @@ import { makeMaterial, type Cloud } from './NeuralCluster'
 
 const STARS_PER_SECTION = 11
 
-// Deterministic per session: farthest-point sampling spreads the figure,
-// nearest-neighbor walk orders it into a zodiac-like polyline.
+// Deterministic per session: farthest-point sampling spreads the figure, then a
+// minimum spanning tree (Prim) connects it — every line ends on a star, no long
+// crossing jumps, and Prim's insertion order doubles as the draw-in reveal order.
 function buildConstellation(cloud: Cloud) {
   const P = cloud.positions
   const d2 = (a: number, b: number) => {
@@ -22,9 +23,11 @@ function buildConstellation(cloud: Cloud) {
     return dx * dx + dy * dy + dz * dz
   }
 
-  const paths: number[][] = sections.map((sec, s) => {
+  interface Figure { nodes: number[]; nodeOrder: number[]; edges: [number, number][] }
+
+  const figures: Figure[] = sections.map((sec, s) => {
     const [hx, hy, hz] = sec.position
-    const maxR2 = (sec.radius * 1.25) ** 2
+    const maxR2 = (sec.radius * 1.0) ** 2
     const members: number[] = []
     for (let i = 0; i < cloud.count; i++) {
       if (cloud.affinity[i] !== s) continue
@@ -32,7 +35,7 @@ function buildConstellation(cloud: Cloud) {
       // keep the figure compact around the hotspot
       if (dx * dx + dy * dy + dz * dz <= maxR2) members.push(i)
     }
-    if (members.length < 2) return []
+    if (members.length < 2) return { nodes: [], nodeOrder: [], edges: [] }
     const k = Math.min(STARS_PER_SECTION, members.length)
 
     let first = members[0]
@@ -56,23 +59,33 @@ function buildConstellation(cloud: Cloud) {
       for (const [i, d] of minD) minD.set(i, Math.min(d, d2(i, cand)))
     }
 
-    const remaining = new Set(chosen.slice(1))
-    const path = [chosen[0]]
-    while (remaining.size) {
-      const last = path[path.length - 1]
-      let best = -1, bdd = Infinity
-      for (const i of remaining) {
-        const d = d2(i, last)
-        if (d < bdd) { bdd = d; best = i }
+    // Prim's MST over the chosen stars
+    const inTree = [false, ...new Array(k - 1).fill(false)] as boolean[]
+    const best = new Array<number>(k).fill(Infinity)
+    const par = new Array<number>(k).fill(0)
+    const nodeOrder = new Array<number>(k).fill(0)
+    inTree[0] = true
+    for (let i = 1; i < k; i++) best[i] = d2(chosen[i], chosen[0])
+    const edges: [number, number][] = []
+    for (let step = 1; step < k; step++) {
+      let next = -1, bd2 = Infinity
+      for (let i = 1; i < k; i++) {
+        if (!inTree[i] && best[i] < bd2) { bd2 = best[i]; next = i }
       }
-      path.push(best)
-      remaining.delete(best)
+      inTree[next] = true
+      nodeOrder[next] = step
+      edges.push([par[next], next])
+      for (let i = 1; i < k; i++) {
+        if (inTree[i]) continue
+        const d = d2(chosen[i], chosen[next])
+        if (d < best[i]) { best[i] = d; par[i] = next }
+      }
     }
-    return path
+    return { nodes: chosen, nodeOrder, edges }
   })
 
-  const totalEdges = paths.reduce((n, p) => n + Math.max(p.length - 1, 0), 0)
-  const totalStars = paths.reduce((n, p) => n + p.length, 0)
+  const totalEdges = figures.reduce((n, f) => n + f.edges.length, 0)
+  const totalStars = figures.reduce((n, f) => n + f.nodes.length, 0)
   const linePos = new Float32Array(totalEdges * 6)
   const lineSeed = new Float32Array(totalEdges * 2)
   const lineAff = new Float32Array(totalEdges * 2)
@@ -84,17 +97,17 @@ function buildConstellation(cloud: Cloud) {
 
   // 0.85 scale keeps the last vertex fully revealed before uConstel reaches 1
   let e = 0, v = 0
-  paths.forEach((path, s) => {
-    const E = Math.max(path.length - 1, 1)
-    path.forEach((idx, j) => {
+  figures.forEach((f, s) => {
+    const E = Math.max(f.edges.length, 1)
+    f.nodes.forEach((idx, j) => {
       starPos.set(P.subarray(idx * 3, idx * 3 + 3), v * 3)
       starSeed[v] = cloud.seeds[idx]
       starAff[v] = s
-      starOrder[v] = (j / E) * 0.85
+      starOrder[v] = (f.nodeOrder[j] / E) * 0.85
       v++
     })
-    for (let j = 0; j < path.length - 1; j++, e++) {
-      const a = path[j], b = path[j + 1]
+    f.edges.forEach(([ia, ib], j) => {
+      const a = f.nodes[ia], b = f.nodes[ib]
       linePos.set(P.subarray(a * 3, a * 3 + 3), e * 6)
       linePos.set(P.subarray(b * 3, b * 3 + 3), e * 6 + 3)
       lineSeed[e * 2] = cloud.seeds[a]
@@ -103,7 +116,8 @@ function buildConstellation(cloud: Cloud) {
       lineAff[e * 2 + 1] = s
       lineOrder[e * 2] = (j / E) * 0.85
       lineOrder[e * 2 + 1] = ((j + 1) / E) * 0.85
-    }
+      e++
+    })
   })
 
   return { linePos, lineSeed, lineAff, lineOrder, starPos, starSeed, starAff, starOrder }
