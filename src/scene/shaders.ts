@@ -87,6 +87,23 @@ float targetMix(float affinity){
 vec3 sectionColor(float affinity){
   return affinity>=0.0?uSectionColors[int(affinity+0.5)]:uAccent;
 }
+
+// Position + depth + seed palette for core nodes; section affinity tints on top
+vec3 nodePalette(vec3 pos, float seed, float aff, float depth){
+  float d=clamp(depth*0.11,0.0,1.0);
+  float n=snoise(pos*0.22+seed*4.1)*0.5+0.5;
+  float t=fract(pos.y*0.09+pos.x*0.06+pos.z*0.05+n*0.35+seed*0.28);
+  vec3 c1=vec3(0.52,0.36,0.98);
+  vec3 c2=vec3(0.36,0.58,0.96);
+  vec3 c3=vec3(0.38,0.78,0.88);
+  vec3 c4=vec3(0.78,0.40,0.92);
+  vec3 col=t<0.33?mix(c1,c2,t*3.0):(t<0.66?mix(c2,c3,(t-0.33)*3.0):mix(c3,c4,(t-0.66)*3.0));
+  col=mix(col*0.48,col*1.18,1.0-d);
+  col*=0.86+0.28*seed;
+  col=mix(col,uAccent,0.1);
+  if(aff>=0.0) col=mix(col,sectionColor(aff),0.52);
+  return col;
+}
 `
 
 export const particleVert = /* glsl */ `
@@ -108,13 +125,12 @@ void main(){
   vGlow=bright*hotspotBoost*(1.0+uFocus*0.15*isT);
   vAlpha=(0.3+0.7*aSeed)*pulse*0.7;
   vAlpha*=mix(1.0,0.38,uFocus*(1.0-isT)*hasSel);
-  vec3 secCol=sectionColor(aAffinity);
-  vec3 base=mix(uAccent,secCol,aAffinity>=0.0?0.5:0.0);
+  vec4 mv=modelViewMatrix*vec4(p,1.0);
+  vec3 base=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.6,1.0);
-  vColor=mix(base,secCol*1.65,lit);
+  vColor=mix(base,sectionColor(aAffinity)*1.65,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.38,0.4,0.48),grey*0.55);
-  vec4 mv=modelViewMatrix*vec4(p,1.0);
   gl_PointSize=uSize*(1.2+aSeed*2.2)*(0.85+0.3*pulse)*(34.0/-mv.z);
   gl_Position=projectionMatrix*mv;
 }
@@ -149,13 +165,13 @@ void main(){
   float pulse=0.5+0.5*sin(uTime*1.3+aSeed*6.2831853);
   vAlpha=0.085*(0.35+0.65*pulse)*bright;
   vAlpha*=mix(1.0,0.32,uFocus*(1.0-isT)*hasSel);
-  vec3 secCol=sectionColor(aAffinity);
-  vec3 base=mix(uAccent,secCol,aAffinity>=0.0?0.25:0.0);
+  vec4 mv=modelViewMatrix*vec4(p,1.0);
+  vec3 base=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.5,1.0);
-  vColor=mix(base,secCol*1.3,lit)*1.15;
+  vColor=mix(base,sectionColor(aAffinity)*1.3,lit)*1.12;
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
-  gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
+  gl_Position=projectionMatrix*mv;
 }
 `
 

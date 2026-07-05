@@ -124,6 +124,7 @@ export function PortfolioUI() {
             key={s.id}
             data-section={s.id}
             className="indicator"
+            style={{ '--section-color': s.color } as React.CSSProperties}
             ref={(el) => { indicatorEls[i] = el }}
             onMouseEnter={() => setHovered(s.id)}
             onMouseLeave={() => setHovered(null)}
@@ -131,7 +132,8 @@ export function PortfolioUI() {
             onBlur={() => setHovered(null)}
             onClick={() => navigateTo(s.id)}
           >
-            <span className="dot" /><span className="line" /><span className="label">{s.label}</span>
+            <span className="dot" /><span className="line" />
+            <span className="label-wrap"><span className="label">{s.label}</span></span>
           </button>
         ))}
       </div>

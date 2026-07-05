@@ -52,34 +52,50 @@ canvas { display: block; }
   transform: translate(-3px, -50%);
   pointer-events: auto;
   background: none; border: none; cursor: pointer;
-  display: flex; align-items: center; gap: 10px;
-  color: rgba(235, 235, 255, 0.55);
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  padding: 6px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px;
+  --section-color: var(--accent);
 }
 .indicator .dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--section-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--section-color) 70%, transparent);
   flex-shrink: 0;
 }
 .indicator .line {
-  width: 58px; height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0.6;
+  width: 44px; height: 1px;
+  background: linear-gradient(90deg, var(--section-color), transparent);
+  opacity: 0.75;
   flex-shrink: 0;
 }
+.indicator .label-wrap {
+  background: rgba(4, 4, 12, 0.78);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 2px solid var(--section-color);
+  padding: 6px 12px;
+  border-radius: 2px;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.5), 0 0 24px color-mix(in srgb, var(--section-color) 12%, transparent);
+}
 .indicator .label {
-  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
-  transition: color 0.3s, text-shadow 0.3s;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 255, 0.94);
   white-space: nowrap;
+  transition: color 0.25s;
+}
+.indicator:hover .label-wrap,
+.indicator:focus-visible .label-wrap {
+  background: rgba(8, 8, 16, 0.9);
+  border-color: color-mix(in srgb, var(--section-color) 45%, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 2px 22px rgba(0, 0, 0, 0.55), 0 0 28px color-mix(in srgb, var(--section-color) 28%, transparent);
 }
 .indicator:hover .label,
-.indicator:focus-visible .label { color: #fff; text-shadow: 0 0 14px var(--accent); }
-.indicator:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+.indicator:focus-visible .label { color: #fff; }
+.indicator:focus-visible { outline: none; }
+.indicator:focus-visible .label-wrap { outline: 1px solid var(--section-color); outline-offset: 2px; }
 
 .overlay {
   position: absolute; inset: 0;
