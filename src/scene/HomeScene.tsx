@@ -2,14 +2,16 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Group, Vector2, Vector3, Color } from 'three'
 import { QUALITY } from '../lib/quality'
+import { NODE_LIMITS } from '../lib/nodes'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
 import { CAM_BASE, CLUSTER_SCALE, uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
 import { NeuralCluster, makeCloud } from './NeuralCluster'
-import { ConnectionSystem, Constellation } from './ConnectionSystem'
+import { ConnectionSystem } from './ConnectionSystem'
 import { CameraRig } from './CameraRig'
 import { PostProcessing } from './PostProcessing'
+import { IntroSequence } from './IntroSequence'
 
 const tmpMouse = new Vector2()
 let frame = 0
@@ -23,12 +25,21 @@ function SceneUniforms() {
     const s = useSceneStore.getState()
     uniforms.uHovered.value = s.hoveredSection ? SECTION_IDS.indexOf(s.hoveredSection) : -1
     uniforms.uActive.value = s.activeSection ? SECTION_IDS.indexOf(s.activeSection) : -1
-    if (s.phase === 'idle') {
-      const target = s.hoveredSection ? 0.72 : 0
-      uniforms.uDim.value += (target - uniforms.uDim.value) * 0.08
-    }
     if ((frame++ & 31) === 0) document.documentElement.style.setProperty('--accent', accentHex(t))
   })
+  return null
+}
+
+function SceneBoot() {
+  const { gl } = useThree()
+  const tier = useSceneStore((s) => s.qualityTier)
+  const cfg = QUALITY[tier]
+
+  useEffect(() => {
+    gl.setPixelRatio(Math.min(devicePixelRatio, cfg.dpr))
+    useSceneStore.getState().setSceneReady()
+  }, [gl, cfg.dpr])
+
   return null
 }
 
@@ -58,8 +69,9 @@ function separateIndicators(pts: { x: number; y: number }[]) {
 function Projection() {
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
+  const ready = useSceneStore((s) => s.loadPhase === 'ready')
   useFrame(() => {
-    if (frame & 1) return
+    if (!ready || frame & 1) return
     const pts = sections.map((_, i) => {
       hotspotWorld(i, projV).project(camera)
       return {
@@ -88,8 +100,6 @@ function Projection() {
   return null
 }
 
-// The whole core moves as one body: layered incommensurate sines give a
-// non-repeating organic sway/bob/breath. Per-node motion stays in the shader.
 function ClusterGroup({ children }: { children: React.ReactNode }) {
   const ref = useRef<Group>(null)
   useEffect(() => {
@@ -132,10 +142,30 @@ function Dust({ count }: { count: number }) {
   )
 }
 
+function BrainScene({ pool }: { pool: number }) {
+  const cloud = useMemo(() => makeCloud(pool), [pool])
+  useEffect(() => {
+    const s = useSceneStore.getState()
+    uniforms.uNodeCount.value = s.nodeCount
+    if (s.loadPhase === 'ready') {
+      uniforms.uSpawn.value = 1
+      uniforms.uSliderSpawn.value = 1
+      uniforms.uRevealFrom.value = 0
+      uniforms.uConnect.value = 1
+    }
+  }, [pool])
+  return (
+    <ClusterGroup>
+      <NeuralCluster cloud={cloud} />
+      <ConnectionSystem cloud={cloud} />
+    </ClusterGroup>
+  )
+}
+
 export function HomeScene() {
   const tier = useSceneStore((s) => s.qualityTier)
   const cfg = QUALITY[tier]
-  const cloud = useMemo(() => makeCloud(cfg.particles), [cfg])
+  const pool = NODE_LIMITS[tier].pool
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -148,7 +178,6 @@ export function HomeScene() {
 
   return (
     <Canvas
-      key={tier}
       dpr={[1, cfg.dpr]}
       camera={{ position: [CAM_BASE.x, CAM_BASE.y, CAM_BASE.z], fov: 49, near: 0.1, far: 80 }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
@@ -157,14 +186,12 @@ export function HomeScene() {
         camera.lookAt(0, 0, 0)
       }}
     >
+      <SceneBoot />
       <SceneUniforms />
-      <ClusterGroup>
-        <NeuralCluster cloud={cloud} />
-        <ConnectionSystem cloud={cloud} />
-        <Constellation cloud={cloud} />
-      </ClusterGroup>
+      <BrainScene key={pool} pool={pool} />
       <Dust count={cfg.dust} />
       <gridHelper args={[42, 52, '#1c2033', '#151827']} position={[0, -4.6, 0]} material-transparent material-opacity={0.3} />
+      <IntroSequence />
       <CameraRig />
       <Projection />
       <PostProcessing />

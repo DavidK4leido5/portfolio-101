@@ -53,29 +53,99 @@ uniform float uDim;
 uniform float uTravel;
 uniform float uHovered;
 uniform float uActive;
-uniform float uConstel;
 uniform float uFocus;
+uniform float uNodeCount;
+uniform float uSpawn;
+uniform float uSliderSpawn;
+uniform float uRevealFrom;
+uniform float uIntroPulse;
+uniform float uConnect;
 uniform vec3 uAccent;
 uniform vec3 uSectionColors[5];
+uniform vec3 uHotspots[5];
 attribute float aSeed;
 attribute float aAffinity;
+attribute float aIndex;
+attribute vec3 aScatter;
 
-vec3 displace(vec3 pos, float seed){
+float spawnEase(float t){
+  t=clamp(t,0.0,1.0);
+  return 1.0-pow(1.0-t,2.8);
+}
+
+// stagger < 1 and denominator (1 - stagger) guarantee t = 1 when the driver reaches 1,
+// otherwise high-seed nodes get stranded mid-morph outside the brain
+float particleSpawnT(float seed,float idx){
+  if(idx>=uNodeCount) return 0.0;
+  if(idx>=uRevealFrom){
+    float band=max(uNodeCount-uRevealFrom,1.0);
+    float local=(idx-uRevealFrom)/band;
+    float stagger=min(seed*0.55+local*0.45,0.92);
+    return clamp((uSliderSpawn-stagger)/(1.0-stagger),0.0,1.0);
+  }
+  float stagger=seed*0.82;
+  return clamp((uSpawn-stagger)/(1.0-stagger),0.0,1.0);
+}
+
+// Curved convergence: each node arcs sideways along a seed-derived tangent while
+// flying in (sin(t*PI) is 0 at both ends, so rest positions are exact)
+vec3 morphedPos(vec3 target,vec3 scatter,float seed,float idx){
+  float t=spawnEase(particleSpawnT(seed,idx));
+  vec3 p=mix(scatter,target,t);
+  vec3 dir=scatter-target;
+  vec3 axis=vec3(sin(seed*12.9),0.55+seed*0.45,cos(seed*7.7));
+  vec3 tangent=cross(dir,axis);
+  float tl=length(tangent);
+  if(tl>0.001) p+=(tangent/tl)*sin(t*3.14159265)*(0.9+seed*1.8);
+  return p;
+}
+
+// Intro-branch nodes (idx < uRevealFrom) stay visible while scattered so the
+// opening shows a field of drifting particles; slider-band nodes hide until spawned
+bool hideParticle(float idx){
+  if(idx>=uNodeCount) return true;
+  if(idx>=uRevealFrom) return particleSpawnT(aSeed,idx)<=0.001;
+  return false;
+}
+
+vec3 displace(vec3 pos, float seed, float morph){
+  float k=morph*morph;
   float t=uTime*0.05;
   vec3 p=pos;
-  p+=0.04*vec3(
+  p+=0.04*k*vec3(
     snoise(pos*0.32+vec3(t,13.7,0.0)),
     snoise(pos*0.32+vec3(0.0,t+37.2,7.1)),
     snoise(pos*0.32+vec3(29.3,0.0,t+91.7))
   );
-  p+=0.012*vec3(
+  // Slow ambient drift while still scattered (fades out as the node settles)
+  p+=(1.0-k)*0.5*vec3(
+    sin(uTime*0.31+seed*11.0),
+    sin(uTime*0.24+seed*23.0+2.1),
+    sin(uTime*0.28+seed*17.0+4.4)
+  );
+  p+=0.012*k*vec3(
     sin(uTime*(1.2+seed*1.6)+seed*6.2831853),
     sin(uTime*(1.0+seed*1.3)+seed*4.7),
     sin(uTime*(1.4+seed*1.1)+seed*2.3)
   );
-  p.x+=uMouse.x*0.05*(0.3+seed*0.7);
-  p.y+=uMouse.y*0.05*(0.3+seed*0.7);
+  p.x+=uMouse.x*0.05*k*(0.3+seed*0.7);
+  p.y+=uMouse.y*0.05*k*(0.3+seed*0.7);
   return p;
+}
+
+// Brain activity: color waves ripple outward from each lobe hotspot, staggered
+// per region, with a sin-shimmered front so the pulse looks organic not geometric
+vec3 brainActivity(vec3 pos){
+  vec3 act=vec3(0.0);
+  for(int i=0;i<5;i++){
+    float d=distance(pos,uHotspots[i]);
+    float ph=fract(uTime*0.16+float(i)*0.37);
+    float ring=ph*5.2;
+    float w=exp(-5.5*abs(d-ring))*(1.0-ph)*(1.0-ph);
+    w*=0.65+0.55*sin(dot(pos,vec3(2.3,1.9,2.7))+uTime*1.4+float(i)*2.1);
+    act+=uSectionColors[i]*max(w,0.0);
+  }
+  return act;
 }
 
 float targetMix(float affinity){
@@ -118,22 +188,33 @@ varying vec3 vColor;
 ${NOISE}
 ${MOTION}
 void main(){
-  vec3 p=displace(position,aSeed);
+  if(hideParticle(aIndex)){
+    gl_Position=vec4(2.0,2.0,2.0,1.0);
+    gl_PointSize=0.0;
+    return;
+  }
+  vec3 anchor=morphedPos(position,aScatter,aSeed,aIndex);
+  float morph=spawnEase(particleSpawnT(aSeed,aIndex));
+  vec3 p=displace(anchor,aSeed,morph);
   float tm=targetMix(aAffinity);
   float hasSel=tm>=0.0?1.0:0.0;
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
+  if(emphasis<0.02&&uHovered>=0.0&&hasSel>0.5) emphasis=0.48;
   float bright=mix(0.92,mix(0.55,1.45,isT),emphasis*hasSel);
   float pulse=0.96+0.04*sin(uTime*2.5+aSeed*6.2831853);
-  vGlow=bright*(1.0+uFocus*0.18*isT);
-  vAlpha=(0.5+0.38*aSeed)*pulse;
+  vGlow=bright*(1.0+uFocus*0.18*isT)*(1.0+uIntroPulse*0.35);
+  vAlpha=(0.5+0.38*aSeed)*pulse*mix(0.4,1.0,morph);
   vAlpha*=mix(1.0,0.35,uFocus*(1.0-isT)*hasSel);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
-  vec3 base=nodePalette(position,aSeed,aAffinity,-mv.z);
+  vec3 baseCol=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.6,1.0);
-  vColor=mix(base,sectionColor(aAffinity)*1.5,lit);
+  vColor=mix(baseCol,sectionColor(aAffinity)*1.5,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.38,0.4,0.48),grey*0.55);
+  vec3 act=brainActivity(position)*morph*uConnect*(1.0-emphasis*0.75);
+  vColor+=act*1.35;
+  vGlow+=dot(act,vec3(0.5));
   float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z);
   gl_PointSize=clamp(px,1.8,5.5);
   gl_Position=projectionMatrix*mv;
@@ -165,21 +246,30 @@ varying vec3 vColor;
 ${NOISE}
 ${MOTION}
 void main(){
-  vec3 p=displace(position,aSeed);
+  if(uConnect<0.01||hideParticle(aIndex)){
+    gl_Position=vec4(2.0,2.0,2.0,1.0);
+    return;
+  }
+  vec3 anchor=morphedPos(position,aScatter,aSeed,aIndex);
+  float morph=spawnEase(particleSpawnT(aSeed,aIndex));
+  vec3 p=displace(anchor,aSeed,morph);
   float tm=targetMix(aAffinity);
   float hasSel=tm>=0.0?1.0:0.0;
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
+  if(emphasis<0.02&&uHovered>=0.0&&hasSel>0.5) emphasis=0.48;
   float bright=mix(0.85,mix(0.4,1.25,isT),emphasis*hasSel);
   float pulse=0.78+0.22*sin(uTime*1.3+aSeed*6.2831853);
-  vAlpha=0.07*(0.35+0.5*pulse)*bright;
+  vAlpha=0.07*(0.35+0.5*pulse)*bright*uConnect;
   vAlpha*=mix(1.0,0.32,uFocus*(1.0-isT)*hasSel);
+  vAlpha*=smoothstep(0.82,1.0,morph);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
-  vec3 base=nodePalette(position,aSeed,aAffinity,-mv.z);
+  vec3 baseCol=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.5,1.0);
-  vColor=mix(base,sectionColor(aAffinity)*1.2,lit);
+  vColor=mix(baseCol,sectionColor(aAffinity)*1.2,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
+  vColor+=brainActivity(position)*0.7*morph*uConnect*(1.0-emphasis*0.75);
   gl_Position=projectionMatrix*mv;
 }
 `
@@ -190,70 +280,5 @@ varying float vAlpha;
 varying vec3 vColor;
 void main(){
   gl_FragColor=vec4(vColor,vAlpha);
-}
-`
-
-export const constellationLineVert = /* glsl */ `
-attribute float aOrder;
-varying float vAlpha;
-varying vec3 vColor;
-${NOISE}
-${MOTION}
-void main(){
-  vec3 p=displace(position,aSeed);
-  float sec=uActive>=0.0?step(abs(aAffinity-uActive),0.5):0.0;
-  float reveal=smoothstep(aOrder,aOrder+0.08,uConstel);
-  float shine=1.0+uFocus*0.85;
-  vAlpha=sec*reveal*(0.95+0.35*uFocus);
-  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.45+0.4*uFocus)*shine;
-  gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
-}
-`
-
-export const constellationLineFrag = /* glsl */ `
-precision highp float;
-uniform float uFocus;
-varying float vAlpha;
-varying vec3 vColor;
-void main(){
-  gl_FragColor=vec4(vColor*(3.2+uFocus*2.5),vAlpha);
-}
-`
-
-export const constellationStarVert = /* glsl */ `
-uniform float uSize;
-attribute float aOrder;
-varying float vAlpha;
-varying vec3 vColor;
-${NOISE}
-${MOTION}
-void main(){
-  vec3 p=displace(position,aSeed);
-  float sec=uActive>=0.0?step(abs(aAffinity-uActive),0.5):0.0;
-  float reveal=smoothstep(aOrder-0.06,aOrder+0.1,uConstel);
-  float shine=1.0+uFocus*0.9;
-  vAlpha=sec*reveal*(1.0+0.25*uFocus);
-  vColor=mix(sectionColor(aAffinity),vec3(1.0),0.65+0.25*uFocus)*shine;
-  vec4 mv=modelViewMatrix*vec4(p,1.0);
-  float pop=reveal*(1.6-0.6*reveal);
-  gl_PointSize=clamp(uSize*(5.2+2.5*uFocus)*(34.0/-mv.z),14.0,80.0)*pop;
-  gl_Position=projectionMatrix*mv;
-}
-`
-
-export const constellationStarFrag = /* glsl */ `
-precision highp float;
-uniform float uFocus;
-varying float vAlpha;
-varying vec3 vColor;
-void main(){
-  vec2 c=gl_PointCoord-0.5;
-  float d=length(c)*2.0;
-  float core=pow(max(0.0,1.0-d),3.0);
-  float fx=pow(max(0.0,1.0-abs(c.x)*4.0),6.0)*max(0.0,1.0-abs(c.y)*3.0);
-  float fy=pow(max(0.0,1.0-abs(c.y)*4.0),6.0)*max(0.0,1.0-abs(c.x)*3.0);
-  float a=min(core+0.7*(fx+fy),1.0);
-  gl_FragColor=vec4(mix(vColor,vec3(1.0),core)*(2.0+1.2*core+uFocus),a*vAlpha);
-  if(gl_FragColor.a<0.01) discard;
 }
 `

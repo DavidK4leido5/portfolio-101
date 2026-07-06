@@ -19,9 +19,16 @@ export const uniforms = {
   uHovered: { value: -1 },
   uActive: { value: -1 },
   uSize: { value: 1.15 },
-  uConstel: { value: 0 },
   uFocus: { value: 0 },
+  uNodeCount: { value: 2200 },
+  uSpawn: { value: 0 },
+  // 0 keeps every node hidden during the loading phase; intro/ready paths raise it
+  uSliderSpawn: { value: 0 },
+  uRevealFrom: { value: 0 },
+  uIntroPulse: { value: 0 },
+  uConnect: { value: 0 },
   uSectionColors: { value: sections.map((s) => new Color(s.color)) },
+  uHotspots: { value: sections.map((s) => new Vector3(...s.position)) },
 }
 
 if (import.meta.env.DEV) {

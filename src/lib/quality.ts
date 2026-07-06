@@ -1,7 +1,6 @@
 export type Tier = 'desktop' | 'tablet' | 'mobile'
 
 export interface TierConfig {
-  particles: number
   maxConnections: number
   neighbors: number
   maxDist: number
@@ -17,15 +16,15 @@ export interface TierConfig {
 
 export const QUALITY: Record<Tier, TierConfig> = {
   desktop: {
-    particles: 10000, maxConnections: 12000, neighbors: 6, maxDist: 0.36, rebuildMs: 550,
-    dust: 100, dpr: 2, bloom: true, bloomIntensity: 0.42, ca: true, grain: true, travelSec: 2.8,
+    maxConnections: 6000, neighbors: 5, maxDist: 0.36, rebuildMs: 650,
+    dust: 80, dpr: 2, bloom: true, bloomIntensity: 0.42, ca: true, grain: true, travelSec: 2.8,
   },
   tablet: {
-    particles: 5200, maxConnections: 6200, neighbors: 5, maxDist: 0.4, rebuildMs: 750,
-    dust: 60, dpr: 1.5, bloom: true, bloomIntensity: 0.32, ca: false, grain: false, travelSec: 2.4,
+    maxConnections: 3200, neighbors: 4, maxDist: 0.4, rebuildMs: 800,
+    dust: 50, dpr: 1.5, bloom: true, bloomIntensity: 0.32, ca: false, grain: false, travelSec: 2.4,
   },
   mobile: {
-    particles: 2600, maxConnections: 3000, neighbors: 4, maxDist: 0.44, rebuildMs: 950,
+    maxConnections: 1600, neighbors: 3, maxDist: 0.44, rebuildMs: 950,
     dust: 0, dpr: 1, bloom: false, bloomIntensity: 0, ca: false, grain: false, travelSec: 2.0,
   },
 }

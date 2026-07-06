@@ -44,7 +44,7 @@ canvas { display: block; }
   box-shadow: 0 0 8px var(--accent);
 }
 
-.indicators { position: absolute; inset: 0; }
+.indicators { position: absolute; inset: 0; visibility: hidden; }
 
 .indicator {
   position: absolute;
@@ -175,4 +175,91 @@ canvas { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at 50% 40%, #0a0a18 0%, #020204 55%, #000 100%);
+  pointer-events: none;
+}
+.loader-core { text-align: center; width: min(420px, 88vw); }
+.loader-kicker {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.35);
+  margin-bottom: 18px;
+}
+.loader-title {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(22px, 5vw, 34px);
+  letter-spacing: 0.28em;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(245, 245, 255, 0.92);
+  margin-bottom: 28px;
+  text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.loader-bar {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.loader-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #fff);
+  box-shadow: 0 0 12px var(--accent);
+}
+.loader-meta {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+}
+
+.node-control {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: rgba(4, 4, 12, 0.72);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  min-width: min(420px, 92vw);
+}
+.node-control label {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.45);
+  white-space: nowrap;
+}
+.node-control input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.node-val {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  min-width: 3.5em;
+  text-align: right;
 }

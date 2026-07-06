@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
 import { sections, type SectionId } from '../data/sections'
-import { QUALITY } from '../lib/quality'
+import { NODE_LIMITS } from '../lib/nodes'
 import { indicatorEls } from '../scene/shared'
+import { animateNodeCount } from '../scene/nodeAnimator'
 import {
   profile, projects, skills, experience, contact, sectionCopy, resolveImage, type ImageSource,
 } from '../content/portfolio'
@@ -80,17 +81,39 @@ function SectionContent({ id }: { id: SectionId }) {
 
 export function PortfolioUI() {
   const phase = useSceneStore((s) => s.phase)
+  const loadPhase = useSceneStore((s) => s.loadPhase)
   const active = useSceneStore((s) => s.activeSection)
   const tier = useSceneStore((s) => s.qualityTier)
+  const nodeCount = useSceneStore((s) => s.nodeCount)
+  const limits = NODE_LIMITS[tier]
   const setHovered = useSceneStore((s) => s.setHovered)
   const navigateTo = useSceneStore((s) => s.navigateTo)
   const returnHome = useSceneStore((s) => s.returnHome)
+  const setNodeCount = useSceneStore((s) => s.setNodeCount)
   const indicatorsRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const uiReady = loadPhase === 'ready'
+
+  const onNodesChange = useCallback((v: number) => {
+    const n = Math.round(v)
+    setNodeCount(n)
+    animateNodeCount(n)
+  }, [setNodeCount])
 
   useEffect(() => {
-    gsap.to(indicatorsRef.current, { autoAlpha: phase === 'idle' ? 1 : 0, duration: 0.45, ease: 'power2.out' })
-  }, [phase])
+    const el = indicatorsRef.current
+    if (!el) return
+    if (!uiReady) {
+      gsap.set(el, { autoAlpha: 0, pointerEvents: 'none' })
+      return
+    }
+    gsap.to(el, {
+      autoAlpha: phase === 'idle' ? 1 : 0,
+      pointerEvents: phase === 'idle' ? 'auto' : 'none',
+      duration: 0.45,
+      ease: 'power2.out',
+    })
+  }, [phase, uiReady])
 
   useEffect(() => {
     if (phase === 'arrived' && overlayRef.current) {
@@ -112,13 +135,36 @@ export function PortfolioUI() {
   }, [])
 
   return (
-    <div className="ui" data-phase={phase}>
+    <div className="ui" data-phase={phase} data-load-phase={loadPhase}>
       <div className="hud tl">{profile.name}<br /><span>{profile.title}</span></div>
-      <div className="hud tr">STATUS <b>ONLINE</b><br />NODES <b>{QUALITY[tier].particles}</b><br />SECTOR <b>{active ?? 'CORE'}</b></div>
+      <div className="hud tr">STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b><br />NODES <b>{nodeCount}</b><br />SECTOR <b>{active ?? 'CORE'}</b></div>
       <div className="hud bl">NEURAL.PORTFOLIO <b>v1.0</b><br />{profile.tagline}</div>
       <div className="hud br">SYS.COLOR<span className="swatch" /><br />LINK <b>{phase.toUpperCase()}</b></div>
 
-      <div className="indicators" ref={indicatorsRef}>
+      {uiReady && (
+        <div className="node-control">
+          <label htmlFor="node-slider">Neural density</label>
+          <input
+            id="node-slider"
+            data-testid="node-slider"
+            type="range"
+            min={limits.min}
+            max={limits.max}
+            step={100}
+            value={nodeCount}
+            onChange={(e) => onNodesChange(Number(e.target.value))}
+          />
+          <span className="node-val">{nodeCount.toLocaleString()}</span>
+        </div>
+      )}
+
+      <div
+        className="indicators"
+        ref={indicatorsRef}
+        data-testid="sector-indicators"
+        data-sectors-ready={uiReady ? 'true' : 'false'}
+        aria-hidden={!uiReady}
+      >
         {sections.map((s, i) => (
           <button
             key={s.id}

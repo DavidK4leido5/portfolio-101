@@ -18,8 +18,10 @@ export function makeMaterial(vertexShader: string, fragmentShader: string): Shad
 
 export interface Cloud {
   positions: Float32Array
+  scatter: Float32Array
   seeds: Float32Array
   affinity: Float32Array
+  indices: Float32Array
   count: number
 }
 
@@ -53,35 +55,66 @@ function sampleSurface(order: Uint32Array, slot: number, jitter = 0.006): [numbe
   return [x, y, z]
 }
 
-export function makeCloud(count: number): Cloud {
-  const positions = new Float32Array(count * 3)
-  const seeds = new Float32Array(count)
-  const affinity = new Float32Array(count)
-  const order = shuffledSurfaceOrder()
-  const perHot = Math.floor((count * 0.14) / sections.length)
-  let i = 0
+// Fills the intro camera frustum (fov 49, cam z ~14.6): nodes start anywhere on screen
+function scatterAnywhere(): [number, number, number] {
+  return [
+    (Math.random() - 0.5) * 23,
+    (Math.random() - 0.5) * 14,
+    (Math.random() - 0.5) * 10 + 1.5,
+  ]
+}
 
-  for (let s = 0; s < sections.length; s++) {
-    const [hx, hy, hz] = sections[s].position
-    const sig = sections[s].radius * 0.28
-    for (let k = 0; k < perHot; k++, i++) {
-      positions[i * 3] = hx + gauss() * sig
-      positions[i * 3 + 1] = hy + gauss() * sig
-      positions[i * 3 + 2] = hz + gauss() * sig
-      affinity[i] = s
+function assignLobes(positions: Float32Array, affinity: Float32Array, count: number) {
+  for (let i = 0; i < count; i++) {
+    const x = positions[i * 3]
+    const y = positions[i * 3 + 1]
+    const z = positions[i * 3 + 2]
+    let best = -1
+    let bestD2 = Infinity
+    for (let s = 0; s < sections.length; s++) {
+      const [hx, hy, hz] = sections[s].position
+      const dx = x - hx
+      const dy = y - hy
+      const dz = z - hz
+      const d2 = dx * dx + dy * dy + dz * dz
+      const r2 = sections[s].radius ** 2
+      if (d2 <= r2 && d2 < bestD2) {
+        bestD2 = d2
+        best = s
+      }
     }
+    affinity[i] = best
   }
+}
 
-  for (; i < count; i++) {
-    const p = sampleSurface(order, i - perHot * sections.length)
+export function makeCloud(poolSize: number): Cloud {
+  const positions = new Float32Array(poolSize * 3)
+  const scatter = new Float32Array(poolSize * 3)
+  const seeds = new Float32Array(poolSize)
+  const affinity = new Float32Array(poolSize)
+  const indices = new Float32Array(poolSize)
+  const order = shuffledSurfaceOrder()
+
+  for (let i = 0; i < poolSize; i++) {
+    const p = sampleSurface(order, i)
     positions[i * 3] = p[0]
     positions[i * 3 + 1] = p[1]
     positions[i * 3 + 2] = p[2]
     affinity[i] = -1
+    seeds[i] = Math.random()
+    indices[i] = i
   }
 
-  for (let k = 0; k < count; k++) seeds[k] = Math.random()
-  return { positions, seeds, affinity, count }
+  assignLobes(positions, affinity, poolSize)
+
+  for (let k = 0; k < poolSize; k++) {
+    const sp = scatterAnywhere()
+    scatter[k * 3] = sp[0]
+    scatter[k * 3 + 1] = sp[1]
+    scatter[k * 3 + 2] = sp[2]
+  }
+
+  return { positions, scatter, seeds, affinity, indices, count: poolSize }
 }
 
 export function NeuralCluster({ cloud }: { cloud: Cloud }) {
@@ -91,8 +124,10 @@ export function NeuralCluster({ cloud }: { cloud: Cloud }) {
     <points frustumCulled={false} material={material}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[cloud.positions, 3]} />
+        <bufferAttribute attach="attributes-aScatter" args={[cloud.scatter, 3]} />
         <bufferAttribute attach="attributes-aSeed" args={[cloud.seeds, 1]} />
         <bufferAttribute attach="attributes-aAffinity" args={[cloud.affinity, 1]} />
+        <bufferAttribute attach="attributes-aIndex" args={[cloud.indices, 1]} />
       </bufferGeometry>
     </points>
   )

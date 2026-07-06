@@ -24,6 +24,7 @@ export function CameraRig() {
   const lookRef = useRef(new Vector3())
 
   useFrame((_, delta) => {
+    if (useSceneStore.getState().loadPhase !== 'ready') return
     if (useSceneStore.getState().phase !== 'idle') return
     clusterState.rotation += delta * 0.015
     const t = uniforms.uTime.value
@@ -46,10 +47,17 @@ export function CameraRig() {
     if (returning) {
       focusTlRef.current?.kill()
       travelTlRef.current?.kill()
-      const tl = gsap.timeline({ onComplete: () => useSceneStore.getState().settleHome() })
+      uniforms.uFocus.value = 0
+      uniforms.uDim.value = 0
+      const tl = gsap.timeline({
+        onComplete: () => {
+          uniforms.uFocus.value = 0
+          uniforms.uDim.value = 0
+          useSceneStore.getState().settleHome()
+        },
+      })
       tl.to(uniforms.uFocus, { value: 0, duration: 0.45, ease: 'power2.out' }, 0)
         .to(uniforms.uDim, { value: 0, duration: 0.5, ease: 'power2.out' }, 0)
-        .to(uniforms.uConstel, { value: 0, duration: 0.45, ease: 'power2.in' }, 0)
         .to(camera.position, { x: CAM_BASE.x, y: CAM_BASE.y, z: CAM_BASE.z, duration: dur * 0.85, ease: 'power3.inOut' }, 0.35)
         .to(look, { x: 0, y: 0, z: 0, duration: dur * 0.8, ease: 'power2.inOut' }, 0.35)
       tl.eventCallback('onUpdate', () => camera.lookAt(look))
@@ -74,13 +82,13 @@ export function CameraRig() {
       tl.to(camera.position, { z: `+=${reduced ? 0 : 0.9}`, duration: reduced ? 0.01 : 0.5, ease: 'power2.out' })
         .to(camera.position, { x: dest.x, y: dest.y, z: dest.z, duration: dur, ease: 'power4.inOut' })
         .to(look, { x: lookT.x, y: lookT.y, z: lookT.z, duration: dur * 0.85, ease: 'power3.inOut' }, '<')
-        .to(uniforms.uConstel, { value: 1, duration: 1.0, ease: 'power2.out' }, dur * 0.45)
+        .to(uniforms.uDim, { value: 0.55, duration: dur * 0.6, ease: 'power2.out' }, dur * 0.35)
       tl.eventCallback('onUpdate', () => camera.lookAt(look))
       travelTlRef.current = tl
     }
   }, [active, returning, camera])
 
-  // After modal visible: constellation shines, other nodes dim — no DoF
+  // After modal visible: lobe nodes brighten, rest dims
   useEffect(() => {
     if (phase !== 'arrived' || !active) {
       focusTlRef.current?.kill()

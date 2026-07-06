@@ -2,12 +2,13 @@ export interface ConnectionOpts {
   maxDist: number
   neighbors: number
   maxTotal: number
+  activeCount?: number
 }
 
 // ponytail: string cell keys + full rebuild each pass; fine at <=4k points / ~600ms.
 // Upgrade path: numeric keys + persistent buffers if profiling ever flags it.
 export function buildConnections(pos: Float32Array, opts: ConnectionOpts): { pairs: Uint32Array; count: number } {
-  const n = pos.length / 3
+  const n = Math.min(pos.length / 3, opts.activeCount ?? pos.length / 3)
   const cell = opts.maxDist
   const maxD2 = opts.maxDist * opts.maxDist
   const map = new Map<string, number[]>()
