@@ -31,9 +31,13 @@ export type Experience = {
 }
 
 export const profile = {
-  name: 'Your Name',
+  name: 'I\'m David',
   title: 'Creative Frontend Engineer',
-  tagline: 'Placeholder tagline — edit in src/content/portfolio.ts',
+  tagline: 'Every stack. One synapse.',
+  hero: {
+    top: '',
+    bottom: 'THE ADAPTIVE MIND',
+  },
   avatar: {
     cdnUrl: '',
     localPath: '/src/content/assets/avatar.jpg',

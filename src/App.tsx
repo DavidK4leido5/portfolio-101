@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { HomeScene } from './scene/HomeScene'
 import { PortfolioUI } from './ui/PortfolioUI'
 import { LoadingScreen } from './ui/LoadingScreen'
+import { HeroTypography } from './ui/HeroTypography'
 import { detectTier } from './lib/quality'
 import { useSceneStore } from './store/sceneStore'
 
@@ -26,10 +27,13 @@ export default function App() {
   }, [sceneReady, loadPhase])
 
   return (
-    <>
-      <HomeScene />
+    <div className="app-root">
+      <div className="app-scene">
+        <HomeScene />
+      </div>
+      <HeroTypography />
       <LoadingScreen />
       <PortfolioUI />
-    </>
+    </div>
   )
 }

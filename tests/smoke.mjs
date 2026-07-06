@@ -58,6 +58,35 @@ const mobileNavState = async (page) => page.evaluate(() => {
 
 const mobileSector = (section) => `[data-testid="sector-nav"] [data-section="${section}"]`
 
+const readHero = (page) => page.evaluate(() => {
+  const hero = document.querySelector('[data-testid="hero-typography"]')
+  const canvas = document.querySelector('canvas')
+  const slider = document.querySelector('[data-testid="node-slider"]')
+  if (!hero || !canvas) return { missing: true }
+  const hs = getComputedStyle(hero)
+  const lines = [...hero.querySelectorAll('.hero-depth--front .chromat-base')].map((el) => el.textContent?.trim() ?? '')
+  const hr = hero.getBoundingClientRect()
+  const cr = canvas.getBoundingClientRect()
+  const sliderHit = slider
+    ? (() => {
+        const r = slider.getBoundingClientRect()
+        const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+        return el === slider
+      })()
+    : true
+  const heroCentered = Math.abs((hr.left + hr.width / 2) - (cr.left + cr.width / 2)) < 48
+    && Math.abs((hr.top + hr.height / 2) - (cr.top + cr.height / 2)) < 80
+  return {
+    opacity: Number(hs.opacity),
+    visibility: hs.visibility,
+    lines,
+    heroCentered,
+    sliderHit,
+    hasDepthLayers: !!hero.querySelector('.hero-depth--back') && !!hero.querySelector('.hero-depth--front'),
+    phase: document.querySelector('.ui')?.getAttribute('data-phase') ?? null,
+  }
+})
+
 // Desktop tier: load + render + no errors (headless software GL is too slow for full desktop navigation)
 const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 watch(desktop)
@@ -135,6 +164,18 @@ else if (Math.abs(desktopFraming.camZ - 9.8) > 0.15) fail(`desktop framing: camZ
 else if (Math.abs(desktopFraming.clusterScale - 1.18) > 0.02) fail(`desktop framing: scale=${desktopFraming.clusterScale}, expected ~1.18`)
 else console.log('ok: desktop camera framing unchanged')
 
+const hero = await readHero(desktop)
+if (hero.missing) fail('desktop: hero typography missing')
+else if (hero.lines[0] !== 'THE ARCHITECTURE' || hero.lines[1] !== 'OF A FULLSTACK MIND') {
+  fail(`desktop hero: unexpected copy ${JSON.stringify(hero.lines)}`)
+} else if (hero.opacity < 0.85 || hero.visibility === 'hidden') {
+  fail(`desktop hero: not visible in idle ${JSON.stringify(hero)}`)
+} else if (!hero.heroCentered || !hero.hasDepthLayers) {
+  fail(`desktop hero: layout issue ${JSON.stringify(hero)}`)
+} else if (!hero.sliderHit) {
+  fail('desktop hero: blocks node slider')
+} else console.log('ok: hero typography centered on brain with depth weave')
+
 // Density slider must be clickable (not covered by the indicators layer) in idle
 const sliderHit = () => desktop.evaluate(() => {
   const s = document.querySelector('[data-testid="node-slider"]')
@@ -162,6 +203,10 @@ await desktop.waitForTimeout(200)
 
 await desktop.click('[data-section="projects"]', { force: true })
 await desktop.waitForSelector('[data-testid="overlay-title"]', { timeout: T.overlay })
+const heroArrived = await readHero(desktop)
+if (!heroArrived.missing && heroArrived.opacity > 0.35) {
+  fail(`desktop hero: should fade on sector arrival, opacity=${heroArrived.opacity}`)
+} else console.log('ok: hero fades on sector arrival')
 hit = await sliderHit()
 if (hit !== 'ok') fail(`arrived: slider not interactive (${hit})`)
 else console.log('ok: slider interactive while arrived')
@@ -205,6 +250,11 @@ else if (portraitNav.count !== 5) fail(`portrait nav: expected 5 sectors, got ${
 else if (portraitNav.opacity < 0.9 || portraitNav.visibility !== 'visible' || !portraitNav.hit) {
   fail(`portrait nav not interactive ${JSON.stringify(portraitNav)}`)
 } else console.log('ok: mobile portrait uses bottom sector nav')
+const portraitHero = await readHero(portrait)
+if (portraitHero.missing) fail('portrait: hero typography missing')
+else if (!(portraitHero.opacity > 0.7) || !portraitHero.heroCentered) {
+  fail(`portrait hero: layout issue ${JSON.stringify(portraitHero)}`)
+} else console.log('ok: portrait hero centered on brain')
 await portrait.close()
 
 // Mobile tier: full navigation loop (light enough for software GL to animate in real time)

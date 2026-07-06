@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
+import { profile } from '../content/portfolio'
 
 export function LoadingScreen() {
   const loadPhase = useSceneStore((s) => s.loadPhase)
@@ -42,7 +43,7 @@ export function LoadingScreen() {
     <div className="loader" ref={ref} data-testid="loading-screen" aria-hidden={loadPhase !== 'loading'}>
       <div className="loader-core">
         <p className="loader-kicker">Neural Portfolio</p>
-        <h1 className="loader-title">SYNTHESIZING<br />CORTEX</h1>
+        <h1 className="loader-title">{profile.hero.top}<br />{profile.hero.bottom}</h1>
         <div className="loader-bar"><div className="loader-bar-fill" ref={barRef} /></div>
         <p className="loader-meta">MAPPING SURFACE NODES <span ref={pctRef}>0%</span></p>
       </div>
