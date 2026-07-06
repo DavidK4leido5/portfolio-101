@@ -3,7 +3,10 @@ import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
 import { profile } from '../content/portfolio'
 
+const hasHeroTop = profile.hero.top.trim().length > 0
+
 function ChromatLine({ text, subtle = false }: { text: string; subtle?: boolean }) {
+  if (!text.trim()) return null
   return (
     <span className={`chromat${subtle ? ' chromat--subtle' : ''}`} data-testid="chromat-line">
       <span className="chromat-base">{text}</span>
@@ -23,10 +26,12 @@ function HeroStack({
   subtle?: boolean
 }) {
   return (
-    <div className="hero-stack">
-      <p className="hero-line" ref={topRef}>
-        <ChromatLine text={profile.hero.top} subtle={subtle} />
-      </p>
+    <div className={`hero-stack${hasHeroTop ? '' : ' hero-stack--single'}`}>
+      {hasHeroTop && (
+        <p className="hero-line" ref={topRef}>
+          <ChromatLine text={profile.hero.top} subtle={subtle} />
+        </p>
+      )}
       <p className="hero-line" ref={bottomRef}>
         <ChromatLine text={profile.hero.bottom} subtle={subtle} />
       </p>
@@ -49,7 +54,7 @@ export function HeroTypography() {
     const stack = stackRef.current
     const top = topRef.current
     const bottom = bottomRef.current
-    if (!wrap || !stack || !top || !bottom) return
+    if (!wrap || !stack || !bottom) return
 
     if (loadPhase === 'loading') {
       introRan.current = false
@@ -69,17 +74,19 @@ export function HeroTypography() {
         { scale: 1, autoAlpha: 1, filter: 'blur(0px)', duration: dur, ease: 'power3.out' },
         0.12,
       )
-      tl.fromTo(
-        top,
-        { y: reduced ? 0 : 18, autoAlpha: 0 },
-        { y: 0, autoAlpha: 1, duration: dur * 0.85, ease: 'power3.out' },
-        0.18,
-      )
+      if (top) {
+        tl.fromTo(
+          top,
+          { y: reduced ? 0 : 18, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: dur * 0.85, ease: 'power3.out' },
+          0.18,
+        )
+      }
       tl.fromTo(
         bottom,
-        { y: reduced ? 0 : -18, autoAlpha: 0 },
+        { y: reduced ? 0 : (top ? -18 : 24), autoAlpha: 0 },
         { y: 0, autoAlpha: 1, duration: dur * 0.85, ease: 'power3.out' },
-        0.28,
+        top ? 0.28 : 0.18,
       )
       if (!reduced) {
         tl.fromTo(
@@ -111,6 +118,8 @@ export function HeroTypography() {
       ref={wrapRef}
       data-quality-tier={tier}
       data-load-phase={loadPhase}
+      data-hero-top={profile.hero.top}
+      data-hero-bottom={profile.hero.bottom}
       data-testid="hero-typography"
       aria-hidden={phase !== 'idle'}
     >

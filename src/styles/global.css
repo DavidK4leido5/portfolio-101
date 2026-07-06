@@ -75,6 +75,10 @@ canvas { display: block; }
   line-height: 0.8;
 }
 
+.hero-stack--single {
+  justify-content: center;
+}
+
 .chromat {
   display: inline-block;
   position: relative;

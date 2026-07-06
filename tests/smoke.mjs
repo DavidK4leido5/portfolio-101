@@ -64,7 +64,12 @@ const readHero = (page) => page.evaluate(() => {
   const slider = document.querySelector('[data-testid="node-slider"]')
   if (!hero || !canvas) return { missing: true }
   const hs = getComputedStyle(hero)
-  const lines = [...hero.querySelectorAll('.hero-depth--front .chromat-base')].map((el) => el.textContent?.trim() ?? '')
+  const lines = [...hero.querySelectorAll('.hero-depth--front .chromat-base')]
+    .map((el) => el.textContent?.trim() ?? '')
+    .filter((t) => t.length > 0)
+  const expectedTop = hero.getAttribute('data-hero-top')?.trim() ?? ''
+  const expectedBottom = hero.getAttribute('data-hero-bottom')?.trim() ?? ''
+  const expectedLines = [expectedTop, expectedBottom].filter((t) => t.length > 0)
   const hr = hero.getBoundingClientRect()
   const cr = canvas.getBoundingClientRect()
   const sliderHit = slider
@@ -80,6 +85,7 @@ const readHero = (page) => page.evaluate(() => {
     opacity: Number(hs.opacity),
     visibility: hs.visibility,
     lines,
+    expectedLines,
     heroCentered,
     sliderHit,
     hasDepthLayers: !!hero.querySelector('.hero-depth--back') && !!hero.querySelector('.hero-depth--front'),
@@ -166,8 +172,8 @@ else console.log('ok: desktop camera framing unchanged')
 
 const hero = await readHero(desktop)
 if (hero.missing) fail('desktop: hero typography missing')
-else if (hero.lines[0] !== 'THE ARCHITECTURE' || hero.lines[1] !== 'OF A FULLSTACK MIND') {
-  fail(`desktop hero: unexpected copy ${JSON.stringify(hero.lines)}`)
+else if (JSON.stringify(hero.lines) !== JSON.stringify(hero.expectedLines)) {
+  fail(`desktop hero: unexpected copy ${JSON.stringify(hero.lines)} expected ${JSON.stringify(hero.expectedLines)}`)
 } else if (hero.opacity < 0.85 || hero.visibility === 'hidden') {
   fail(`desktop hero: not visible in idle ${JSON.stringify(hero)}`)
 } else if (!hero.heroCentered || !hero.hasDepthLayers) {
