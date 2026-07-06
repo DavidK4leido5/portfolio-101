@@ -65,6 +65,7 @@ uniform vec3 uSectionColors[5];
 uniform vec3 uHotspots[5];
 uniform float uWaveSection;
 uniform float uWaveT;
+uniform vec3 uAmbientOrigins[8];
 attribute float aSeed;
 attribute float aAffinity;
 attribute float aIndex;
@@ -145,12 +146,13 @@ float waveFront(vec3 pos,vec3 origin,float ph,float sharp){
   return max(w,0.0);
 }
 
-// Ambient brain activity: one subtle wave at a time, source rotating between
-// lobes — same shockwave concept as hover, dialed way down
+// Ambient brain activity: same shockwave as hover but firing from random
+// brain-surface points (not the sectors), tinted with the live accent color
 vec3 brainActivity(vec3 pos){
-  float cyc=uTime*0.09;
-  int src=int(mod(floor(cyc),5.0));
-  vec3 act=uSectionColors[src]*waveFront(pos,uHotspots[src],fract(cyc),3.0)*0.5;
+  float cyc=uTime*0.15;
+  int src=int(mod(floor(cyc),8.0));
+  float w=waveFront(pos,uAmbientOrigins[src],fract(cyc),2.8);
+  vec3 act=mix(uAccent,vec3(1.0),0.55)*w*2.1;
   if(uWaveSection>=0.0&&uWaveT<0.999){
     int wi=int(uWaveSection+0.5);
     act+=uSectionColors[wi]*waveFront(pos,uHotspots[wi],uWaveT,4.0)*2.2;

@@ -1,5 +1,15 @@
 import { Color, Vector2, Vector3, type Group } from 'three'
 import { sections } from '../data/sections'
+import { brainSurface } from '../data/brainCloud'
+
+// Random brain-surface points used as ambient activity wave sources (new set each load)
+function pickAmbientOrigins(count: number): Vector3[] {
+  const n = brainSurface.length / 3
+  return Array.from({ length: count }, () => {
+    const i = (Math.random() * n) | 0
+    return new Vector3(brainSurface[i * 3], brainSurface[i * 3 + 1], brainSurface[i * 3 + 2])
+  })
+}
 
 export const CAM_BASE = new Vector3(0, 0.5, 9.8)
 export const CLUSTER_SCALE = 1.18
@@ -32,6 +42,7 @@ export const uniforms = {
   // Hover shockwave: section index + 0..1 progress of the expanding wave
   uWaveSection: { value: -1 },
   uWaveT: { value: 1 },
+  uAmbientOrigins: { value: pickAmbientOrigins(8) },
 }
 
 if (import.meta.env.DEV) {
