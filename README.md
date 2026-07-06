@@ -108,11 +108,25 @@ tests/
 
 Pushes to `master` trigger the [CI/CD workflow](.github/workflows/ci-cd.yml):
 
-1. Install dependencies
-2. Typecheck and build
-3. Run Playwright smoke tests against a preview server
-4. Rebuild with the GitHub Pages base path (`/repo-name/`)
-5. Deploy to GitHub Pages
+1. **Path filter** — skip build/smoke when only docs/skills/README change
+2. **Build** — typecheck + smoke build (artifact uploaded)
+3. **Smoke** — Playwright against preview (Chromium cached between runs)
+4. **Deploy** — production build + GitHub Pages (master only)
+
+Use **Actions → CI/CD → Run workflow** to force a full run anytime.
+
+### CI efficiency
+
+This is a **single Vite app**, not a monorepo — **Turborepo** would not help here (it caches tasks across packages in monorepos). Instead we use:
+
+| Optimization | Effect |
+|---|---|
+| **Path filters** | README/skills/docs-only pushes skip build + ~2 min smoke |
+| **Playwright browser cache** | Chromium downloaded once per Playwright version, then restored from cache |
+| **Split jobs** | Build artifact reused by smoke job; deploy is separate |
+| **concurrency cancel-in-progress** | New push cancels an in-flight run on the same branch |
+
+Smoke still runs on every push that touches `src/`, `tests/`, config, or workflows — that's intentional for a WebGL app where small shader changes can break rendering.
 
 ### First-time setup (required — fixes deploy 404)
 

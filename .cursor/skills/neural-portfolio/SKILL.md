@@ -207,6 +207,7 @@ Use these when building similar projects from scratch:
 | `gsap-shader-scenes` | GSAP uniform timelines, camera travel, intro |
 | `cinematic-webgl-app` | Zustand phases, HUD/sectors, pointer-events layering |
 | `webgl-smoke-deploy` | Playwright smoke + GitHub Pages CI/CD |
+| `efficient-github-ci` | Path filters, Playwright cache, split jobs, when to skip Turborepo |
 
 ## Reference
 

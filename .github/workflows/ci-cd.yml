@@ -17,7 +17,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  # Skip heavy CI when only docs/skills change; still allow deploy on master if needed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'tests/**'
+              - 'public/**'
+              - 'scripts/**'
+              - 'index.html'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+              - 'tsconfig*.json'
+              - '.github/workflows/**'
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,8 +67,56 @@ jobs:
           VITE_SMOKE: 'true'
         run: pnpm exec vite build
 
+      - name: Upload smoke build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-smoke
+          path: dist
+          retention-days: 1
+
+  smoke:
+    needs: [changes, build]
+    if: needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install chromium --with-deps
+
+      - name: Install Playwright OS deps (browser cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Download smoke build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-smoke
+          path: dist
 
       - name: Smoke tests
         env:
@@ -70,27 +143,53 @@ jobs:
 
           SMOKE_URL=http://127.0.0.1:4173 SMOKE_LOOPS=1 pnpm test
 
-      - name: Build for GitHub Pages
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
-        env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
-        run: pnpm build
-
-      - name: Upload production build
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
-
   # Requires Pages enabled: Settings → Pages → Source → GitHub Actions (404 if skipped)
   deploy:
-    needs: build-and-test
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
+    needs: [changes, build, smoke]
+    if: |
+      always() &&
+      github.ref == 'refs/heads/master' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.build.result == 'success' &&
+      (needs.smoke.result == 'success' || needs.smoke.result == 'skipped')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for GitHub Pages
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+        run: pnpm build
+
+      - name: Upload production build
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  skip:
+    needs: changes
+    if: |
+      needs.changes.outputs.code != 'true' &&
+      github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No app code changed — skipped build, smoke, and deploy."
