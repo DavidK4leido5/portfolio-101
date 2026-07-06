@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
+import { PerspectiveCamera } from 'three'
 import { useSceneStore } from '../store/sceneStore'
 import { measureBrainFit, sceneFraming } from '../lib/framing'
 import { uniforms } from './shared'
@@ -38,7 +39,7 @@ export function CameraFraming() {
 
   useEffect(() => {
     const { fov } = sceneFraming(tier)
-    if (camera.type === 'PerspectiveCamera') {
+    if (camera instanceof PerspectiveCamera) {
       camera.fov = fov
       camera.updateProjectionMatrix()
     }
