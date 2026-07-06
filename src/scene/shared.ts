@@ -45,11 +45,6 @@ export const uniforms = {
   uAmbientOrigins: { value: pickAmbientOrigins(8) },
 }
 
-// Expose for Playwright: dev server or CI smoke build (VITE_SMOKE=true), not production deploy
-if (import.meta.env.DEV || import.meta.env.VITE_SMOKE === 'true') {
-  ;(window as unknown as Record<string, unknown>).__scene = { uniforms }
-}
-
 export function hotspotWorld(i: number, out: Vector3): Vector3 {
   const [x, y, z] = sections[i].position
   if (clusterState.group) return clusterState.group.localToWorld(out.set(x, y, z))

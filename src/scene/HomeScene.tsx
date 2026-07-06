@@ -6,12 +6,14 @@ import { NODE_LIMITS } from '../lib/nodes'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
-import { CAM_BASE, CLUSTER_SCALE, uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
+import { uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
+import { sceneFraming } from '../lib/framing'
 import { NeuralCluster, makeCloud } from './NeuralCluster'
 import { ConnectionSystem } from './ConnectionSystem'
 import { CameraRig } from './CameraRig'
 import { PostProcessing } from './PostProcessing'
 import { IntroSequence } from './IntroSequence'
+import { CameraFraming, SceneDebugBridge } from './SceneDebugBridge'
 
 const tmpMouse = new Vector2()
 let frame = 0
@@ -102,6 +104,7 @@ function Projection() {
 
 function ClusterGroup({ children }: { children: React.ReactNode }) {
   const ref = useRef<Group>(null)
+  const tier = useSceneStore((s) => s.qualityTier)
   useEffect(() => {
     clusterState.group = ref.current
     return () => { clusterState.group = null }
@@ -109,6 +112,7 @@ function ClusterGroup({ children }: { children: React.ReactNode }) {
   useFrame(() => {
     const g = ref.current
     if (!g) return
+    const clusterScale = sceneFraming(tier).clusterScale
     const t = uniforms.uTime.value
     g.rotation.y = clusterState.rotation
     g.rotation.x = Math.sin(t * 0.13) * 0.02 + Math.sin(t * 0.071 + 2.0) * 0.012
@@ -119,7 +123,7 @@ function ClusterGroup({ children }: { children: React.ReactNode }) {
       0,
     )
     const breath = 1 + Math.sin(t * 0.24) * 0.008 + Math.sin(t * 0.11 + 3.0) * 0.005
-    g.scale.setScalar(CLUSTER_SCALE * breath)
+    g.scale.setScalar(clusterScale * breath)
     g.updateMatrixWorld()
   })
   return <group ref={ref}>{children}</group>
@@ -166,6 +170,7 @@ export function HomeScene() {
   const tier = useSceneStore((s) => s.qualityTier)
   const cfg = QUALITY[tier]
   const pool = NODE_LIMITS[tier].pool
+  const framing = sceneFraming(tier)
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -179,7 +184,7 @@ export function HomeScene() {
   return (
     <Canvas
       dpr={[1, cfg.dpr]}
-      camera={{ position: [CAM_BASE.x, CAM_BASE.y, CAM_BASE.z], fov: 49, near: 0.1, far: 80 }}
+      camera={{ position: [framing.cam.x, framing.cam.y, framing.cam.z], fov: framing.fov, near: 0.1, far: 80 }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
       onCreated={({ gl, camera }) => {
         gl.setClearColor('#020204')
@@ -188,6 +193,8 @@ export function HomeScene() {
     >
       <SceneBoot />
       <SceneUniforms />
+      <CameraFraming />
+      <SceneDebugBridge />
       <BrainScene key={pool} pool={pool} />
       <Dust count={cfg.dust} />
       <gridHelper args={[42, 52, '#1c2033', '#151827']} position={[0, -4.6, 0]} material-transparent material-opacity={0.3} />

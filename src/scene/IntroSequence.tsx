@@ -3,7 +3,8 @@ import gsap from 'gsap'
 import { useThree } from '@react-three/fiber'
 import { useSceneStore } from '../store/sceneStore'
 import { NODE_LIMITS } from '../lib/nodes'
-import { CAM_BASE, clusterState, uniforms } from './shared'
+import { clusterState, uniforms } from './shared'
+import { sceneFraming } from '../lib/framing'
 import { runIntroSpawn } from './nodeAnimator'
 
 export function IntroSequence() {
@@ -23,7 +24,8 @@ export function IntroSequence() {
     uniforms.uConnect.value = 0
     useSceneStore.setState({ nodeCount: limits.default })
 
-    camera.position.set(CAM_BASE.x - 1.4, CAM_BASE.y + 0.9, CAM_BASE.z + 6.4)
+    const home = sceneFraming(tier).cam
+    camera.position.set(home.x - 1.4, home.y + 0.9, home.z + 6.4)
     clusterState.rotation = 0
 
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -31,9 +33,9 @@ export function IntroSequence() {
 
     const tl = runIntroSpawn(dur)
     gsap.to(camera.position, {
-      x: CAM_BASE.x,
-      y: CAM_BASE.y,
-      z: CAM_BASE.z,
+      x: home.x,
+      y: home.y,
+      z: home.z,
       duration: dur,
       ease: 'power2.inOut',
     })

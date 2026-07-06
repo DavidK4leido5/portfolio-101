@@ -5,7 +5,8 @@ import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
 import { QUALITY } from '../lib/quality'
-import { CAM_BASE, clusterState, hotspotWorld, rotateY, uniforms } from './shared'
+import { clusterState, hotspotWorld, rotateY, uniforms } from './shared'
+import { sceneFraming } from '../lib/framing'
 
 gsap.ticker.lagSmoothing(0)
 
@@ -16,6 +17,7 @@ const tmpOff = new Vector3()
 
 export function CameraRig() {
   const camera = useThree((s) => s.camera)
+  const tier = useSceneStore((s) => s.qualityTier)
   const active = useSceneStore((s) => s.activeSection)
   const phase = useSceneStore((s) => s.phase)
   const returning = useSceneStore((s) => s.returning)
@@ -28,10 +30,11 @@ export function CameraRig() {
     if (useSceneStore.getState().phase !== 'idle') return
     clusterState.rotation += delta * 0.015
     const t = uniforms.uTime.value
+    const base = sceneFraming(useSceneStore.getState().qualityTier).cam
     tmpPos.set(
-      CAM_BASE.x + Math.sin(t * 0.11) * 0.35 + uniforms.uMouse.value.x * 0.5,
-      CAM_BASE.y + Math.sin(t * 0.17 + 1.3) * 0.25 + uniforms.uMouse.value.y * 0.3,
-      CAM_BASE.z + Math.sin(t * 0.07 + 2.1) * 0.3,
+      base.x + Math.sin(t * 0.11) * 0.35 + uniforms.uMouse.value.x * 0.5,
+      base.y + Math.sin(t * 0.17 + 1.3) * 0.25 + uniforms.uMouse.value.y * 0.3,
+      base.z + Math.sin(t * 0.07 + 2.1) * 0.3,
     )
     camera.position.lerp(tmpPos, 0.035)
     lookRef.current.lerp(ORIGIN, 0.05)
@@ -56,9 +59,10 @@ export function CameraRig() {
           useSceneStore.getState().settleHome()
         },
       })
+      const home = sceneFraming(useSceneStore.getState().qualityTier).cam
       tl.to(uniforms.uFocus, { value: 0, duration: 0.45, ease: 'power2.out' }, 0)
         .to(uniforms.uDim, { value: 0, duration: 0.5, ease: 'power2.out' }, 0)
-        .to(camera.position, { x: CAM_BASE.x, y: CAM_BASE.y, z: CAM_BASE.z, duration: dur * 0.85, ease: 'power3.inOut' }, 0.35)
+        .to(camera.position, { x: home.x, y: home.y, z: home.z, duration: dur * 0.85, ease: 'power3.inOut' }, 0.35)
         .to(look, { x: 0, y: 0, z: 0, duration: dur * 0.8, ease: 'power2.inOut' }, 0.35)
       tl.eventCallback('onUpdate', () => camera.lookAt(look))
       travelTlRef.current = tl
@@ -86,7 +90,7 @@ export function CameraRig() {
       tl.eventCallback('onUpdate', () => camera.lookAt(look))
       travelTlRef.current = tl
     }
-  }, [active, returning, camera])
+  }, [active, returning, camera, tier])
 
   // After modal visible: lobe nodes brighten, rest dims
   useEffect(() => {

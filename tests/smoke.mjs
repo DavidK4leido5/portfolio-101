@@ -90,12 +90,29 @@ const readFx = () => desktop.evaluate(() => ({
   dim: window.__scene?.uniforms.uDim.value ?? -1,
   active: window.__scene?.uniforms.uActive.value ?? -2,
 }))
+
+const readFraming = (page) => page.evaluate(() => ({
+  tier: window.__scene?.qualityTier ?? null,
+  uiTier: document.querySelector('.ui')?.getAttribute('data-quality-tier') ?? null,
+  camZ: window.__scene?.framing?.camZ ?? -1,
+  clusterScale: window.__scene?.framing?.clusterScale ?? -1,
+  fov: window.__scene?.framing?.fov ?? -1,
+  fit: typeof window.__scene?.measureBrainFit === 'function' ? window.__scene.measureBrainFit() : -1,
+}))
+
 await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
 
 // Uniform assertions need VITE_SMOKE build (preview) or dev server — not production deploy
 const sceneOk = await desktop.evaluate(() => !!window.__scene?.uniforms)
 if (!sceneOk) fail('desktop: window.__scene missing — build with VITE_SMOKE=true for preview tests')
 else console.log('ok: __scene exposed for smoke assertions')
+
+const desktopFraming = await readFraming(desktop)
+if (desktopFraming.tier !== 'desktop') fail(`desktop framing: tier=${desktopFraming.tier}, expected desktop`)
+else if (desktopFraming.uiTier !== 'desktop') fail(`desktop UI: data-quality-tier=${desktopFraming.uiTier}`)
+else if (Math.abs(desktopFraming.camZ - 9.8) > 0.15) fail(`desktop framing: camZ=${desktopFraming.camZ}, expected ~9.8`)
+else if (Math.abs(desktopFraming.clusterScale - 1.18) > 0.02) fail(`desktop framing: scale=${desktopFraming.clusterScale}, expected ~1.18`)
+else console.log('ok: desktop camera framing unchanged')
 
 // Density slider must be clickable (not covered by the indicators layer) in idle
 const sliderHit = () => desktop.evaluate(() => {
@@ -145,13 +162,35 @@ if (!(fx.dim < 0.05)) fail(`desktop returned: uDim=${fx.dim}, expected <0.05`)
 if (fx.focus < 0.05 && fx.dim < 0.05) console.log('ok: lobe highlight dissolved on return')
 await desktop.close()
 
+// Mobile portrait: brain must fit in frame (pulled-back camera + smaller scale)
+const portrait = await browser.newPage({ viewport: { width: 390, height: 844 } })
+watch(portrait)
+await portrait.goto(URL, { waitUntil: 'domcontentloaded' })
+await portrait.waitForSelector('canvas', { timeout: 15000 })
+await portrait.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
+await portrait.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
+await portrait.waitForTimeout(1200)
+const portraitFraming = await readFraming(portrait)
+if (portraitFraming.tier !== 'mobile') fail(`portrait framing: tier=${portraitFraming.tier}, expected mobile`)
+else if (portraitFraming.uiTier !== 'mobile') fail(`portrait UI: data-quality-tier=${portraitFraming.uiTier}`)
+else if (portraitFraming.camZ < 12) fail(`portrait framing: camZ=${portraitFraming.camZ}, expected >=12 (pulled back)`)
+else if (portraitFraming.clusterScale > 1.0) fail(`portrait framing: scale=${portraitFraming.clusterScale}, expected <=1.0 on mobile portrait`)
+else if (!(portraitFraming.fit > 0.04)) fail(`portrait brain fit: margin=${portraitFraming.fit}, expected >0.04 (fully visible)`)
+else console.log(`ok: mobile portrait brain fits (margin=${portraitFraming.fit.toFixed(3)}, camZ=${portraitFraming.camZ})`)
+await portrait.close()
+
 // Mobile tier: full navigation loop (light enough for software GL to animate in real time)
 const page = await browser.newPage({ viewport: { width: 720, height: 540 } })
 watch(page)
 await page.goto(URL, { waitUntil: 'domcontentloaded' })
 await page.waitForSelector('canvas', { timeout: 15000 })
 await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
-await page.waitForTimeout(500)
+await page.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
+await page.waitForTimeout(800)
+const mobileFraming = await readFraming(page)
+if (mobileFraming.tier !== 'mobile') fail(`mobile framing: tier=${mobileFraming.tier}, expected mobile`)
+else if (!(mobileFraming.fit > 0.04)) fail(`mobile brain fit: margin=${mobileFraming.fit}, expected >0.04`)
+else console.log(`ok: mobile landscape brain fits (margin=${mobileFraming.fit.toFixed(3)})`)
 
 const idle = () => page.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
 
