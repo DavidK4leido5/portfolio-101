@@ -45,7 +45,8 @@ export const uniforms = {
   uAmbientOrigins: { value: pickAmbientOrigins(8) },
 }
 
-if (import.meta.env.DEV) {
+// Expose for Playwright: dev server or CI smoke build (VITE_SMOKE=true), not production deploy
+if (import.meta.env.DEV || import.meta.env.VITE_SMOKE === 'true') {
   ;(window as unknown as Record<string, unknown>).__scene = { uniforms }
 }
 

@@ -3,11 +3,20 @@ import { chromium } from 'playwright'
 const URL = process.env.SMOKE_URL ?? 'http://localhost:5173'
 const SECTIONS = ['projects', 'experience', 'skills', 'about', 'contact']
 const LOOPS = Number(process.env.SMOKE_LOOPS ?? 2)
+const CI = !!process.env.CI
+// Headless software GL on GitHub runners is much slower than local dev
+const T = {
+  ready: CI ? 120_000 : 60_000,
+  idle: CI ? 60_000 : 30_000,
+  overlay: CI ? 120_000 : 90_000,
+  mobileOverlay: CI ? 90_000 : 30_000,
+  return: CI ? 120_000 : 90_000,
+}
 
 const errors = []
 const fail = (msg) => { errors.push(msg); console.error('FAIL:', msg) }
 
-const browser = await chromium.launch()
+const browser = await chromium.launch({ args: CI ? ['--disable-dev-shm-usage'] : [] })
 
 function watch(page) {
   page.on('pageerror', (e) => fail(`pageerror: ${e.message}`))
@@ -42,7 +51,7 @@ else if (sectors.loadPhase !== 'ready' && (sectors.opacity !== '0' || sectors.vi
   fail(`desktop intro: sectors visible too early opacity=${sectors.opacity} visibility=${sectors.visibility}`)
 } else console.log('ok: sectors hidden during intro')
 
-await desktop.waitForSelector('[data-testid="sector-indicators"][data-sectors-ready="true"]', { timeout: 60000 })
+await desktop.waitForSelector('[data-testid="sector-indicators"][data-sectors-ready="true"]', { timeout: T.ready })
 await desktop.waitForTimeout(700)
 // Container stays pointer-events:none by design; verify visibility + that a
 // sector button actually receives pointer hits
@@ -81,7 +90,12 @@ const readFx = () => desktop.evaluate(() => ({
   dim: window.__scene?.uniforms.uDim.value ?? -1,
   active: window.__scene?.uniforms.uActive.value ?? -2,
 }))
-await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: 30000 })
+await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
+
+// Uniform assertions need VITE_SMOKE build (preview) or dev server — not production deploy
+const sceneOk = await desktop.evaluate(() => !!window.__scene?.uniforms)
+if (!sceneOk) fail('desktop: window.__scene missing — build with VITE_SMOKE=true for preview tests')
+else console.log('ok: __scene exposed for smoke assertions')
 
 // Density slider must be clickable (not covered by the indicators layer) in idle
 const sliderHit = () => desktop.evaluate(() => {
@@ -109,7 +123,7 @@ await desktop.mouse.move(0, 0)
 await desktop.waitForTimeout(200)
 
 await desktop.click('[data-section="projects"]', { force: true })
-await desktop.waitForSelector('[data-testid="overlay-title"]', { timeout: 90000 })
+await desktop.waitForSelector('[data-testid="overlay-title"]', { timeout: T.overlay })
 hit = await sliderHit()
 if (hit !== 'ok') fail(`arrived: slider not interactive (${hit})`)
 else console.log('ok: slider interactive while arrived')
@@ -121,8 +135,8 @@ if (!(fx.focus > 0.5)) fail(`desktop arrived: uFocus=${fx.focus}, expected >0.5 
 else console.log('ok: lobe nodes highlighted after modal')
 if (!(fx.dim > 0.4)) fail(`desktop arrived: uDim=${fx.dim}, expected >0.4`)
 await desktop.keyboard.press('Escape')
-await desktop.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: 90000 })
-await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: 90000 })
+await desktop.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.return })
+await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: T.return })
 await desktop.mouse.move(0, 0)
 await desktop.waitForTimeout(800)
 fx = await readFx()
@@ -136,20 +150,20 @@ const page = await browser.newPage({ viewport: { width: 720, height: 540 } })
 watch(page)
 await page.goto(URL, { waitUntil: 'domcontentloaded' })
 await page.waitForSelector('canvas', { timeout: 15000 })
-await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: 90000 })
+await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
 await page.waitForTimeout(500)
 
-const idle = () => page.waitForSelector('.ui[data-phase="idle"]', { timeout: 30000 })
+const idle = () => page.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
 
 for (let loop = 1; loop <= LOOPS; loop++) {
   console.log(`--- loop ${loop}/${LOOPS} ---`)
   for (const s of SECTIONS) {
-    await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: 60000 })
+    await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
     await idle()
     await page.hover(`[data-section="${s}"]`, { force: true })
     await page.waitForTimeout(250)
     await page.click(`[data-section="${s}"]`, { force: true })
-    await page.waitForSelector('[data-testid="overlay-title"]', { timeout: 30000 })
+    await page.waitForSelector('[data-testid="overlay-title"]', { timeout: T.mobileOverlay })
     const title = (await page.textContent('[data-testid="overlay-title"]'))?.trim().toLowerCase()
     if (title !== s) fail(`section ${s}: overlay title was "${title}"`)
     else console.log(`ok: ${s} overlay shown`)
@@ -162,16 +176,16 @@ for (let loop = 1; loop <= LOOPS; loop++) {
     if (mfx.active !== mfx.expected) fail(`section ${s}: uActive=${mfx.active}, expected ${mfx.expected}`)
     if (!(mfx.focus > 0.4)) fail(`section ${s}: uFocus=${mfx.focus}, expected >0.4`)
     await page.click('[data-testid="overlay-back"]')
-    await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: 30000 })
+    await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.mobileOverlay })
   }
 }
 
 // Escape key path
 await idle()
 await page.click('[data-section="projects"]', { force: true })
-await page.waitForSelector('[data-testid="overlay-title"]', { timeout: 30000 })
+await page.waitForSelector('[data-testid="overlay-title"]', { timeout: T.mobileOverlay })
 await page.keyboard.press('Escape')
-await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: 30000 })
+await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.mobileOverlay })
 await idle()
 console.log('ok: escape returns home')
 

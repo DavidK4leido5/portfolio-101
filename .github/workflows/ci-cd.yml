@@ -34,22 +34,41 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck and build
-        run: pnpm build
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Build for smoke tests
+        env:
+          VITE_SMOKE: 'true'
+        run: pnpm exec vite build
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Smoke tests
+        env:
+          CI: 'true'
         run: |
-          pnpm preview &
+          set -euo pipefail
+          pnpm preview --host 127.0.0.1 &
           PREVIEW_PID=$!
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:4173 > /dev/null && break
+          cleanup() { kill "$PREVIEW_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
+
+          ready=0
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:4173 > /dev/null; then
+              ready=1
+              break
+            fi
             sleep 1
           done
-          SMOKE_URL=http://localhost:4173 SMOKE_LOOPS=1 pnpm test
-          kill $PREVIEW_PID
+          if [ "$ready" -ne 1 ]; then
+            echo "Preview server failed to start on :4173"
+            exit 1
+          fi
+
+          SMOKE_URL=http://127.0.0.1:4173 SMOKE_LOOPS=1 pnpm test
 
       - name: Build for GitHub Pages
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
