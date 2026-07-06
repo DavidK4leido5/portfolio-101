@@ -10,9 +10,9 @@ export function PostProcessing() {
   if (!cfg.bloom) return null
   return (
     <EffectComposer>
-      <Bloom intensity={cfg.bloomIntensity} luminanceThreshold={0.32} mipmapBlur />
+      <Bloom intensity={cfg.bloomIntensity} luminanceThreshold={0.62} mipmapBlur />
       {cfg.ca ? <ChromaticAberration offset={caOffset} /> : <></>}
-      {cfg.grain ? <Noise opacity={0.045} /> : <></>}
+      {cfg.grain ? <Noise opacity={0.035} /> : <></>}
       <Vignette offset={0.26} darkness={0.72} />
     </EffectComposer>
   )

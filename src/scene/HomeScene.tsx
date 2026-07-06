@@ -5,7 +5,7 @@ import { QUALITY } from '../lib/quality'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
-import { uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
+import { CAM_BASE, CLUSTER_SCALE, uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
 import { NeuralCluster, makeCloud } from './NeuralCluster'
 import { ConnectionSystem, Constellation } from './ConnectionSystem'
 import { CameraRig } from './CameraRig'
@@ -33,19 +33,56 @@ function SceneUniforms() {
 }
 
 const projV = new Vector3()
+const MIN_IND_GAP = 118
+
+function separateIndicators(pts: { x: number; y: number }[]) {
+  for (let pass = 0; pass < 6; pass++) {
+    for (let a = 0; a < pts.length; a++) {
+      for (let b = a + 1; b < pts.length; b++) {
+        const dx = pts[b].x - pts[a].x
+        const dy = pts[b].y - pts[a].y
+        const d = Math.hypot(dx, dy)
+        if (d >= MIN_IND_GAP || d < 1) continue
+        const push = (MIN_IND_GAP - d) * 0.55
+        const nx = dx / d
+        const ny = dy / d
+        pts[a].x -= nx * push
+        pts[a].y -= ny * push
+        pts[b].x += nx * push
+        pts[b].y += ny * push
+      }
+    }
+  }
+}
 
 function Projection() {
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
   useFrame(() => {
     if (frame & 1) return
-    for (let i = 0; i < sections.length; i++) {
-      const el = indicatorEls[i]
-      if (!el) continue
+    const pts = sections.map((_, i) => {
       hotspotWorld(i, projV).project(camera)
-      el.style.opacity = projV.z > 1 ? '0' : ''
-      el.style.left = `${(projV.x * 0.5 + 0.5) * size.width}px`
-      el.style.top = `${(-projV.y * 0.5 + 0.5) * size.height}px`
+      return {
+        i,
+        hide: projV.z > 1,
+        x: (projV.x * 0.5 + 0.5) * size.width,
+        y: (-projV.y * 0.5 + 0.5) * size.height,
+      }
+    })
+    separateIndicators(pts)
+    const pad = 96
+    for (const p of pts) {
+      p.x = Math.max(pad, Math.min(size.width - pad, p.x))
+      p.y = Math.max(pad, Math.min(size.height - pad, p.y))
+    }
+    for (const p of pts) {
+      const el = indicatorEls[p.i]
+      if (!el) continue
+      el.style.opacity = p.hide ? '0' : ''
+      el.style.pointerEvents = p.hide ? 'none' : 'auto'
+      el.style.zIndex = String(20 - p.i)
+      el.style.left = `${p.x}px`
+      el.style.top = `${p.y}px`
     }
   })
   return null
@@ -67,11 +104,12 @@ function ClusterGroup({ children }: { children: React.ReactNode }) {
     g.rotation.x = Math.sin(t * 0.13) * 0.02 + Math.sin(t * 0.071 + 2.0) * 0.012
     g.rotation.z = Math.sin(t * 0.094 + 1.2) * 0.016
     g.position.set(
-      Math.sin(t * 0.16 + 0.7) * 0.05,
-      Math.sin(t * 0.21) * 0.08 + Math.sin(t * 0.34 + 1.5) * 0.03,
+      Math.sin(t * 0.16 + 0.7) * 0.03,
+      Math.sin(t * 0.21) * 0.05 + Math.sin(t * 0.34 + 1.5) * 0.02,
       0,
     )
-    g.scale.setScalar(1 + Math.sin(t * 0.24) * 0.012 + Math.sin(t * 0.11 + 3.0) * 0.008)
+    const breath = 1 + Math.sin(t * 0.24) * 0.008 + Math.sin(t * 0.11 + 3.0) * 0.005
+    g.scale.setScalar(CLUSTER_SCALE * breath)
     g.updateMatrixWorld()
   })
   return <group ref={ref}>{children}</group>
@@ -89,7 +127,7 @@ function Dust({ count }: { count: number }) {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.035} sizeAttenuation transparent opacity={0.22} color="#8899bb" depthWrite={false} />
+      <pointsMaterial size={0.03} sizeAttenuation transparent opacity={0.16} color="#7788aa" depthWrite={false} />
     </points>
   )
 }
@@ -112,7 +150,7 @@ export function HomeScene() {
     <Canvas
       key={tier}
       dpr={[1, cfg.dpr]}
-      camera={{ position: [0, 0.5, 8.5], fov: 50, near: 0.1, far: 60 }}
+      camera={{ position: [CAM_BASE.x, CAM_BASE.y, CAM_BASE.z], fov: 49, near: 0.1, far: 80 }}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
       onCreated={({ gl, camera }) => {
         gl.setClearColor('#020204')
@@ -126,7 +164,7 @@ export function HomeScene() {
         <Constellation cloud={cloud} />
       </ClusterGroup>
       <Dust count={cfg.dust} />
-      <gridHelper args={[36, 48, '#1c2033', '#151827']} position={[0, -3.4, 0]} material-transparent material-opacity={0.35} />
+      <gridHelper args={[42, 52, '#1c2033', '#151827']} position={[0, -4.6, 0]} material-transparent material-opacity={0.3} />
       <CameraRig />
       <Projection />
       <PostProcessing />

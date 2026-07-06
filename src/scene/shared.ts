@@ -1,7 +1,8 @@
 import { Color, Vector2, Vector3, type Group } from 'three'
 import { sections } from '../data/sections'
 
-export const CAM_BASE = new Vector3(0, 0.5, 8.5)
+export const CAM_BASE = new Vector3(0, 0.5, 9.8)
+export const CLUSTER_SCALE = 1.18
 
 export const clusterState: { rotation: number; group: Group | null } = { rotation: 0, group: null }
 
@@ -17,7 +18,7 @@ export const uniforms = {
   uTravel: { value: 0 },
   uHovered: { value: -1 },
   uActive: { value: -1 },
-  uSize: { value: 1 },
+  uSize: { value: 1.15 },
   uConstel: { value: 0 },
   uFocus: { value: 0 },
   uSectionColors: { value: sections.map((s) => new Color(s.color)) },

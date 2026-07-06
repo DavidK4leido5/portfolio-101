@@ -1,11 +1,10 @@
 import { useEffect, useMemo } from 'react'
 import { AdditiveBlending, ShaderMaterial } from 'three'
+import { brainSurface } from '../data/brainCloud'
 import { sections } from '../data/sections'
 import { uniforms } from './shared'
 import { particleVert, particleFrag } from './shaders'
 
-// new ShaderMaterial({ uniforms }) shares the object by reference;
-// the R3F uniforms prop clones holders, silently disconnecting shared updates.
 export function makeMaterial(vertexShader: string, fragmentShader: string): ShaderMaterial {
   return new ShaderMaterial({
     vertexShader,
@@ -31,19 +30,40 @@ function gauss(): number {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
 }
 
-const LOBES: [number, number, number][] = [[0.9, 0.3, -0.5], [-1.0, -0.2, 0.6], [0.2, 0.7, 0.9]]
+const SURFACE = brainSurface
+const SURFACE_N = SURFACE.length / 3
+
+function shuffledSurfaceOrder(): Uint32Array {
+  const order = new Uint32Array(SURFACE_N)
+  for (let i = 0; i < SURFACE_N; i++) order[i] = i
+  for (let i = SURFACE_N - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0
+    const t = order[i]
+    order[i] = order[j]
+    order[j] = t
+  }
+  return order
+}
+
+function sampleSurface(order: Uint32Array, slot: number, jitter = 0.006): [number, number, number] {
+  const i = order[slot % SURFACE_N]
+  const x = SURFACE[i * 3] + gauss() * jitter
+  const y = SURFACE[i * 3 + 1] + gauss() * jitter
+  const z = SURFACE[i * 3 + 2] + gauss() * jitter
+  return [x, y, z]
+}
 
 export function makeCloud(count: number): Cloud {
   const positions = new Float32Array(count * 3)
   const seeds = new Float32Array(count)
   const affinity = new Float32Array(count)
-  const perHot = Math.floor((count * 0.15) / sections.length)
-  const nShell = Math.floor(count * 0.1)
+  const order = shuffledSurfaceOrder()
+  const perHot = Math.floor((count * 0.14) / sections.length)
   let i = 0
 
   for (let s = 0; s < sections.length; s++) {
     const [hx, hy, hz] = sections[s].position
-    const sig = sections[s].radius * 0.5
+    const sig = sections[s].radius * 0.28
     for (let k = 0; k < perHot; k++, i++) {
       positions[i * 3] = hx + gauss() * sig
       positions[i * 3 + 1] = hy + gauss() * sig
@@ -51,23 +71,15 @@ export function makeCloud(count: number): Cloud {
       affinity[i] = s
     }
   }
-  for (let k = 0; k < nShell; k++, i++) {
-    const th = Math.random() * Math.PI * 2
-    const ph = Math.acos(2 * Math.random() - 1)
-    const r = 3.4 + Math.random() * 2.2
-    positions[i * 3] = r * Math.sin(ph) * Math.cos(th)
-    positions[i * 3 + 1] = r * Math.cos(ph) * 0.72
-    positions[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th)
-    affinity[i] = -1
-  }
+
   for (; i < count; i++) {
-    const lobe = LOBES[(Math.random() * LOBES.length) | 0]
-    const w = Math.random() * 0.55
-    positions[i * 3] = gauss() * 1.9 + lobe[0] * w
-    positions[i * 3 + 1] = gauss() * 1.35 + lobe[1] * w
-    positions[i * 3 + 2] = gauss() * 1.7 + lobe[2] * w
+    const p = sampleSurface(order, i - perHot * sections.length)
+    positions[i * 3] = p[0]
+    positions[i * 3 + 1] = p[1]
+    positions[i * 3 + 2] = p[2]
     affinity[i] = -1
   }
+
   for (let k = 0; k < count; k++) seeds[k] = Math.random()
   return { positions, seeds, affinity, count }
 }

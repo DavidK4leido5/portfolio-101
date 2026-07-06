@@ -63,18 +63,18 @@ attribute float aAffinity;
 vec3 displace(vec3 pos, float seed){
   float t=uTime*0.05;
   vec3 p=pos;
-  p+=0.22*vec3(
+  p+=0.04*vec3(
     snoise(pos*0.32+vec3(t,13.7,0.0)),
     snoise(pos*0.32+vec3(0.0,t+37.2,7.1)),
     snoise(pos*0.32+vec3(29.3,0.0,t+91.7))
   );
-  p+=0.035*vec3(
+  p+=0.012*vec3(
     sin(uTime*(1.2+seed*1.6)+seed*6.2831853),
     sin(uTime*(1.0+seed*1.3)+seed*4.7),
     sin(uTime*(1.4+seed*1.1)+seed*2.3)
   );
-  p.x+=uMouse.x*0.12*(0.3+seed*0.7);
-  p.y+=uMouse.y*0.12*(0.3+seed*0.7);
+  p.x+=uMouse.x*0.05*(0.3+seed*0.7);
+  p.y+=uMouse.y*0.05*(0.3+seed*0.7);
   return p;
 }
 
@@ -88,19 +88,23 @@ vec3 sectionColor(float affinity){
   return affinity>=0.0?uSectionColors[int(affinity+0.5)]:uAccent;
 }
 
-// Position + depth + seed palette for core nodes; section affinity tints on top
+// Position + depth + seed palette — warm cortex, cooler deep matter
 vec3 nodePalette(vec3 pos, float seed, float aff, float depth){
   float d=clamp(depth*0.11,0.0,1.0);
+  float radial=length(pos-vec3(0.0,0.12,0.0));
+  float cortex=smoothstep(0.62,1.18,radial);
   float n=snoise(pos*0.22+seed*4.1)*0.5+0.5;
   float t=fract(pos.y*0.09+pos.x*0.06+pos.z*0.05+n*0.35+seed*0.28);
-  vec3 c1=vec3(0.52,0.36,0.98);
-  vec3 c2=vec3(0.36,0.58,0.96);
-  vec3 c3=vec3(0.38,0.78,0.88);
-  vec3 c4=vec3(0.78,0.40,0.92);
+  vec3 deep=vec3(0.38,0.28,0.52);
+  vec3 cort=vec3(0.94,0.62,0.78);
+  vec3 c1=mix(deep,cort,cortex*0.85);
+  vec3 c2=vec3(0.42,0.52,0.88);
+  vec3 c3=vec3(0.38,0.72,0.82);
+  vec3 c4=vec3(0.72,0.38,0.86);
   vec3 col=t<0.33?mix(c1,c2,t*3.0):(t<0.66?mix(c2,c3,(t-0.33)*3.0):mix(c3,c4,(t-0.66)*3.0));
-  col=mix(col*0.48,col*1.18,1.0-d);
-  col*=0.86+0.28*seed;
-  col=mix(col,uAccent,0.1);
+  col=mix(col*0.52,col*1.02,1.0-d);
+  col*=0.72+0.22*seed;
+  col=mix(col,uAccent,0.06);
   if(aff>=0.0) col=mix(col,sectionColor(aff),0.52);
   return col;
 }
@@ -119,19 +123,19 @@ void main(){
   float hasSel=tm>=0.0?1.0:0.0;
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
-  float bright=mix(1.0,mix(0.42,1.7,isT),emphasis*hasSel);
-  float pulse=0.72+0.28*sin(uTime*2.5+aSeed*6.2831853);
-  float hotspotBoost=aAffinity>=0.0?1.2:1.0;
-  vGlow=bright*hotspotBoost*(1.0+uFocus*0.15*isT);
-  vAlpha=(0.3+0.7*aSeed)*pulse*0.7;
-  vAlpha*=mix(1.0,0.38,uFocus*(1.0-isT)*hasSel);
+  float bright=mix(0.92,mix(0.55,1.45,isT),emphasis*hasSel);
+  float pulse=0.96+0.04*sin(uTime*2.5+aSeed*6.2831853);
+  vGlow=bright*(1.0+uFocus*0.18*isT);
+  vAlpha=(0.5+0.38*aSeed)*pulse;
+  vAlpha*=mix(1.0,0.35,uFocus*(1.0-isT)*hasSel);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   vec3 base=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.6,1.0);
-  vColor=mix(base,sectionColor(aAffinity)*1.65,lit);
+  vColor=mix(base,sectionColor(aAffinity)*1.5,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.38,0.4,0.48),grey*0.55);
-  gl_PointSize=uSize*(1.2+aSeed*2.2)*(0.85+0.3*pulse)*(34.0/-mv.z);
+  float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z);
+  gl_PointSize=clamp(px,1.8,5.5);
   gl_Position=projectionMatrix*mv;
 }
 `
@@ -143,10 +147,15 @@ varying float vAlpha;
 varying vec3 vColor;
 void main(){
   float d=length(gl_PointCoord-0.5)*2.0;
-  float a=pow(max(0.0,1.0-d),2.6);
-  vec3 col=mix(vColor,vec3(1.0),pow(a,3.0)*0.55);
-  gl_FragColor=vec4(col*vGlow,a*vAlpha);
-  if(gl_FragColor.a<0.01) discard;
+  if(d>1.0) discard;
+  // Tight disk — no wide soft halo
+  float disk=1.0-smoothstep(0.62,1.0,d);
+  // Pin-point catch light at center only
+  float pin=pow(max(0.0,1.0-d*2.6),14.0);
+  vec3 col=vColor*vGlow;
+  col+=pin*0.42;
+  gl_FragColor=vec4(col,disk*vAlpha);
+  if(gl_FragColor.a<0.02) discard;
 }
 `
 
@@ -161,14 +170,14 @@ void main(){
   float hasSel=tm>=0.0?1.0:0.0;
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
-  float bright=mix(1.0,mix(0.38,1.4,isT),emphasis*hasSel);
-  float pulse=0.5+0.5*sin(uTime*1.3+aSeed*6.2831853);
-  vAlpha=0.085*(0.35+0.65*pulse)*bright;
+  float bright=mix(0.85,mix(0.4,1.25,isT),emphasis*hasSel);
+  float pulse=0.78+0.22*sin(uTime*1.3+aSeed*6.2831853);
+  vAlpha=0.07*(0.35+0.5*pulse)*bright;
   vAlpha*=mix(1.0,0.32,uFocus*(1.0-isT)*hasSel);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   vec3 base=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.5,1.0);
-  vColor=mix(base,sectionColor(aAffinity)*1.3,lit)*1.12;
+  vColor=mix(base,sectionColor(aAffinity)*1.2,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
   gl_Position=projectionMatrix*mv;

@@ -17,15 +17,15 @@ export interface TierConfig {
 
 export const QUALITY: Record<Tier, TierConfig> = {
   desktop: {
-    particles: 4000, maxConnections: 5000, neighbors: 5, maxDist: 1.15, rebuildMs: 600,
-    dust: 180, dpr: 2, bloom: true, bloomIntensity: 0.55, ca: true, grain: true, travelSec: 2.8,
+    particles: 10000, maxConnections: 12000, neighbors: 6, maxDist: 0.36, rebuildMs: 550,
+    dust: 100, dpr: 2, bloom: true, bloomIntensity: 0.42, ca: true, grain: true, travelSec: 2.8,
   },
   tablet: {
-    particles: 2200, maxConnections: 2600, neighbors: 4, maxDist: 1.25, rebuildMs: 800,
-    dust: 100, dpr: 1.5, bloom: true, bloomIntensity: 0.45, ca: false, grain: false, travelSec: 2.4,
+    particles: 5200, maxConnections: 6200, neighbors: 5, maxDist: 0.4, rebuildMs: 750,
+    dust: 60, dpr: 1.5, bloom: true, bloomIntensity: 0.32, ca: false, grain: false, travelSec: 2.4,
   },
   mobile: {
-    particles: 1100, maxConnections: 1200, neighbors: 3, maxDist: 1.35, rebuildMs: 1000,
+    particles: 2600, maxConnections: 3000, neighbors: 4, maxDist: 0.44, rebuildMs: 950,
     dust: 0, dpr: 1, bloom: false, bloomIntensity: 0, ca: false, grain: false, travelSec: 2.0,
   },
 }
