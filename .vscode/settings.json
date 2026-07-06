@@ -1,0 +1,11 @@
+{
+  "terminal.integrated.env.windows": {
+    "PLAYWRIGHT_BROWSERS_PATH": "${env:LOCALAPPDATA}\\ms-playwright"
+  },
+  "terminal.integrated.env.linux": {
+    "PLAYWRIGHT_BROWSERS_PATH": "${env:HOME}/.cache/ms-playwright"
+  },
+  "terminal.integrated.env.osx": {
+    "PLAYWRIGHT_BROWSERS_PATH": "${env:HOME}/.cache/ms-playwright"
+  }
+}

@@ -1,7 +1,9 @@
 // Dev-only visual check. Headless GL is too slow to catch live intro frames,
 // so after load we drive uSpawn manually to photograph each morph stage,
 // then restore and capture idle brain-activity frames.
-import { chromium } from 'playwright'
+import { loadChromium } from './playwright-env.mjs'
+
+const chromium = await loadChromium()
 
 const URL = process.env.SMOKE_URL ?? 'http://localhost:5173'
 const browser = await chromium.launch()

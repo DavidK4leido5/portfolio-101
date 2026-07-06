@@ -181,6 +181,7 @@ Empty file in `public/` so GitHub Pages skips Jekyll processing.
 ## Related skills
 
 - App patterns: `cinematic-webgl-app`
+- **Responsive fix loop:** `react-responsive-verify` (tier-scoped fixes, Playwright per viewport, mandatory `tsc --noEmit`)
 - **Workflow optimization:** `efficient-github-ci` (path filters, Playwright cache, split jobs)
 - General E2E: `e2e-testing` (Page Object Model, fixtures — use for larger suites)
 

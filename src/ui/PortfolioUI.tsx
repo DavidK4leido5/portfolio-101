@@ -90,9 +90,18 @@ export function PortfolioUI() {
   const navigateTo = useSceneStore((s) => s.navigateTo)
   const returnHome = useSceneStore((s) => s.returnHome)
   const setNodeCount = useSceneStore((s) => s.setNodeCount)
+  const isMobileNav = tier === 'mobile'
   const indicatorsRef = useRef<HTMLDivElement>(null)
+  const navRef = useRef<HTMLElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const uiReady = loadPhase === 'ready'
+
+  const onSectorEnter = useCallback((id: SectionId, i: number) => {
+    setHovered(id)
+    triggerSectorWave(i)
+  }, [setHovered])
+
+  const onSectorLeave = useCallback(() => setHovered(null), [setHovered])
 
   const onNodesChange = useCallback((v: number) => {
     const n = Math.round(v)
@@ -101,7 +110,12 @@ export function PortfolioUI() {
   }, [setNodeCount])
 
   useEffect(() => {
-    const el = indicatorsRef.current
+    if (!isMobileNav) return
+    sections.forEach((_, i) => { indicatorEls[i] = null })
+  }, [isMobileNav])
+
+  useEffect(() => {
+    const el = isMobileNav ? navRef.current : indicatorsRef.current
     if (!el) return
     if (!uiReady) {
       gsap.set(el, { autoAlpha: 0 })
@@ -112,7 +126,7 @@ export function PortfolioUI() {
       duration: 0.45,
       ease: 'power2.out',
     })
-  }, [phase, uiReady])
+  }, [phase, uiReady, isMobileNav])
 
   useEffect(() => {
     if (phase === 'arrived' && overlayRef.current) {
@@ -129,9 +143,11 @@ export function PortfolioUI() {
   }, [returnHome])
 
   useEffect(() => {
-    const tw = gsap.to('.indicator .dot', { opacity: 0.35, repeat: -1, yoyo: true, duration: 1.1, ease: 'sine.inOut', stagger: 0.2 })
+    const tw = gsap.to('.indicator .dot, .sector-nav-btn .dot', {
+      opacity: 0.35, repeat: -1, yoyo: true, duration: 1.1, ease: 'sine.inOut', stagger: 0.2,
+    })
     return () => { tw.kill() }
-  }, [])
+  }, [isMobileNav])
 
   return (
     <div className="ui" data-phase={phase} data-load-phase={loadPhase} data-quality-tier={tier}>
@@ -157,31 +173,60 @@ export function PortfolioUI() {
         </div>
       )}
 
-      <div
-        className="indicators"
-        ref={indicatorsRef}
-        data-testid="sector-indicators"
-        data-sectors-ready={uiReady ? 'true' : 'false'}
-        aria-hidden={!uiReady}
-      >
-        {sections.map((s, i) => (
-          <button
-            key={s.id}
-            data-section={s.id}
-            className="indicator"
-            style={{ '--section-color': s.color } as React.CSSProperties}
-            ref={(el) => { indicatorEls[i] = el }}
-            onMouseEnter={() => { setHovered(s.id); triggerSectorWave(i) }}
-            onMouseLeave={() => setHovered(null)}
-            onFocus={() => { setHovered(s.id); triggerSectorWave(i) }}
-            onBlur={() => setHovered(null)}
-            onClick={() => navigateTo(s.id)}
-          >
-            <span className="dot" /><span className="line" />
-            <span className="label-wrap"><span className="label">{s.label}</span></span>
-          </button>
-        ))}
-      </div>
+      {!isMobileNav && (
+        <div
+          className="indicators"
+          ref={indicatorsRef}
+          data-testid="sector-indicators"
+          data-sectors-ready={uiReady ? 'true' : 'false'}
+          aria-hidden={!uiReady}
+        >
+          {sections.map((s, i) => (
+            <button
+              key={s.id}
+              data-section={s.id}
+              className="indicator"
+              style={{ '--section-color': s.color } as React.CSSProperties}
+              ref={(el) => { indicatorEls[i] = el }}
+              onMouseEnter={() => onSectorEnter(s.id, i)}
+              onMouseLeave={onSectorLeave}
+              onFocus={() => onSectorEnter(s.id, i)}
+              onBlur={onSectorLeave}
+              onClick={() => navigateTo(s.id)}
+            >
+              <span className="dot" /><span className="line" />
+              <span className="label-wrap"><span className="label">{s.label}</span></span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {isMobileNav && uiReady && (
+        <nav
+          className="sector-nav"
+          ref={navRef}
+          data-testid="sector-nav"
+          data-sectors-ready={uiReady ? 'true' : 'false'}
+          aria-label="Portfolio sections"
+        >
+          {sections.map((s, i) => (
+            <button
+              key={s.id}
+              type="button"
+              data-section={s.id}
+              className="sector-nav-btn"
+              style={{ '--section-color': s.color } as React.CSSProperties}
+              aria-current={active === s.id ? 'page' : undefined}
+              onFocus={() => onSectorEnter(s.id, i)}
+              onBlur={onSectorLeave}
+              onClick={() => navigateTo(s.id)}
+            >
+              <span className="dot" aria-hidden />
+              <span className="label">{s.label}</span>
+            </button>
+          ))}
+        </nav>
+      )}
 
       {phase === 'arrived' && active && (
         <div className="overlay" ref={overlayRef}>

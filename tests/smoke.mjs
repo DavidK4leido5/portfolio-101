@@ -1,4 +1,6 @@
-import { chromium } from 'playwright'
+import { loadChromium } from './playwright-env.mjs'
+
+const chromium = await loadChromium()
 
 const URL = process.env.SMOKE_URL ?? 'http://localhost:5173'
 const SECTIONS = ['projects', 'experience', 'skills', 'about', 'contact']
@@ -36,6 +38,25 @@ const sectorHidden = async (page) => page.evaluate(() => {
     loadPhase: document.querySelector('.ui')?.getAttribute('data-load-phase'),
   }
 })
+
+const mobileNavState = async (page) => page.evaluate(() => {
+  const nav = document.querySelector('[data-testid="sector-nav"]')
+  const brain = document.querySelector('[data-testid="sector-indicators"]')
+  const btn = document.querySelector('[data-testid="sector-nav"] [data-section="projects"]')
+  if (!nav || !btn) return { missing: true, brainPresent: !!brain }
+  const ns = getComputedStyle(nav)
+  const r = btn.getBoundingClientRect()
+  const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+  return {
+    opacity: Number(ns.opacity),
+    visibility: ns.visibility,
+    hit: btn.contains(el),
+    brainPresent: !!brain,
+    count: nav.querySelectorAll('[data-section]').length,
+  }
+})
+
+const mobileSector = (section) => `[data-testid="sector-nav"] [data-section="${section}"]`
 
 // Desktop tier: load + render + no errors (headless software GL is too slow for full desktop navigation)
 const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } })
@@ -177,6 +198,13 @@ else if (portraitFraming.camZ < 12) fail(`portrait framing: camZ=${portraitFrami
 else if (portraitFraming.clusterScale > 1.0) fail(`portrait framing: scale=${portraitFraming.clusterScale}, expected <=1.0 on mobile portrait`)
 else if (!(portraitFraming.fit > 0.04)) fail(`portrait brain fit: margin=${portraitFraming.fit}, expected >0.04 (fully visible)`)
 else console.log(`ok: mobile portrait brain fits (margin=${portraitFraming.fit.toFixed(3)}, camZ=${portraitFraming.camZ})`)
+const portraitNav = await mobileNavState(portrait)
+if (portraitNav.missing) fail('portrait: sector nav missing')
+else if (portraitNav.brainPresent) fail('portrait: brain sector indicators should be hidden on mobile')
+else if (portraitNav.count !== 5) fail(`portrait nav: expected 5 sectors, got ${portraitNav.count}`)
+else if (portraitNav.opacity < 0.9 || portraitNav.visibility !== 'visible' || !portraitNav.hit) {
+  fail(`portrait nav not interactive ${JSON.stringify(portraitNav)}`)
+} else console.log('ok: mobile portrait uses bottom sector nav')
 await portrait.close()
 
 // Mobile tier: full navigation loop (light enough for software GL to animate in real time)
@@ -191,6 +219,12 @@ const mobileFraming = await readFraming(page)
 if (mobileFraming.tier !== 'mobile') fail(`mobile framing: tier=${mobileFraming.tier}, expected mobile`)
 else if (!(mobileFraming.fit > 0.04)) fail(`mobile brain fit: margin=${mobileFraming.fit}, expected >0.04`)
 else console.log(`ok: mobile landscape brain fits (margin=${mobileFraming.fit.toFixed(3)})`)
+const navState = await mobileNavState(page)
+if (navState.missing) fail('mobile: sector nav missing')
+else if (navState.brainPresent) fail('mobile: brain sector indicators should be hidden')
+else if (navState.opacity < 0.9 || navState.visibility !== 'visible' || !navState.hit) {
+  fail(`mobile nav not interactive ${JSON.stringify(navState)}`)
+} else console.log('ok: mobile sector nav interactive')
 
 const idle = () => page.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
 
@@ -199,9 +233,7 @@ for (let loop = 1; loop <= LOOPS; loop++) {
   for (const s of SECTIONS) {
     await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
     await idle()
-    await page.hover(`[data-section="${s}"]`, { force: true })
-    await page.waitForTimeout(250)
-    await page.click(`[data-section="${s}"]`, { force: true })
+    await page.click(mobileSector(s), { force: true })
     await page.waitForSelector('[data-testid="overlay-title"]', { timeout: T.mobileOverlay })
     const title = (await page.textContent('[data-testid="overlay-title"]'))?.trim().toLowerCase()
     if (title !== s) fail(`section ${s}: overlay title was "${title}"`)
@@ -221,7 +253,7 @@ for (let loop = 1; loop <= LOOPS; loop++) {
 
 // Escape key path
 await idle()
-await page.click('[data-section="projects"]', { force: true })
+await page.click(mobileSector('projects'), { force: true })
 await page.waitForSelector('[data-testid="overlay-title"]', { timeout: T.mobileOverlay })
 await page.keyboard.press('Escape')
 await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.mobileOverlay })

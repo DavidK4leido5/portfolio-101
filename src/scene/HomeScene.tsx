@@ -72,8 +72,9 @@ function Projection() {
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
   const ready = useSceneStore((s) => s.loadPhase === 'ready')
+  const tier = useSceneStore((s) => s.qualityTier)
   useFrame(() => {
-    if (!ready || frame & 1) return
+    if (!ready || tier === 'mobile' || frame & 1) return
     const pts = sections.map((_, i) => {
       hotspotWorld(i, projV).project(camera)
       return {

@@ -30,7 +30,8 @@
       "args": [
         "-y",
         "@playwright/mcp@0.0.69",
-        "--extension"
+        "--browser",
+        "chrome"
       ]
     },
     "sequential-thinking": {
