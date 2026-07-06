@@ -29,13 +29,31 @@ const browser = await chromium.launch()
 process.exit(errors.length ? 1 : 0)
 ```
 
-## Expose uniforms for assertions (DEV only)
+## Expose uniforms for assertions (smoke build only)
+
+Production deploy must NOT expose `window.__scene`. CI preview builds use `VITE_SMOKE=true`:
 
 ```typescript
-if (import.meta.env.DEV) {
+// shared.ts
+if (import.meta.env.DEV || import.meta.env.VITE_SMOKE === 'true') {
   (window as any).__scene = { uniforms }
 }
 ```
+
+CI workflow:
+```yaml
+- name: Build for smoke tests
+  env:
+    VITE_SMOKE: 'true'
+  run: pnpm exec vite build
+
+- name: Build for GitHub Pages   # separate step, no VITE_SMOKE
+  env:
+    VITE_BASE_PATH: /${{ github.event.repository.name }}/
+  run: pnpm build
+```
+
+Without `VITE_SMOKE`, all `window.__scene` assertions fail on `pnpm preview` (production bundle).
 
 Assert hover/travel/focus:
 

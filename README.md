@@ -114,11 +114,28 @@ Pushes to `master` trigger the [CI/CD workflow](.github/workflows/ci-cd.yml):
 4. Rebuild with the GitHub Pages base path (`/repo-name/`)
 5. Deploy to GitHub Pages
 
-### First-time setup
+### First-time setup (required — fixes deploy 404)
 
-1. In your GitHub repo, go to **Settings → Pages → Build and deployment**
-2. Set **Source** to **GitHub Actions**
-3. Push to `master` — the workflow handles the rest
+If **build-and-test passes** but **deploy fails** with:
+
+`Failed to create deployment (status: 404)` … `Ensure GitHub Pages has been enabled`
+
+Pages is not configured yet. Do this **once** in the repo:
+
+1. Open **[Settings → Pages](https://github.com/DavidK4leido5/portfolio-101/settings/pages)** for your repo  
+   (replace `portfolio-101` if you renamed the repository)
+2. Under **Build and deployment → Source**, change from **Deploy from a branch** to **GitHub Actions**
+3. Save (no branch or folder selection needed when using Actions)
+4. Re-run the failed workflow: **Actions → CI/CD → Re-run all jobs**  
+   Or push an empty commit / use **Run workflow**
+
+After the deploy job succeeds, the site is live at:
+
+**https://davidk4leido5.github.io/portfolio-101/**
+
+> **Note:** GitHub Pages on free accounts requires a **public** repository. Private repos need GitHub Pro/Team for Pages.
+
+> **Node 20 warnings** in the Actions log (`Node 20 is being deprecated…`) come from GitHub’s internal action runtime, not this workflow. We pin **Node 22** for build/test steps; those warnings are safe to ignore unless a step actually fails.
 
 You can also trigger a manual deploy from **Actions → CI/CD → Run workflow**.
 

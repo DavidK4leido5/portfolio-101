@@ -78,10 +78,11 @@ jobs:
 
       - name: Upload production build
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
+  # Requires Pages enabled: Settings → Pages → Source → GitHub Actions (404 if skipped)
   deploy:
     needs: build-and-test
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
