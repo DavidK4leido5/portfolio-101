@@ -29,6 +29,9 @@ export const uniforms = {
   uConnect: { value: 0 },
   uSectionColors: { value: sections.map((s) => new Color(s.color)) },
   uHotspots: { value: sections.map((s) => new Vector3(...s.position)) },
+  // Hover shockwave: section index + 0..1 progress of the expanding wave
+  uWaveSection: { value: -1 },
+  uWaveT: { value: 1 },
 }
 
 if (import.meta.env.DEV) {

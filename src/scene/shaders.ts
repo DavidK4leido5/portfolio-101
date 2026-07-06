@@ -63,6 +63,8 @@ uniform float uConnect;
 uniform vec3 uAccent;
 uniform vec3 uSectionColors[5];
 uniform vec3 uHotspots[5];
+uniform float uWaveSection;
+uniform float uWaveT;
 attribute float aSeed;
 attribute float aAffinity;
 attribute float aIndex;
@@ -133,17 +135,25 @@ vec3 displace(vec3 pos, float seed, float morph){
   return p;
 }
 
-// Brain activity: color waves ripple outward from each lobe hotspot, staggered
-// per region, with a sin-shimmered front so the pulse looks organic not geometric
+// Expanding spherical shockwave from a lobe hotspot; ph 0..1 sweeps the whole
+// brain (max hotspot-to-far-side distance ~7), fading as it travels outward.
+// The sin shimmer makes the wavefront ragged/organic instead of a clean shell.
+float waveFront(vec3 pos,vec3 origin,float ph,float sharp){
+  float d=distance(pos,origin);
+  float w=exp(-sharp*abs(d-ph*7.0))*(1.0-ph)*(1.0-ph);
+  w*=0.7+0.5*sin(dot(pos,vec3(2.3,1.9,2.7))+uTime*1.6);
+  return max(w,0.0);
+}
+
+// Ambient brain activity: one subtle wave at a time, source rotating between
+// lobes — same shockwave concept as hover, dialed way down
 vec3 brainActivity(vec3 pos){
-  vec3 act=vec3(0.0);
-  for(int i=0;i<5;i++){
-    float d=distance(pos,uHotspots[i]);
-    float ph=fract(uTime*0.16+float(i)*0.37);
-    float ring=ph*5.2;
-    float w=exp(-5.5*abs(d-ring))*(1.0-ph)*(1.0-ph);
-    w*=0.65+0.55*sin(dot(pos,vec3(2.3,1.9,2.7))+uTime*1.4+float(i)*2.1);
-    act+=uSectionColors[i]*max(w,0.0);
+  float cyc=uTime*0.09;
+  int src=int(mod(floor(cyc),5.0));
+  vec3 act=uSectionColors[src]*waveFront(pos,uHotspots[src],fract(cyc),3.0)*0.5;
+  if(uWaveSection>=0.0&&uWaveT<0.999){
+    int wi=int(uWaveSection+0.5);
+    act+=uSectionColors[wi]*waveFront(pos,uHotspots[wi],uWaveT,4.0)*2.2;
   }
   return act;
 }
@@ -212,7 +222,7 @@ void main(){
   vColor=mix(baseCol,sectionColor(aAffinity)*1.5,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.38,0.4,0.48),grey*0.55);
-  vec3 act=brainActivity(position)*morph*uConnect*(1.0-emphasis*0.75);
+  vec3 act=brainActivity(position)*morph*uConnect*(1.0-uFocus*0.75);
   vColor+=act*1.35;
   vGlow+=dot(act,vec3(0.5));
   float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z);
@@ -269,7 +279,7 @@ void main(){
   vColor=mix(baseCol,sectionColor(aAffinity)*1.2,lit);
   float grey=(1.0-isT)*hasSel*uFocus;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
-  vColor+=brainActivity(position)*0.7*morph*uConnect*(1.0-emphasis*0.75);
+  vColor+=brainActivity(position)*0.7*morph*uConnect*(1.0-uFocus*0.75);
   gl_Position=projectionMatrix*mv;
 }
 `

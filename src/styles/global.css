@@ -44,7 +44,9 @@ canvas { display: block; }
   box-shadow: 0 0 8px var(--accent);
 }
 
-.indicators { position: absolute; inset: 0; visibility: hidden; }
+/* Full-screen layer must never eat clicks meant for the slider/HUD beneath it;
+   the .indicator buttons re-enable their own pointer events */
+.indicators { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 
 .indicator {
   position: absolute;
@@ -101,11 +103,12 @@ canvas { display: block; }
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: flex-end;
   padding-right: 5vw;
-  pointer-events: auto;
+  pointer-events: none;
   background: linear-gradient(90deg, rgba(2, 2, 6, 0) 38%, rgba(2, 2, 6, 0.45) 62%, rgba(2, 2, 6, 0.72));
 }
 
 .panel {
+  pointer-events: auto;
   width: min(480px, 88vw);
   max-height: 80vh;
   overflow-y: auto;

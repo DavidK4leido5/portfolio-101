@@ -43,9 +43,19 @@ else if (sectors.loadPhase !== 'ready' && (sectors.opacity !== '0' || sectors.vi
 } else console.log('ok: sectors hidden during intro')
 
 await desktop.waitForSelector('[data-testid="sector-indicators"][data-sectors-ready="true"]', { timeout: 60000 })
-sectors = await sectorHidden(desktop)
-if (sectors.pointerEvents === 'none' || Number(sectors.opacity) < 0.9) {
-  fail(`desktop ready: sectors not interactive opacity=${sectors.opacity} pointerEvents=${sectors.pointerEvents}`)
+await desktop.waitForTimeout(700)
+// Container stays pointer-events:none by design; verify visibility + that a
+// sector button actually receives pointer hits
+const sectorState = await desktop.evaluate(() => {
+  const wrap = document.querySelector('[data-testid="sector-indicators"]')
+  const btn = document.querySelector('[data-section="projects"]')
+  const s = getComputedStyle(wrap)
+  const r = btn.getBoundingClientRect()
+  const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+  return { opacity: Number(s.opacity), visibility: s.visibility, hit: btn.contains(el) }
+})
+if (sectorState.opacity < 0.9 || sectorState.visibility !== 'visible' || !sectorState.hit) {
+  fail(`desktop ready: sectors not interactive ${JSON.stringify(sectorState)}`)
 } else console.log('ok: sectors visible after brain assembled')
 
 await desktop.waitForTimeout(500)
@@ -72,8 +82,37 @@ const readFx = () => desktop.evaluate(() => ({
   active: window.__scene?.uniforms.uActive.value ?? -2,
 }))
 await desktop.waitForSelector('.ui[data-phase="idle"]', { timeout: 30000 })
+
+// Density slider must be clickable (not covered by the indicators layer) in idle
+const sliderHit = () => desktop.evaluate(() => {
+  const s = document.querySelector('[data-testid="node-slider"]')
+  if (!s) return 'missing'
+  const r = s.getBoundingClientRect()
+  const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+  return el === s ? 'ok' : `blocked by ${el?.className || el?.tagName}`
+})
+let hit = await sliderHit()
+if (hit !== 'ok') fail(`idle: slider not interactive (${hit})`)
+else console.log('ok: slider interactive while idle')
+
+// Hover fires a sector shockwave (uWaveSection set, uWaveT animating from 0)
+await desktop.hover('[data-section="skills"]', { force: true })
+await desktop.waitForTimeout(300)
+const wave = await desktop.evaluate(() => ({
+  section: window.__scene?.uniforms.uWaveSection.value ?? -2,
+  t: window.__scene?.uniforms.uWaveT.value ?? -1,
+}))
+if (wave.section !== 2) fail(`hover wave: uWaveSection=${wave.section}, expected 2 (skills)`)
+else if (!(wave.t > 0 && wave.t < 1)) fail(`hover wave: uWaveT=${wave.t}, expected animating in (0,1)`)
+else console.log('ok: hover triggers sector shockwave')
+await desktop.mouse.move(0, 0)
+await desktop.waitForTimeout(200)
+
 await desktop.click('[data-section="projects"]', { force: true })
 await desktop.waitForSelector('[data-testid="overlay-title"]', { timeout: 90000 })
+hit = await sliderHit()
+if (hit !== 'ok') fail(`arrived: slider not interactive (${hit})`)
+else console.log('ok: slider interactive while arrived')
 await desktop.waitForTimeout(2500)
 let fx = await readFx()
 if (!(fx.active === 0)) fail(`desktop arrived: uActive=${fx.active}, expected 0 (projects)`)

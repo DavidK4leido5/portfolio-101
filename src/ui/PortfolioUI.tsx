@@ -4,7 +4,7 @@ import { useSceneStore } from '../store/sceneStore'
 import { sections, type SectionId } from '../data/sections'
 import { NODE_LIMITS } from '../lib/nodes'
 import { indicatorEls } from '../scene/shared'
-import { animateNodeCount } from '../scene/nodeAnimator'
+import { animateNodeCount, triggerSectorWave } from '../scene/nodeAnimator'
 import {
   profile, projects, skills, experience, contact, sectionCopy, resolveImage, type ImageSource,
 } from '../content/portfolio'
@@ -104,12 +104,11 @@ export function PortfolioUI() {
     const el = indicatorsRef.current
     if (!el) return
     if (!uiReady) {
-      gsap.set(el, { autoAlpha: 0, pointerEvents: 'none' })
+      gsap.set(el, { autoAlpha: 0 })
       return
     }
     gsap.to(el, {
       autoAlpha: phase === 'idle' ? 1 : 0,
-      pointerEvents: phase === 'idle' ? 'auto' : 'none',
       duration: 0.45,
       ease: 'power2.out',
     })
@@ -172,9 +171,9 @@ export function PortfolioUI() {
             className="indicator"
             style={{ '--section-color': s.color } as React.CSSProperties}
             ref={(el) => { indicatorEls[i] = el }}
-            onMouseEnter={() => setHovered(s.id)}
+            onMouseEnter={() => { setHovered(s.id); triggerSectorWave(i) }}
             onMouseLeave={() => setHovered(null)}
-            onFocus={() => setHovered(s.id)}
+            onFocus={() => { setHovered(s.id); triggerSectorWave(i) }}
             onBlur={() => setHovered(null)}
             onClick={() => navigateTo(s.id)}
           >

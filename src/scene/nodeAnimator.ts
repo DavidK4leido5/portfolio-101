@@ -59,3 +59,14 @@ export function killNodeTweens() {
   countTween?.kill()
   sliderTween?.kill()
 }
+
+let waveTween: gsap.core.Tween | null = null
+
+// Shockwave in the section's color, expanding from its lobe across the brain;
+// self-resolving (color fades back as the wave travels out)
+export function triggerSectorWave(section: number, duration = 1.7) {
+  waveTween?.kill()
+  uniforms.uWaveSection.value = section
+  uniforms.uWaveT.value = 0
+  waveTween = gsap.to(uniforms.uWaveT, { value: 1, duration, ease: 'power1.out' })
+}
