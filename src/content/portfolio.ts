@@ -32,7 +32,7 @@ export type Experience = {
 
 export const profile = {
   name: 'I\'m David',
-  title: 'Creative Frontend Engineer',
+  title: 'Creative Fullstack Engineer',
   tagline: 'Every stack. One synapse.',
   hero: {
     top: '',

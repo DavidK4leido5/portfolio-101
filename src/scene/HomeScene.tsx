@@ -198,7 +198,6 @@ export function HomeScene() {
       <SceneDebugBridge />
       <BrainScene key={pool} pool={pool} />
       <Dust count={cfg.dust} />
-      <gridHelper args={[42, 52, '#1c2033', '#151827']} position={[0, -4.6, 0]} material-transparent material-opacity={0.3} />
       <IntroSequence />
       <CameraRig />
       <Projection />

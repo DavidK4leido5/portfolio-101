@@ -151,8 +151,24 @@ export function PortfolioUI() {
 
   return (
     <div className="ui" data-phase={phase} data-load-phase={loadPhase} data-quality-tier={tier}>
-      <div className="hud tl">{profile.name}<br /><span>{profile.title}</span></div>
-      <div className="hud tr">STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b><br />NODES <b>{nodeCount}</b><br />SECTOR <b>{active ?? 'CORE'}</b></div>
+      {isMobileNav ? (
+        <div className="hud hud-profile-group" data-testid="hud-profile-group">
+          {profile.name}
+          <span className="hud-profile-title">{profile.title}</span>
+          <div className="hud-profile-meta">
+            STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b>
+            {' · '}
+            NODES <b>{nodeCount}</b>
+            {' · '}
+            SECTOR <b>{active ?? 'CORE'}</b>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="hud tl">{profile.name}<br /><span>{profile.title}</span></div>
+          <div className="hud tr">STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b><br />NODES <b>{nodeCount}</b><br />SECTOR <b>{active ?? 'CORE'}</b></div>
+        </>
+      )}
       <div className="hud bl">NEURAL.PORTFOLIO <b>v1.0</b><br />{profile.tagline}</div>
       <div className="hud br">SYS.COLOR<span className="swatch" /><br />LINK <b>{phase.toUpperCase()}</b></div>
 

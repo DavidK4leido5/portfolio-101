@@ -198,6 +198,29 @@ canvas { display: block; }
 .hud.br { bottom: 22px; right: 26px; text-align: right; }
 .hud.tl span { color: rgba(235, 235, 255, 0.6); }
 
+.ui[data-quality-tier="mobile"] .hud-profile-group {
+  top: max(14px, env(safe-area-inset-top, 0px));
+  left: 16px;
+  right: auto;
+  max-width: min(92vw, 340px);
+  text-align: left;
+  line-height: 1.55;
+}
+
+.hud-profile-title {
+  display: block;
+  margin-top: 2px;
+  color: rgba(235, 235, 255, 0.6);
+}
+
+.hud-profile-meta {
+  margin-top: 8px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  color: rgba(235, 235, 255, 0.38);
+}
+
 .swatch {
   display: inline-block;
   width: 9px; height: 9px;
