@@ -81,6 +81,17 @@ const readHero = (page) => page.evaluate(() => {
     : true
   const heroCentered = Math.abs((hr.left + hr.width / 2) - (cr.left + cr.width / 2)) < 48
     && Math.abs((hr.top + hr.height / 2) - (cr.top + cr.height / 2)) < 80
+  const chromaR = hero.querySelector('.hero-depth--front .chromat-r')
+  const chromaB = hero.querySelector('.hero-depth--front .chromat-b')
+  const chromaBase = hero.querySelector('.hero-depth--front .chromat-base')
+  const rs = chromaR ? getComputedStyle(chromaR) : null
+  const bs = chromaB ? getComputedStyle(chromaB) : null
+  const chromaLayersOk = !!(chromaR && chromaB && chromaBase)
+    && (rs?.mixBlendMode === 'screen' || rs?.mixBlendMode === 'plus-lighter')
+    && Number(rs?.opacity) > 0.35
+    && Number(bs?.opacity) > 0.35
+    && rs?.color === 'rgb(255, 42, 92)'
+    && bs?.color === 'rgb(36, 232, 255)'
   return {
     opacity: Number(hs.opacity),
     visibility: hs.visibility,
@@ -89,6 +100,7 @@ const readHero = (page) => page.evaluate(() => {
     heroCentered,
     sliderHit,
     hasDepthLayers: !!hero.querySelector('.hero-depth--back') && !!hero.querySelector('.hero-depth--front'),
+    chromaLayersOk,
     phase: document.querySelector('.ui')?.getAttribute('data-phase') ?? null,
   }
 })
@@ -170,6 +182,12 @@ else if (Math.abs(desktopFraming.camZ - 9.8) > 0.15) fail(`desktop framing: camZ
 else if (Math.abs(desktopFraming.clusterScale - 1.18) > 0.02) fail(`desktop framing: scale=${desktopFraming.clusterScale}, expected ~1.18`)
 else console.log('ok: desktop camera framing unchanged')
 
+const ambient = await desktop.evaluate(() => window.__scene?.ambient ?? null)
+if (!ambient) fail('desktop: ambient state missing — build with VITE_SMOKE=true')
+else if (ambient.count < 1) fail(`desktop ambient: count=${ambient.count}, expected >0 on desktop`)
+else if (ambient.fade < 0.85) fail(`desktop ambient: fade=${ambient.fade}, expected visible when ready`)
+else console.log(`ok: ambient particles active (count=${ambient.count}, fade=${ambient.fade.toFixed(2)})`)
+
 const hero = await readHero(desktop)
 if (hero.missing) fail('desktop: hero typography missing')
 else if (JSON.stringify(hero.lines) !== JSON.stringify(hero.expectedLines)) {
@@ -178,9 +196,54 @@ else if (JSON.stringify(hero.lines) !== JSON.stringify(hero.expectedLines)) {
   fail(`desktop hero: not visible in idle ${JSON.stringify(hero)}`)
 } else if (!hero.heroCentered || !hero.hasDepthLayers) {
   fail(`desktop hero: layout issue ${JSON.stringify(hero)}`)
+} else if (!hero.chromaLayersOk) {
+  fail(`desktop hero: chromatic aberration layers missing or mis-styled ${JSON.stringify(hero)}`)
 } else if (!hero.sliderHit) {
   fail('desktop hero: blocks node slider')
 } else console.log('ok: hero typography centered on brain with depth weave')
+
+const post = await desktop.evaluate(() => window.__scene?.post ?? null)
+if (!post) fail('desktop: post stack config missing on __scene')
+else if (!post.ca) fail('desktop: chromatic aberration disabled in quality tier')
+else if (post.caOffset?.[0] !== 0.0006 || post.caOffset?.[1] !== 0.0009) {
+  fail(`desktop: unexpected CA offset ${JSON.stringify(post.caOffset)}`)
+} else console.log('ok: post chromatic aberration configured (0.0006, 0.0009)')
+
+await desktop.mouse.move(30, 40)
+await desktop.waitForTimeout(700)
+const touchOff = await desktop.evaluate(() => {
+  const t = window.__scene?.touch
+  return {
+    strength: t?.strength ?? 0,
+    pos: t ? { x: t.x, y: t.y, z: t.z } : null,
+  }
+})
+
+await desktop.mouse.move(720, 450)
+await desktop.waitForTimeout(700)
+const touchOn = await desktop.evaluate(() => {
+  const t = window.__scene?.touch
+  return {
+    strength: t?.strength ?? 0,
+    gain: t?.gain ?? -1,
+    pointerOnScene: t?.pointerOnScene ?? false,
+    pos: t ? { x: t.x, y: t.y, z: t.z } : null,
+  }
+})
+
+const touchPosDelta = touchOff.pos && touchOn.pos
+  ? Math.hypot(touchOn.pos.x - touchOff.pos.x, touchOn.pos.y - touchOff.pos.y, touchOn.pos.z - touchOff.pos.z)
+  : 0
+
+if (touchOn.gain !== 0.68) fail(`desktop: fabric gain expected 0.68, got ${touchOn.gain}`)
+else if (!touchOn.pointerOnScene) fail('desktop: pointerOnScene false over canvas center')
+else if (touchOff.strength > 0.12) fail(`desktop: touch should be off-brain at corner (strength=${touchOff.strength})`)
+else if (touchOn.strength < 0.2) fail(`desktop: brain touch inactive over center (strength=${touchOn.strength})`)
+else if (touchOn.strength <= touchOff.strength + 0.12) {
+  fail(`desktop: touch strength did not rise on brain off=${touchOff.strength} on=${touchOn.strength}`)
+} else if (touchPosDelta < 0.02) {
+  fail(`desktop: uTouchPos did not move on brain (delta=${touchPosDelta})`)
+} else console.log(`ok: brain touch raycast active (strength=${touchOn.strength.toFixed(2)}, gain=${touchOn.gain}, posΔ=${touchPosDelta.toFixed(3)})`)
 
 // Density slider must be clickable (not covered by the indicators layer) in idle
 const sliderHit = () => desktop.evaluate(() => {

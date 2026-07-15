@@ -9,6 +9,7 @@ import { useSceneStore } from './store/sceneStore'
 export default function App() {
   const sceneReady = useSceneStore((s) => s.sceneReady)
   const loadPhase = useSceneStore((s) => s.loadPhase)
+  const tier = useSceneStore((s) => s.qualityTier)
 
   useEffect(() => {
     let to: ReturnType<typeof setTimeout>
@@ -27,7 +28,7 @@ export default function App() {
   }, [sceneReady, loadPhase])
 
   return (
-    <div className="app-root">
+    <div className="app-root" data-quality-tier={tier}>
       <div className="app-scene">
         <HomeScene />
       </div>

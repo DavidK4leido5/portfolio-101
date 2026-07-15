@@ -6,13 +6,15 @@ import { NODE_LIMITS } from '../lib/nodes'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
-import { uniforms, mouse, clusterState, hotspotWorld, indicatorEls } from './shared'
+import { uniforms, mouse, clusterState, hotspotWorld, indicatorEls, setPointerOnScene } from './shared'
 import { sceneFraming } from '../lib/framing'
 import { NeuralCluster, makeCloud } from './NeuralCluster'
 import { ConnectionSystem } from './ConnectionSystem'
 import { CameraRig } from './CameraRig'
 import { PostProcessing } from './PostProcessing'
 import { IntroSequence } from './IntroSequence'
+import { AmbientParticles } from './AmbientParticles'
+import { BrainTouchProbe } from './BrainTouch'
 import { CameraFraming, SceneDebugBridge } from './SceneDebugBridge'
 
 const tmpMouse = new Vector2()
@@ -130,23 +132,6 @@ function ClusterGroup({ children }: { children: React.ReactNode }) {
   return <group ref={ref}>{children}</group>
 }
 
-function Dust({ count }: { count: number }) {
-  const positions = useMemo(() => {
-    const p = new Float32Array(Math.max(count, 1) * 3)
-    for (let i = 0; i < p.length; i++) p[i] = (Math.random() - 0.5) * 14
-    return p
-  }, [count])
-  if (!count) return null
-  return (
-    <points frustumCulled={false}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial size={0.03} sizeAttenuation transparent opacity={0.16} color="#7788aa" depthWrite={false} />
-    </points>
-  )
-}
-
 function BrainScene({ pool }: { pool: number }) {
   const cloud = useMemo(() => makeCloud(pool), [pool])
   useEffect(() => {
@@ -161,6 +146,7 @@ function BrainScene({ pool }: { pool: number }) {
   }, [pool])
   return (
     <ClusterGroup>
+      <BrainTouchProbe />
       <NeuralCluster cloud={cloud} />
       <ConnectionSystem cloud={cloud} />
     </ClusterGroup>
@@ -177,6 +163,10 @@ export function HomeScene() {
     const onMove = (e: PointerEvent) => {
       mouse.x = (e.clientX / innerWidth) * 2 - 1
       mouse.y = -((e.clientY / innerHeight) * 2 - 1)
+      const el = document.elementFromPoint(e.clientX, e.clientY)
+      setPointerOnScene(!el?.closest(
+        '.indicator, [data-testid="node-slider"], .panel, .back, [data-testid="sector-nav"]',
+      ))
     }
     addEventListener('pointermove', onMove)
     return () => removeEventListener('pointermove', onMove)
@@ -186,18 +176,23 @@ export function HomeScene() {
     <Canvas
       dpr={[1, cfg.dpr]}
       camera={{ position: [framing.cam.x, framing.cam.y, framing.cam.z], fov: framing.fov, near: 0.1, far: 80 }}
-      gl={{ antialias: false, powerPreference: 'high-performance' }}
+      gl={{
+        antialias: false,
+        powerPreference: 'high-performance',
+      }}
       onCreated={({ gl, camera }) => {
         gl.setClearColor('#020204')
         camera.lookAt(0, 0, 0)
+        const onLost = (e: Event) => e.preventDefault()
+        gl.domElement.addEventListener('webglcontextlost', onLost)
       }}
     >
       <SceneBoot />
       <SceneUniforms />
       <CameraFraming />
       <SceneDebugBridge />
+      <AmbientParticles />
       <BrainScene key={pool} pool={pool} />
-      <Dust count={cfg.dust} />
       <IntroSequence />
       <CameraRig />
       <Projection />

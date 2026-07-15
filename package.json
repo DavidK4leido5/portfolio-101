@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:smoke": "tsc --noEmit && VITE_SMOKE=true vite build",
     "preview": "vite preview",
     "test": "node tests/smoke.mjs",
     "bake:brain": "node scripts/bake-brain-cloud.mjs"

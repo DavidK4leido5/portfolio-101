@@ -49,6 +49,9 @@ float snoise(vec3 v){
 const MOTION = /* glsl */ `
 uniform float uTime;
 uniform vec2 uMouse;
+uniform vec3 uTouchPos;
+uniform float uTouch;
+uniform float uFabricGain;
 uniform float uDim;
 uniform float uTravel;
 uniform float uHovered;
@@ -111,6 +114,28 @@ bool hideParticle(float idx){
   return false;
 }
 
+// Soft cloth: press indent, bunching ring, tangent stretch, slow fold ripples
+vec3 fabricTouch(vec3 pos,float seed,float morphK){
+  vec3 d=pos-uTouchPos;
+  float dist=length(d);
+  vec3 n=dist>0.001?normalize(d):vec3(0.0,1.0,0.0);
+  float gate=exp(-dist*dist*2.4)*uTouch*morphK;
+  if(gate<0.0001) return vec3(0.0);
+
+  vec3 up=vec3(0.0,1.0,0.0);
+  vec3 t1=normalize(cross(n,up));
+  if(length(t1)<0.01) t1=normalize(cross(n,vec3(1.0,0.0,0.0)));
+  vec3 t2=cross(n,t1);
+
+  float indent=-exp(-dist*dist*5.0)*0.065;
+  float bunch=exp(-pow(dist-0.3,2.0)*11.0)*0.072;
+  float fold=sin(dist*0.95-uTime*0.65+seed*0.08)*cos(dist*0.42+seed*0.2+uTime*0.28)*gate*0.035;
+  float shearWave=sin(dist*0.78-uTime*0.55+seed*0.1)*gate;
+  vec3 stretch=(t1*sin(seed*6.283+uTime*0.26)+t2*cos(seed*5.02+uTime*0.22))*shearWave*0.04;
+
+  return (n*((indent+bunch)*gate+fold)+stretch)*uFabricGain;
+}
+
 vec3 displace(vec3 pos, float seed, float morph){
   float k=morph*morph;
   float t=uTime*0.05;
@@ -131,8 +156,7 @@ vec3 displace(vec3 pos, float seed, float morph){
     sin(uTime*(1.0+seed*1.3)+seed*4.7),
     sin(uTime*(1.4+seed*1.1)+seed*2.3)
   );
-  p.x+=uMouse.x*0.05*k*(0.3+seed*0.7);
-  p.y+=uMouse.y*0.05*k*(0.3+seed*0.7);
+  if(uTouch>0.001) p+=fabricTouch(pos,seed,k);
   return p;
 }
 
@@ -292,5 +316,49 @@ varying float vAlpha;
 varying vec3 vColor;
 void main(){
   gl_FragColor=vec4(vColor,vAlpha);
+}
+`
+
+export const ambientVert = /* glsl */ `
+uniform float uTime;
+uniform float uSize;
+uniform float uMotion;
+attribute float aSeed;
+varying float vAlpha;
+varying vec3 vColor;
+${NOISE}
+void main(){
+  vec3 pos=position;
+  float spd=0.035+aSeed*0.03;
+  float t=uTime*spd;
+  float m=uMotion;
+  pos.x+=snoise(vec3(pos.y*0.07,pos.z*0.07,t+aSeed*9.0))*0.32*m;
+  pos.y+=(sin(t*0.65+aSeed*6.2831853)*0.11+snoise(vec3(pos.x*0.05,pos.z*0.05,t*0.8+4.7))*0.08)*m;
+  pos.z+=snoise(vec3(pos.x*0.07,pos.y*0.07,t*0.85+aSeed*5.0))*0.32*m;
+  vec4 mv=modelViewMatrix*vec4(pos,1.0);
+  float radial=length(position);
+  float front=smoothstep(3.5,7.0,radial);
+  vAlpha=(0.16+aSeed*0.14)*(0.65+0.35*front);
+  vColor=vec3(0.52,0.6,0.78);
+  float px=uSize*(0.7+aSeed*0.55)*(22.0/-mv.z);
+  gl_PointSize=clamp(px,2.5,7.5);
+  gl_Position=projectionMatrix*mv;
+}
+`
+
+export const ambientFrag = /* glsl */ `
+precision highp float;
+uniform vec3 uAccent;
+uniform float uFade;
+varying float vAlpha;
+varying vec3 vColor;
+void main(){
+  float d=length(gl_PointCoord-0.5)*2.0;
+  if(d>1.0) discard;
+  float disk=1.0-smoothstep(0.45,1.0,d);
+  vec3 col=mix(vColor,uAccent,0.14);
+  float a=disk*vAlpha*uFade;
+  gl_FragColor=vec4(col,a);
+  if(gl_FragColor.a<0.008) discard;
 }
 `

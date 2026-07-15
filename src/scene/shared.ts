@@ -17,13 +17,25 @@ export const CLUSTER_SCALE = 1.18
 export const clusterState: { rotation: number; group: Group | null } = { rotation: 0, group: null }
 
 export const mouse = { x: 0, y: 0 }
+/** false when pointer is over interactive HUD (sector buttons, slider, panels). */
+export let pointerOnScene = true
+
+export function setPointerOnScene(onScene: boolean) {
+  pointerOnScene = onScene
+}
 
 export const indicatorEls: (HTMLButtonElement | null)[] = sections.map(() => null)
+
+/** Master scale for fabric touch — tune here; coeffs in shaders.ts target ~3–6px at desktop framing. */
+export const FABRIC_GAIN = 0.68
 
 export const uniforms = {
   uTime: { value: 0 },
   uAccent: { value: new Color('#8b5cf6') },
   uMouse: { value: new Vector2() },
+  uTouchPos: { value: new Vector3(0, 0.12, 0) },
+  uTouch: { value: 0 },
+  uFabricGain: { value: FABRIC_GAIN },
   uDim: { value: 0 },
   uTravel: { value: 0 },
   uHovered: { value: -1 },

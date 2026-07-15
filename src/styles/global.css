@@ -19,6 +19,29 @@ canvas { display: block; }
 .app-root { position: fixed; inset: 0; }
 .app-scene { position: absolute; inset: 0; z-index: 1; }
 
+/* Full-frame film grain — complements WebGL Noise on the canvas */
+.app-root[data-quality-tier="desktop"]::after,
+.app-root[data-quality-tier="tablet"]::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.022;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: film-grain 0.8s steps(3) infinite;
+}
+
+@keyframes film-grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, -3%); }
+  50% { transform: translate(3%, 1%); }
+  75% { transform: translate(-1%, 4%); }
+  100% { transform: translate(2%, -2%); }
+}
+
 .ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
 /* Poster hero — centered on brain, woven depth + chromatic aberration */
