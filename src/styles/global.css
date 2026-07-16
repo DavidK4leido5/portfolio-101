@@ -181,10 +181,23 @@ canvas { display: block; }
   --hero-occlude-h: 34%;
 }
 
-.hero-type[data-quality-tier="mobile"] .chromat-base,
-.hero-type[data-quality-tier="mobile"] .chromat-r,
-.hero-type[data-quality-tier="mobile"] .chromat-b {
-  font-size: clamp(1.15rem, 8.2vw, 2.65rem);
+.hero-line--ghost .chromat-base {
+  color: rgba(255, 255, 255, 0.34);
+  text-shadow: none;
+}
+
+.hero-line--ghost .chromat-r,
+.hero-line--ghost .chromat-b {
+  opacity: 0.28;
+}
+
+.hero-type[data-quality-tier="mobile"] .hero-line .chromat-base,
+.hero-type[data-quality-tier="mobile"] .hero-line .chromat-r,
+.hero-type[data-quality-tier="mobile"] .hero-line .chromat-b {
+  font-size: clamp(1.35rem, 7.8vw, 3.2rem);
+  white-space: normal;
+  max-width: 92vw;
+  line-height: 0.92;
   letter-spacing: -0.035em;
 }
 

@@ -55,6 +55,10 @@ export const uniforms = {
   uWaveSection: { value: -1 },
   uWaveT: { value: 1 },
   uAmbientOrigins: { value: pickAmbientOrigins(8) },
+  uShapeFrom: { value: 0 },
+  uShapeTo: { value: 0 },
+  uShapeMorph: { value: 0 },
+  uShapeAlt: { value: 0 },
 }
 
 export function hotspotWorld(i: number, out: Vector3): Vector3 {

@@ -30,13 +30,28 @@ export type Experience = {
   image: ImageSource
 }
 
+export type HeroShapeId = 'brain' | 'network' | 'stack'
+
+export type HeroBeat = {
+  text: string
+  shape: HeroShapeId
+}
+
 export const profile = {
   name: 'I\'m David',
   title: 'Creative Fullstack Engineer',
   tagline: 'Every stack. One synapse.',
   hero: {
-    top: '',
-    bottom: 'THE ADAPTIVE MIND',
+    beats: [
+      { text: 'FULLSTACK ENGINEER', shape: 'brain' },
+      { text: 'UI TO INFRASTRUCTURE', shape: 'network' },
+      { text: 'SHIP · SCALE · REFINE', shape: 'stack' },
+      { text: 'THE ADAPTIVE MIND', shape: 'brain' },
+    ] satisfies HeroBeat[],
+    holdSec: 2.2,
+    morphSec: 1.4,
+    textInSec: 0.7,
+    textOutSec: 0.55,
   },
   avatar: {
     cdnUrl: '',

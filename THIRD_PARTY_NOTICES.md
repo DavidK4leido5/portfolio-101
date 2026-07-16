@@ -17,3 +17,13 @@ node scripts/bake-brain-cloud.mjs
 ```
 
 The OBJ source is downloaded to `scripts/brain.obj` from the [SAGE project](https://github.com/l33tdawg/sage) (same CC BY 4.0 asset).
+
+## Hero morph shapes (network globe, layered stack)
+
+The other hero shapes (`src/data/shapeClouds.ts`) are baked by `scripts/bake-shapes.mjs` from
+[three.js](https://github.com/mrdoob/three.js) `IcosahedronGeometry` (MIT license) plus
+parametric curves — no external mesh assets. Regenerate with:
+
+```bash
+pnpm bake:shapes
+```

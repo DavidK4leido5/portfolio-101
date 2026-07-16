@@ -67,9 +67,9 @@ const readHero = (page) => page.evaluate(() => {
   const lines = [...hero.querySelectorAll('.hero-depth--front .chromat-base')]
     .map((el) => el.textContent?.trim() ?? '')
     .filter((t) => t.length > 0)
-  const expectedTop = hero.getAttribute('data-hero-top')?.trim() ?? ''
-  const expectedBottom = hero.getAttribute('data-hero-bottom')?.trim() ?? ''
-  const expectedLines = [expectedTop, expectedBottom].filter((t) => t.length > 0)
+  const activeLine = hero.getAttribute('data-hero-active')?.trim() ?? ''
+  const beatIndex = hero.getAttribute('data-hero-beat') ?? '0'
+  const expectedFirst = hero.getAttribute('data-hero-first-beat')?.trim() ?? ''
   const hr = hero.getBoundingClientRect()
   const cr = canvas.getBoundingClientRect()
   const sliderHit = slider
@@ -96,7 +96,9 @@ const readHero = (page) => page.evaluate(() => {
     opacity: Number(hs.opacity),
     visibility: hs.visibility,
     lines,
-    expectedLines,
+    activeLine,
+    beatIndex,
+    expectedFirst,
     heroCentered,
     sliderHit,
     hasDepthLayers: !!hero.querySelector('.hero-depth--back') && !!hero.querySelector('.hero-depth--front'),
@@ -190,8 +192,8 @@ else console.log(`ok: ambient particles active (count=${ambient.count}, fade=${a
 
 const hero = await readHero(desktop)
 if (hero.missing) fail('desktop: hero typography missing')
-else if (JSON.stringify(hero.lines) !== JSON.stringify(hero.expectedLines)) {
-  fail(`desktop hero: unexpected copy ${JSON.stringify(hero.lines)} expected ${JSON.stringify(hero.expectedLines)}`)
+else if (!hero.activeLine || hero.activeLine.length < 4) {
+  fail(`desktop hero: no active line ${JSON.stringify(hero)}`)
 } else if (hero.opacity < 0.85 || hero.visibility === 'hidden') {
   fail(`desktop hero: not visible in idle ${JSON.stringify(hero)}`)
 } else if (!hero.heroCentered || !hero.hasDepthLayers) {
@@ -200,7 +202,18 @@ else if (JSON.stringify(hero.lines) !== JSON.stringify(hero.expectedLines)) {
   fail(`desktop hero: chromatic aberration layers missing or mis-styled ${JSON.stringify(hero)}`)
 } else if (!hero.sliderHit) {
   fail('desktop hero: blocks node slider')
-} else console.log('ok: hero typography centered on brain with depth weave')
+} else console.log(`ok: hero typography centered (line="${hero.activeLine}")`)
+
+await desktop.waitForTimeout(3500)
+const heroCycle = await desktop.evaluate(() => ({
+  beat: window.__scene?.hero?.beatIndex ?? -1,
+  morph: window.__scene?.hero?.morph ?? 0,
+  shapeTo: window.__scene?.hero?.shapeTo ?? -1,
+  text: window.__scene?.hero?.activeText ?? '',
+}))
+if (!heroCycle.text) fail('desktop hero: reel state missing on __scene')
+else if (heroCycle.beat < 0) fail(`desktop hero: beat index not advancing (${heroCycle.beat})`)
+else console.log(`ok: hero reel active (beat=${heroCycle.beat}, shapeTo=${heroCycle.shapeTo})`)
 
 const post = await desktop.evaluate(() => window.__scene?.post ?? null)
 if (!post) fail('desktop: post stack config missing on __scene')

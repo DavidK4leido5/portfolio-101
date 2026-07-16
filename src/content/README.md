@@ -29,3 +29,12 @@ assets/
 - **`src/data/sections.ts`** — 3D hotspot positions and camera offsets (scene wiring; imports section ids from content)
 
 Do not put 3D coordinates in this folder.
+
+## Hero reel copy
+
+`profile.hero.beats` is an array of `{ text, shape }` lines cycled in idle:
+
+- `text` — short promo line (shown one at a time)
+- `shape` — `brain` | `network` | `stack` (synced 3D morph; desktop/tablet only)
+
+Tune timing via `holdSec`, `morphSec`, `textInSec`, `textOutSec` on the same object.

@@ -69,6 +69,12 @@ uniform vec3 uHotspots[5];
 uniform float uWaveSection;
 uniform float uWaveT;
 uniform vec3 uAmbientOrigins[8];
+uniform float uShapeFrom;
+uniform float uShapeTo;
+uniform float uShapeMorph;
+uniform float uShapeAlt;
+attribute vec3 aShapeNetwork;
+attribute vec3 aShapeStack;
 attribute float aSeed;
 attribute float aAffinity;
 attribute float aIndex;
@@ -95,6 +101,30 @@ float particleSpawnT(float seed,float idx){
 
 // Curved convergence: each node arcs sideways along a seed-derived tangent while
 // flying in (sin(t*PI) is 0 at both ends, so rest positions are exact)
+vec3 pickShape(float id){
+  if(id<0.5) return position;
+  if(id<1.5) return aShapeNetwork;
+  return aShapeStack;
+}
+
+// Staggered per-node morph with a sideways arc: nodes stream between shapes in
+// waves instead of translating as one rigid mass ((m-s)/(1-s) guarantees k=1 at m=1)
+vec3 shapeTarget(float seed){
+  vec3 a=pickShape(uShapeFrom);
+  vec3 b=pickShape(uShapeTo);
+  float m=clamp(uShapeMorph,0.0,1.0);
+  if(m<=0.0) return a;
+  float s=seed*0.34;
+  float k=smoothstep(0.0,1.0,clamp((m-s)/(1.0-s),0.0,1.0));
+  vec3 p=mix(a,b,k);
+  vec3 dir=b-a;
+  vec3 axis=vec3(sin(seed*9.3),0.6+seed*0.4,cos(seed*5.1));
+  vec3 tangent=cross(dir,axis);
+  float tl=length(tangent);
+  if(tl>0.001) p+=(tangent/tl)*sin(k*3.14159265)*(0.22+seed*0.42);
+  return p;
+}
+
 vec3 morphedPos(vec3 target,vec3 scatter,float seed,float idx){
   float t=spawnEase(particleSpawnT(seed,idx));
   vec3 p=mix(scatter,target,t);
@@ -229,7 +259,8 @@ void main(){
     gl_PointSize=0.0;
     return;
   }
-  vec3 anchor=morphedPos(position,aScatter,aSeed,aIndex);
+  vec3 rest=shapeTarget(aSeed);
+  vec3 anchor=morphedPos(rest,aScatter,aSeed,aIndex);
   float morph=spawnEase(particleSpawnT(aSeed,aIndex));
   vec3 p=displace(anchor,aSeed,morph);
   float tm=targetMix(aAffinity);
@@ -237,22 +268,25 @@ void main(){
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
   if(emphasis<0.02&&uHovered>=0.0&&hasSel>0.5) emphasis=0.48;
-  float bright=mix(0.92,mix(0.55,1.45,isT),emphasis*hasSel);
+  float shapeFade=1.0-uShapeAlt*0.88;
+  float bright=mix(0.92,mix(0.55,1.45,isT),emphasis*hasSel*shapeFade);
   float pulse=0.96+0.04*sin(uTime*2.5+aSeed*6.2831853);
-  vGlow=bright*(1.0+uFocus*0.18*isT)*(1.0+uIntroPulse*0.35);
+  // Alt shapes lose their connection web — points carry the structure alone,
+  // so they get brighter and slightly larger to keep the silhouette crisp
+  vGlow=bright*(1.0+uFocus*0.18*isT)*(1.0+uIntroPulse*0.35)*(1.0+uShapeAlt*0.4);
   vAlpha=(0.5+0.38*aSeed)*pulse*mix(0.4,1.0,morph);
   vAlpha*=mix(1.0,0.35,uFocus*(1.0-isT)*hasSel);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   vec3 baseCol=nodePalette(position,aSeed,aAffinity,-mv.z);
-  float lit=isT*hasSel*min(emphasis*1.6,1.0);
+  float lit=isT*hasSel*min(emphasis*1.6,1.0)*shapeFade;
   vColor=mix(baseCol,sectionColor(aAffinity)*1.5,lit);
-  float grey=(1.0-isT)*hasSel*uFocus;
+  float grey=(1.0-isT)*hasSel*uFocus*shapeFade;
   vColor=mix(vColor,vec3(0.38,0.4,0.48),grey*0.55);
-  vec3 act=brainActivity(position)*morph*uConnect*(1.0-uFocus*0.75);
+  vec3 act=brainActivity(position)*morph*uConnect*(1.0-uFocus*0.75)*(1.0-uShapeAlt*0.92);
   vColor+=act*1.35;
   vGlow+=dot(act,vec3(0.5));
-  float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z);
-  gl_PointSize=clamp(px,1.8,5.5);
+  float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z)*(1.0+uShapeAlt*0.3);
+  gl_PointSize=clamp(px,1.8,6.5);
   gl_Position=projectionMatrix*mv;
 }
 `
@@ -286,7 +320,8 @@ void main(){
     gl_Position=vec4(2.0,2.0,2.0,1.0);
     return;
   }
-  vec3 anchor=morphedPos(position,aScatter,aSeed,aIndex);
+  vec3 rest=shapeTarget(aSeed);
+  vec3 anchor=morphedPos(rest,aScatter,aSeed,aIndex);
   float morph=spawnEase(particleSpawnT(aSeed,aIndex));
   vec3 p=displace(anchor,aSeed,morph);
   float tm=targetMix(aAffinity);
@@ -294,18 +329,22 @@ void main(){
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
   if(emphasis<0.02&&uHovered>=0.0&&hasSel>0.5) emphasis=0.48;
-  float bright=mix(0.85,mix(0.4,1.25,isT),emphasis*hasSel);
+  float shapeFade=1.0-uShapeAlt*0.88;
+  float bright=mix(0.85,mix(0.4,1.25,isT),emphasis*hasSel*shapeFade);
   float pulse=0.78+0.22*sin(uTime*1.3+aSeed*6.2831853);
   vAlpha=0.07*(0.35+0.5*pulse)*bright*uConnect;
   vAlpha*=mix(1.0,0.32,uFocus*(1.0-isT)*hasSel);
   vAlpha*=smoothstep(0.82,1.0,morph);
+  // Brain-neighbor pairs scatter across alt shapes — the criss-cross web reads
+  // as fog, so lines dissolve completely once a morph starts
+  vAlpha*=1.0-smoothstep(0.0,0.45,max(uShapeAlt,uShapeMorph*1.6));
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   vec3 baseCol=nodePalette(position,aSeed,aAffinity,-mv.z);
-  float lit=isT*hasSel*min(emphasis*1.5,1.0);
+  float lit=isT*hasSel*min(emphasis*1.5,1.0)*shapeFade;
   vColor=mix(baseCol,sectionColor(aAffinity)*1.2,lit);
-  float grey=(1.0-isT)*hasSel*uFocus;
+  float grey=(1.0-isT)*hasSel*uFocus*shapeFade;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
-  vColor+=brainActivity(position)*0.7*morph*uConnect*(1.0-uFocus*0.75);
+  vColor+=brainActivity(position)*0.7*morph*uConnect*(1.0-uFocus*0.75)*(1.0-uShapeAlt*0.92);
   gl_Position=projectionMatrix*mv;
 }
 `

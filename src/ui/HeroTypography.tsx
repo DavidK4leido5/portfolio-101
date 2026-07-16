@@ -1,41 +1,17 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
 import { profile } from '../content/portfolio'
+import { setHeroTextCallbacks } from '../scene/heroReel'
 
-const hasHeroTop = profile.hero.top.trim().length > 0
-
-function ChromatLine({ text, subtle = false }: { text: string; subtle?: boolean }) {
+function ChromatLine({ text }: { text: string }) {
   if (!text.trim()) return null
   return (
-    <span className={`chromat${subtle ? ' chromat--subtle' : ''}`} data-testid="chromat-line">
+    <span className="chromat" data-testid="chromat-line">
       <span className="chromat-base">{text}</span>
       <span className="chromat-r" aria-hidden>{text}</span>
       <span className="chromat-b" aria-hidden>{text}</span>
     </span>
-  )
-}
-
-function HeroStack({
-  topRef,
-  bottomRef,
-  subtle = false,
-}: {
-  topRef?: RefObject<HTMLParagraphElement | null>
-  bottomRef?: RefObject<HTMLParagraphElement | null>
-  subtle?: boolean
-}) {
-  return (
-    <div className={`hero-stack${hasHeroTop ? '' : ' hero-stack--single'}`}>
-      {hasHeroTop && (
-        <p className="hero-line" ref={topRef}>
-          <ChromatLine text={profile.hero.top} subtle={subtle} />
-        </p>
-      )}
-      <p className="hero-line" ref={bottomRef}>
-        <ChromatLine text={profile.hero.bottom} subtle={subtle} />
-      </p>
-    </div>
   )
 }
 
@@ -45,16 +21,16 @@ export function HeroTypography() {
   const tier = useSceneStore((s) => s.qualityTier)
   const wrapRef = useRef<HTMLDivElement>(null)
   const stackRef = useRef<HTMLDivElement>(null)
-  const topRef = useRef<HTMLParagraphElement>(null)
-  const bottomRef = useRef<HTMLParagraphElement>(null)
+  const lineRef = useRef<HTMLParagraphElement>(null)
   const introRan = useRef(false)
+  const [line, setLine] = useState(profile.hero.beats[0]?.text ?? '')
+  const [beatIndex, setBeatIndex] = useState(0)
 
   useEffect(() => {
     const wrap = wrapRef.current
     const stack = stackRef.current
-    const top = topRef.current
-    const bottom = bottomRef.current
-    if (!wrap || !stack || !bottom) return
+    const lineEl = lineRef.current
+    if (!wrap || !stack || !lineEl) return
 
     if (loadPhase === 'loading') {
       introRan.current = false
@@ -64,6 +40,9 @@ export function HeroTypography() {
 
     if (loadPhase === 'intro' && !introRan.current) {
       introRan.current = true
+      const first = profile.hero.beats[0]?.text ?? ''
+      setLine(first)
+      setBeatIndex(0)
       gsap.set(wrap, { autoAlpha: 1 })
       const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
       const dur = reduced ? 0.55 : 1.45
@@ -74,19 +53,11 @@ export function HeroTypography() {
         { scale: 1, autoAlpha: 1, filter: 'blur(0px)', duration: dur, ease: 'power3.out' },
         0.12,
       )
-      if (top) {
-        tl.fromTo(
-          top,
-          { y: reduced ? 0 : 18, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: dur * 0.85, ease: 'power3.out' },
-          0.18,
-        )
-      }
       tl.fromTo(
-        bottom,
-        { y: reduced ? 0 : (top ? -18 : 24), autoAlpha: 0 },
+        lineEl,
+        { y: reduced ? 0 : 24, autoAlpha: 0 },
         { y: 0, autoAlpha: 1, duration: dur * 0.85, ease: 'power3.out' },
-        top ? 0.28 : 0.18,
+        0.2,
       )
       if (!reduced) {
         tl.fromTo(
@@ -110,6 +81,44 @@ export function HeroTypography() {
     })
   }, [phase, loadPhase])
 
+  useEffect(() => {
+    if (loadPhase !== 'ready') return
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const { textInSec, textOutSec } = profile.hero
+
+    setHeroTextCallbacks({
+      onOut: () => {
+        const el = lineRef.current
+        if (!el || reduced) return
+        gsap.to(el, {
+          y: -22,
+          autoAlpha: 0,
+          filter: 'blur(10px)',
+          duration: textOutSec,
+          ease: 'power2.in',
+        })
+      },
+      onIn: (text, index) => {
+        setLine(text)
+        setBeatIndex(index)
+        const el = lineRef.current
+        if (!el) return
+        if (reduced) {
+          gsap.set(el, { y: 0, autoAlpha: 1, filter: 'none' })
+          return
+        }
+        gsap.fromTo(
+          el,
+          { y: 28, autoAlpha: 0, filter: 'blur(12px)' },
+          { y: 0, autoAlpha: 1, filter: 'blur(0px)', duration: textInSec, ease: 'power3.out' },
+        )
+      },
+    })
+
+    return () => setHeroTextCallbacks({})
+  }, [loadPhase])
+
   if (loadPhase === 'loading') return null
 
   return (
@@ -118,16 +127,25 @@ export function HeroTypography() {
       ref={wrapRef}
       data-quality-tier={tier}
       data-load-phase={loadPhase}
-      data-hero-top={profile.hero.top}
-      data-hero-bottom={profile.hero.bottom}
+      data-hero-active={line}
+      data-hero-beat={beatIndex}
+      data-hero-first-beat={profile.hero.beats[0]?.text ?? ''}
       data-testid="hero-typography"
       aria-hidden={phase !== 'idle'}
     >
       <div className="hero-depth hero-depth--back">
-        <HeroStack subtle />
+        <div className="hero-stack hero-stack--single">
+          <p className="hero-line hero-line--ghost">
+            <ChromatLine text={line} />
+          </p>
+        </div>
       </div>
       <div className="hero-depth hero-depth--front" ref={stackRef}>
-        <HeroStack topRef={topRef} bottomRef={bottomRef} />
+        <div className="hero-stack hero-stack--single">
+          <p className="hero-line" ref={lineRef}>
+            <ChromatLine text={line} />
+          </p>
+        </div>
       </div>
     </div>
   )

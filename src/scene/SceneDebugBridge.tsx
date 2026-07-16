@@ -5,6 +5,7 @@ import { useSceneStore } from '../store/sceneStore'
 import { measureBrainFit, sceneFraming } from '../lib/framing'
 import { POST_CA_OFFSET, QUALITY } from '../lib/quality'
 import { FABRIC_GAIN, pointerOnScene, uniforms } from './shared'
+import { heroReelState } from './heroReel'
 import { ambientState } from './ambientState'
 
 /** Exposes camera + brain-fit probe for Playwright (smoke / dev builds only). */
@@ -35,6 +36,14 @@ export function SceneDebugBridge() {
         get x() { return uniforms.uTouchPos.value.x },
         get y() { return uniforms.uTouchPos.value.y },
         get z() { return uniforms.uTouchPos.value.z },
+      },
+      hero: {
+        get beatIndex() { return heroReelState.beatIndex },
+        get activeText() { return heroReelState.activeText },
+        get running() { return heroReelState.running },
+        get shapeFrom() { return uniforms.uShapeFrom.value },
+        get shapeTo() { return uniforms.uShapeTo.value },
+        get morph() { return uniforms.uShapeMorph.value },
       },
       measureBrainFit: () => measureBrainFit(camera, framing.clusterScale),
       framing: {

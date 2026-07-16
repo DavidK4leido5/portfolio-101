@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { AdditiveBlending, ShaderMaterial } from 'three'
-import { brainSurface } from '../data/brainCloud'
+import { brainSortedSurface, networkSurface, stackSurface, SHAPE_SURFACE_COUNT } from '../data/shapeClouds'
 import { sections } from '../data/sections'
 import { uniforms } from './shared'
 import { particleVert, particleFrag } from './shaders'
@@ -22,6 +22,8 @@ export interface Cloud {
   seeds: Float32Array
   affinity: Float32Array
   indices: Float32Array
+  shapeNetwork: Float32Array
+  shapeStack: Float32Array
   count: number
 }
 
@@ -32,8 +34,7 @@ function gauss(): number {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
 }
 
-const SURFACE = brainSurface
-const SURFACE_N = SURFACE.length / 3
+const SURFACE_N = SHAPE_SURFACE_COUNT
 
 function shuffledSurfaceOrder(): Uint32Array {
   const order = new Uint32Array(SURFACE_N)
@@ -47,11 +48,16 @@ function shuffledSurfaceOrder(): Uint32Array {
   return order
 }
 
-function sampleSurface(order: Uint32Array, slot: number, jitter = 0.006): [number, number, number] {
+function sampleAligned(
+  order: Uint32Array,
+  slot: number,
+  surface: Float32Array,
+  jitter = 0.006,
+): [number, number, number] {
   const i = order[slot % SURFACE_N]
-  const x = SURFACE[i * 3] + gauss() * jitter
-  const y = SURFACE[i * 3 + 1] + gauss() * jitter
-  const z = SURFACE[i * 3 + 2] + gauss() * jitter
+  const x = surface[i * 3] + gauss() * jitter
+  const y = surface[i * 3 + 1] + gauss() * jitter
+  const z = surface[i * 3 + 2] + gauss() * jitter
   return [x, y, z]
 }
 
@@ -93,13 +99,23 @@ export function makeCloud(poolSize: number): Cloud {
   const seeds = new Float32Array(poolSize)
   const affinity = new Float32Array(poolSize)
   const indices = new Float32Array(poolSize)
+  const shapeNetwork = new Float32Array(poolSize * 3)
+  const shapeStack = new Float32Array(poolSize * 3)
   const order = shuffledSurfaceOrder()
 
   for (let i = 0; i < poolSize; i++) {
-    const p = sampleSurface(order, i)
+    const p = sampleAligned(order, i, brainSortedSurface)
     positions[i * 3] = p[0]
     positions[i * 3 + 1] = p[1]
     positions[i * 3 + 2] = p[2]
+    const n = sampleAligned(order, i, networkSurface, 0.004)
+    shapeNetwork[i * 3] = n[0]
+    shapeNetwork[i * 3 + 1] = n[1]
+    shapeNetwork[i * 3 + 2] = n[2]
+    const s = sampleAligned(order, i, stackSurface, 0.004)
+    shapeStack[i * 3] = s[0]
+    shapeStack[i * 3 + 1] = s[1]
+    shapeStack[i * 3 + 2] = s[2]
     affinity[i] = -1
     seeds[i] = Math.random()
     indices[i] = i
@@ -114,7 +130,7 @@ export function makeCloud(poolSize: number): Cloud {
     scatter[k * 3 + 2] = sp[2]
   }
 
-  return { positions, scatter, seeds, affinity, indices, count: poolSize }
+  return { positions, scatter, seeds, affinity, indices, shapeNetwork, shapeStack, count: poolSize }
 }
 
 export function NeuralCluster({ cloud }: { cloud: Cloud }) {
@@ -128,6 +144,8 @@ export function NeuralCluster({ cloud }: { cloud: Cloud }) {
         <bufferAttribute attach="attributes-aSeed" args={[cloud.seeds, 1]} />
         <bufferAttribute attach="attributes-aAffinity" args={[cloud.affinity, 1]} />
         <bufferAttribute attach="attributes-aIndex" args={[cloud.indices, 1]} />
+        <bufferAttribute attach="attributes-aShapeNetwork" args={[cloud.shapeNetwork, 3]} />
+        <bufferAttribute attach="attributes-aShapeStack" args={[cloud.shapeStack, 3]} />
       </bufferGeometry>
     </points>
   )

@@ -44,8 +44,7 @@ export function LoadingScreen() {
       <div className="loader-core">
         <p className="loader-kicker">Neural Portfolio</p>
         <h1 className="loader-title">
-          {profile.hero.top.trim() ? <>{profile.hero.top}<br /></> : null}
-          {profile.hero.bottom}
+          {profile.hero.beats[0]?.text ?? profile.title}
         </h1>
         <div className="loader-bar"><div className="loader-bar-fill" ref={barRef} /></div>
         <p className="loader-meta">MAPPING SURFACE NODES <span ref={pctRef}>0%</span></p>

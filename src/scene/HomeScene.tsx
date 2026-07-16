@@ -15,6 +15,7 @@ import { PostProcessing } from './PostProcessing'
 import { IntroSequence } from './IntroSequence'
 import { AmbientParticles } from './AmbientParticles'
 import { BrainTouchProbe } from './BrainTouch'
+import { HeroShapeCycle } from './HeroShapeCycle'
 import { CameraFraming, SceneDebugBridge } from './SceneDebugBridge'
 
 const tmpMouse = new Vector2()
@@ -194,6 +195,7 @@ export function HomeScene() {
       <AmbientParticles />
       <BrainScene key={pool} pool={pool} />
       <IntroSequence />
+      <HeroShapeCycle />
       <CameraRig />
       <Projection />
       <PostProcessing />
