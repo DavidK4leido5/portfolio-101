@@ -18,10 +18,10 @@ assets/
   avatar.jpg
   about.jpg
   contact.jpg
-  projects/
-  skills/
   experience/
 ```
+
+Projects are text-only (no preview images) — edit the `projects` array in `portfolio.ts`.
 
 ## Scene vs content
 
@@ -38,3 +38,34 @@ Do not put 3D coordinates in this folder.
 - `shape` — `brain` | `network` | `stack` (synced 3D morph; desktop/tablet only)
 
 Tune timing via `holdSec`, `morphSec`, `textInSec`, `textOutSec` on the same object.
+
+## Skills radar
+
+`skills` is an array of categories (hex radar vertices). Each category:
+
+| Field | Use |
+|-------|-----|
+| `id` | Stable key |
+| `label` | Detail card title |
+| `score` | 0–100, drives the radar polygon vertex |
+| `icon` | Key in `src/ui/skillIcons.tsx` |
+| `tech` | Rows in the detail card |
+
+Each `tech` entry: `{ name, score (0–10), icon }`. Bar width = `score * 10%`.
+Keep about **6 primary skills per category** so the detail card fits without scrolling.
+
+## Projects
+
+`projects` is an array of cards (no preview images). Each entry:
+
+| Field | Use |
+|-------|-----|
+| `id` | Stable key |
+| `title` | Project name |
+| `description` | Short blurb |
+| `skills` | String chips (e.g. `['React', 'Next.js']`) |
+| `liveUrl` | Optional live demo — omit / empty to hide |
+| `githubUrl` | Optional repo — omit / empty to hide |
+| `status` | Optional `'live'` \| `'wip'` status pill |
+
+Add or edit objects in `portfolio.ts` — the overlay reads the array as-is.

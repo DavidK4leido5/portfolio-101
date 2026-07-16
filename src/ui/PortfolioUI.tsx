@@ -6,8 +6,10 @@ import { NODE_LIMITS } from '../lib/nodes'
 import { indicatorEls } from '../scene/shared'
 import { animateNodeCount, triggerSectorWave } from '../scene/nodeAnimator'
 import {
-  profile, projects, skills, experience, contact, sectionCopy, resolveImage, type ImageSource,
+  profile, experience, contact, sectionCopy, resolveImage, type ImageSource,
 } from '../content/portfolio'
+import { SkillsPanel } from './SkillsPanel'
+import { ProjectsPanel } from './ProjectsPanel'
 
 function Img({ image }: { image: ImageSource }) {
   return (
@@ -21,32 +23,8 @@ function Img({ image }: { image: ImageSource }) {
 }
 
 function SectionContent({ id }: { id: SectionId }) {
-  if (id === 'projects')
-    return (
-      <>
-        {projects.map((p) => (
-          <article className="card" key={p.id}>
-            <Img image={p.image} />
-            <h3>{p.title}</h3>
-            <p>{p.description}</p>
-            <div className="tags">{p.tags.map((t) => <span key={t}>{t}</span>)}</div>
-            <a href={p.link} target="_blank" rel="noreferrer">View project →</a>
-          </article>
-        ))}
-      </>
-    )
-  if (id === 'skills')
-    return (
-      <>
-        {skills.map((s) => (
-          <article className="card" key={s.id}>
-            <h3>{s.name}</h3>
-            <p>{s.description}</p>
-            <div className="tags"><span>{s.level}</span></div>
-          </article>
-        ))}
-      </>
-    )
+  if (id === 'projects') return <ProjectsPanel />
+  if (id === 'skills') return <SkillsPanel />
   if (id === 'experience')
     return (
       <>
@@ -246,11 +224,21 @@ export function PortfolioUI() {
 
       {phase === 'arrived' && active && (
         <div className="overlay" ref={overlayRef}>
-          <div className="panel">
+          <div className={`panel${active === 'skills' ? ' panel--skills' : ''}${active === 'projects' ? ' panel--projects' : ''}`}>
+            <button
+              type="button"
+              className="panel-close"
+              data-testid="overlay-back"
+              aria-label="Close and return to core"
+              onClick={returnHome}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
             <h2 data-testid="overlay-title">{sectionCopy[active].headline}</h2>
             <p className="intro">{sectionCopy[active].intro}</p>
             <SectionContent id={active} />
-            <button className="back" data-testid="overlay-back" onClick={returnHome}>← Return to core</button>
           </div>
         </div>
       )}

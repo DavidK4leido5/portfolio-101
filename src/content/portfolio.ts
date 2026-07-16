@@ -8,17 +8,32 @@ export type Project = {
   id: string
   title: string
   description: string
-  tags: string[]
-  image: ImageSource
-  link: string
+  /** Tech / skill chips shown on the card */
+  skills: string[]
+  /** Live demo URL — omit or leave empty to hide the Live link */
+  liveUrl?: string
+  /** Source repo URL — omit or leave empty to hide the GitHub link */
+  githubUrl?: string
+  /** Optional status pill: live | wip */
+  status?: 'live' | 'wip'
 }
 
-export type Skill = {
-  id: string
+export type SkillTech = {
   name: string
-  description: string
-  level: 'learning' | 'comfortable' | 'expert'
-  image: ImageSource
+  /** 0–10 proficiency; bar width = score * 10% */
+  score: number
+  /** Key into skillIcons map */
+  icon: string
+}
+
+export type SkillCategory = {
+  id: string
+  label: string
+  /** 0–100; drives the radar polygon vertex */
+  score: number
+  /** Key into skillIcons map */
+  icon: string
+  tech: SkillTech[]
 }
 
 export type Experience = {
@@ -71,53 +86,170 @@ export const profile = {
 
 export const projects: Project[] = [
   {
-    id: 'project-1',
-    title: 'Project One',
-    description: 'Placeholder project description. Link a live demo or case study when ready.',
-    tags: ['React', 'Three.js', 'GSAP'],
-    image: {
-      cdnUrl: '',
-      localPath: '/src/content/assets/projects/project-1.jpg',
-      alt: 'Project one thumbnail placeholder',
-    },
-    link: 'https://example.com',
+    id: 'anime-vault',
+    title: 'Anime Vault',
+    description: 'Anime catalog with infinite scroll and dynamic loading.',
+    skills: ['React', 'Next.js', 'TypeScript', 'Tailwind'],
+    liveUrl: 'https://anime-vault-lyart.vercel.app/',
+    githubUrl: 'https://github.com/DaddyPeeg/anime_vault',
+    status: 'live',
   },
   {
-    id: 'project-2',
-    title: 'Project Two',
-    description: 'Placeholder project description.',
-    tags: ['WebGL', 'R3F'],
-    image: {
-      cdnUrl: '',
-      localPath: '/src/content/assets/projects/project-2.jpg',
-      alt: 'Project two thumbnail placeholder',
-    },
-    link: 'https://example.com',
+    id: 'messenger-clone',
+    title: 'Messenger Clone',
+    description: 'Real-time chat app with conversations, presence, and a modern messaging UI.',
+    skills: ['Next.js', 'React', 'Pusher', 'Prisma', 'Tailwind'],
+    liveUrl: 'https://messenger-clone-swart.vercel.app/',
+    githubUrl: 'https://github.com/DaddyPeeg/messenger-clone',
+    status: 'live',
+  },
+  {
+    id: 'kanban-app',
+    title: 'Kanban App',
+    description: 'SaaS-style Kanban board with drag-and-drop boards and progress tracking.',
+    skills: ['React', 'Next.js', 'TypeScript', 'Tailwind'],
+    liveUrl: 'https://task-management-kanban.vercel.app/',
+    githubUrl: 'https://github.com/DaddyPeeg/task-management-kanban',
+    status: 'live',
+  },
+  {
+    id: 'pathfinding',
+    title: 'Pathfinding Visualization',
+    description: 'Interactive graph pathfinding visualizer for classic search algorithms.',
+    skills: ['React', 'JavaScript', 'Algorithms'],
+    liveUrl: 'https://daddypeeg.github.io/pathfinding/',
+    githubUrl: 'https://github.com/DaddyPeeg/pathfinding',
+    status: 'live',
+  },
+  {
+    id: 'react-admin',
+    title: 'React Admin',
+    description: 'Reusable admin template with charts, tables, and dashboard layouts.',
+    skills: ['React', 'TypeScript', 'Tailwind'],
+    liveUrl: 'https://daddypeeg.github.io/react-admin-temp/',
+    githubUrl: 'https://github.com/DaddyPeeg/react-admin-temp',
+    status: 'live',
+  },
+  {
+    id: 'threads',
+    title: 'Threads',
+    description: 'Social app where users create threads and discuss topics in communities.',
+    skills: ['Next.js', 'React', 'MongoDB', 'Clerk', 'Tailwind'],
+    liveUrl: 'https://threads-sample-app.vercel.app/',
+    githubUrl: 'https://github.com/DaddyPeeg/threads-app',
+    status: 'live',
+  },
+  {
+    id: 'codebility',
+    title: 'Codebility',
+    description: 'Employee and client management platform for digital delivery teams.',
+    skills: ['Next.js', 'React', 'TypeScript', 'Tailwind'],
+    liveUrl: 'https://codebility-fe.vercel.app/',
+    githubUrl: 'https://github.com/Zeff01/codebility-fe/tree/main',
+    status: 'live',
+  },
+  {
+    id: 'image-gallery',
+    title: 'Image Gallery',
+    description: 'Image gallery with Cloudinary-backed optimization and responsive layout.',
+    skills: ['React', 'Cloudinary', 'TypeScript'],
+    githubUrl: 'https://github.com/DaddyPeeg/image-gallery-church',
+    status: 'wip',
+  },
+  {
+    id: 'discord-clone',
+    title: 'Discord Clone',
+    description: 'Discord-inspired app with realtime messaging and video chat foundations.',
+    skills: ['Next.js', 'React', 'Socket.io', 'Prisma'],
+    githubUrl: 'https://github.com/DaddyPeeg/discord-clone',
+    status: 'wip',
   },
 ]
 
-export const skills: Skill[] = [
+export const skills: SkillCategory[] = [
   {
-    id: 'skill-react',
-    name: 'React',
-    description: 'Placeholder skill note.',
-    level: 'expert',
-    image: {
-      cdnUrl: '',
-      localPath: '/src/content/assets/skills/react.jpg',
-      alt: 'React skill placeholder',
-    },
+    id: 'frontend',
+    label: 'Frontend Development',
+    score: 88.6,
+    icon: 'atom',
+    tech: [
+      { name: 'JavaScript (ES6+)', score: 9.5, icon: 'javascript' },
+      { name: 'TypeScript', score: 9, icon: 'typescript' },
+      { name: 'React', score: 9, icon: 'react' },
+      { name: 'Tailwind CSS', score: 9, icon: 'tailwind' },
+      { name: 'Vite', score: 9, icon: 'vite' },
+      { name: 'Figma', score: 9, icon: 'figma' },
+    ],
   },
   {
-    id: 'skill-webgl',
-    name: 'WebGL / Three.js',
-    description: 'Placeholder skill note.',
-    level: 'comfortable',
-    image: {
-      cdnUrl: '',
-      localPath: '/src/content/assets/skills/webgl.jpg',
-      alt: 'WebGL skill placeholder',
-    },
+    id: 'backend',
+    label: 'Backend Development',
+    score: 88,
+    icon: 'code',
+    tech: [
+      { name: 'Node.js', score: 9.5, icon: 'node' },
+      { name: 'NextJS', score: 10, icon: 'nextjs' },
+      { name: 'Express.js', score: 9, icon: 'express' },
+      { name: 'FastAPI', score: 9, icon: 'fastapi' },
+      { name: 'REST API', score: 9, icon: 'api' },
+      { name: 'GraphQL', score: 8.5, icon: 'graphql' },
+    ],
+  },
+  {
+    id: 'database',
+    label: 'Database Management',
+    score: 81.4,
+    icon: 'database',
+    tech: [
+      { name: 'PostgreSQL', score: 9, icon: 'postgres' },
+      { name: 'MongoDB', score: 9, icon: 'mongodb' },
+      { name: 'MySQL', score: 9, icon: 'mysql' },
+      { name: 'Prisma', score: 8, icon: 'prisma' },
+      { name: 'Firebase', score: 8.5, icon: 'firebase' },
+      { name: 'Supabase', score: 7.5, icon: 'supabase' },
+    ],
+  },
+  {
+    id: 'devops',
+    label: 'DevOps/Deployment',
+    score: 68.3,
+    icon: 'docker',
+    tech: [
+      { name: 'GitHub Actions', score: 8, icon: 'githubActions' },
+      { name: 'Docker', score: 7, icon: 'docker' },
+      { name: 'Google Cloud', score: 7.5, icon: 'gcp' },
+      { name: 'AWS', score: 6, icon: 'aws' },
+      { name: 'Nginx', score: 6.5, icon: 'nginx' },
+      { name: 'Apache', score: 6, icon: 'apache' },
+    ],
+  },
+  {
+    id: 'collaboration',
+    label: 'Version Control & Collaboration',
+    score: 89.2,
+    icon: 'github',
+    tech: [
+      { name: 'Git', score: 9, icon: 'git' },
+      { name: 'GitHub', score: 9, icon: 'github' },
+      { name: 'GitLab', score: 8, icon: 'gitlab' },
+      { name: 'Jira', score: 10, icon: 'jira' },
+      { name: 'Trello', score: 9, icon: 'trello' },
+      { name: 'ClickUp', score: 8.5, icon: 'clickup' },
+    ],
+  },
+  {
+    id: 'algorithms',
+    label: 'Problem Solving & Algorithms',
+    score: 70.5,
+    icon: 'algorithms',
+    tech: [
+      { name: 'JavaScript', score: 9.5, icon: 'javascript' },
+      { name: 'Python', score: 8, icon: 'python' },
+      { name: 'TypeScript', score: 9, icon: 'typescript' },
+      { name: 'Java', score: 7, icon: 'java' },
+      { name: 'C++', score: 6, icon: 'cpp' },
+      { name: 'LeetCode', score: 7, icon: 'leetcode' },
+    ],
   },
 ]
 
@@ -154,7 +286,7 @@ export const contact = {
 export const sectionCopy = {
   projects: {
     headline: 'Projects',
-    intro: 'Placeholder intro for the projects hotspot overlay.',
+    intro: 'Selected builds — live demos and source when available.',
   },
   experience: {
     headline: 'Experience',
@@ -162,7 +294,7 @@ export const sectionCopy = {
   },
   skills: {
     headline: 'Skills',
-    intro: 'Placeholder intro for the skills hotspot overlay.',
+    intro: 'Click a radar vertex to inspect a stack. Scores are relative proficiency.',
   },
   about: {
     headline: 'About',
