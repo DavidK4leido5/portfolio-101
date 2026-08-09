@@ -11,6 +11,9 @@ import {
 import { SkillsPanel } from './SkillsPanel'
 import { ProjectsPanel } from './ProjectsPanel'
 
+const prefersReduced = () =>
+  typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
+
 function Img({ image }: { image: ImageSource }) {
   return (
     <img
@@ -72,7 +75,21 @@ export function PortfolioUI() {
   const indicatorsRef = useRef<HTMLDivElement>(null)
   const navRef = useRef<HTMLElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const closingRef = useRef(false)
   const uiReady = loadPhase === 'ready'
+
+  // Play the exit "dissolve" before returnHome unmounts the panel.
+  const runClose = useCallback(() => {
+    if (closingRef.current) return
+    const panel = overlayRef.current?.querySelector('.panel') as HTMLElement | null
+    if (!panel || prefersReduced()) { returnHome(); return }
+    closingRef.current = true
+    const kids = panel.querySelectorAll(':scope > :not(.panel-close)')
+    gsap.killTweensOf([panel, ...kids])
+    gsap.timeline({ onComplete: () => { closingRef.current = false; returnHome() } })
+      .to(kids, { autoAlpha: 0, y: -8, filter: 'blur(8px)', duration: 0.22, stagger: 0.025, ease: 'power2.in' }, 0)
+      .to(panel, { autoAlpha: 0, y: -12, scale: 0.985, duration: 0.32, ease: 'power2.in' }, 0.05)
+  }, [returnHome])
 
   const onSectorEnter = useCallback((id: SectionId, i: number) => {
     setHovered(id)
@@ -107,18 +124,30 @@ export function PortfolioUI() {
   }, [phase, uiReady, isMobileNav])
 
   useEffect(() => {
-    if (phase === 'arrived' && overlayRef.current) {
-      gsap.fromTo(overlayRef.current, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' })
-    }
-  }, [phase])
+    if (phase !== 'arrived') return
+    const overlay = overlayRef.current
+    const panel = overlay?.querySelector('.panel') as HTMLElement | null
+    if (!overlay || !panel) return
+    if (prefersReduced()) { gsap.set(panel, { autoAlpha: 1 }); return }
+    const ctx = gsap.context(() => {
+      const kids = panel.querySelectorAll(':scope > :not(.panel-close)')
+      gsap.timeline()
+        .fromTo(panel, { autoAlpha: 0, y: 18, scale: 0.985 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' })
+        .fromTo(kids,
+          { autoAlpha: 0, y: 14, filter: 'blur(10px)' },
+          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.55, stagger: 0.06, ease: 'power2.out', clearProps: 'filter' },
+          0.12)
+    }, overlay)
+    return () => ctx.revert()
+  }, [phase, active])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && useSceneStore.getState().phase === 'arrived') returnHome()
+      if (e.key === 'Escape' && useSceneStore.getState().phase === 'arrived') runClose()
     }
     addEventListener('keydown', onKey)
     return () => removeEventListener('keydown', onKey)
-  }, [returnHome])
+  }, [runClose])
 
   useEffect(() => {
     const tw = gsap.to('.indicator .dot, .sector-nav-btn .dot', {
@@ -230,7 +259,7 @@ export function PortfolioUI() {
               className="panel-close"
               data-testid="overlay-back"
               aria-label="Close and return to core"
-              onClick={returnHome}
+              onClick={runClose}
             >
               <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
                 <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
