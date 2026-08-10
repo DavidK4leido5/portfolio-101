@@ -29,7 +29,8 @@ function SceneUniforms() {
     uniforms.uMouse.value.lerp(tmpMouse.set(mouse.x, mouse.y), 0.05)
     const s = useSceneStore.getState()
     uniforms.uHovered.value = s.hoveredSection ? SECTION_IDS.indexOf(s.hoveredSection) : -1
-    uniforms.uActive.value = s.activeSection ? SECTION_IDS.indexOf(s.activeSection) : -1
+    const focusId = s.scrollZone === 'journey' ? s.journeySection : s.activeSection
+    uniforms.uActive.value = focusId ? SECTION_IDS.indexOf(focusId) : -1
     if ((frame++ & 31) === 0) document.documentElement.style.setProperty('--accent', accentHex(t))
   })
   return null
@@ -166,7 +167,7 @@ export function HomeScene() {
       mouse.y = -((e.clientY / innerHeight) * 2 - 1)
       const el = document.elementFromPoint(e.clientX, e.clientY)
       setPointerOnScene(!el?.closest(
-        '.indicator, [data-testid="node-slider"], .panel, .back, [data-testid="sector-nav"]',
+        '.indicator, [data-testid="node-slider"], .panel, .back, [data-testid="sector-nav"], .cover-section, .journey-copy, .scroll-end',
       ))
     }
     addEventListener('pointermove', onMove)

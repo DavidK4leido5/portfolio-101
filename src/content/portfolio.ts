@@ -45,6 +45,22 @@ export type Experience = {
   image: ImageSource
 }
 
+export type Contribution = {
+  id: string
+  role: string
+  company: string
+  period: string
+  highlights: string[]
+}
+
+export type Testimonial = {
+  id: string
+  quote: string
+  name: string
+  title: string
+  company: string
+}
+
 export type HeroShapeId = 'brain' | 'network' | 'stack'
 
 export type HeroBeat = {
@@ -75,7 +91,7 @@ export const profile = {
   } satisfies ImageSource,
   about: {
     headline: 'About',
-    body: 'Placeholder bio. Replace with your story, focus areas, and what you build.',
+    body: 'Full-stack engineer focused on systems design and integration — shipping React, TypeScript, and Next.js products end to end, from UI and CMS-driven content to APIs, microservices, CI/CD, and cloud. I\'ve built rate-limited backends, Docker pipelines that cut deploy time, Core Web Vitals wins, OpenAI integrations, and CMS-to-frontend wiring across pharmacy systems, marketing platforms, and AI products. I care about clean architecture, reliable interfaces between services, and product experiences that stay fast under load.',
     image: {
       cdnUrl: '',
       localPath: '/src/content/assets/about.jpg',
@@ -255,16 +271,124 @@ export const skills: SkillCategory[] = [
 
 export const experience: Experience[] = [
   {
-    id: 'exp-1',
-    role: 'Frontend Engineer',
-    company: 'Company Name',
-    period: '2022 — Present',
-    description: 'Placeholder experience summary.',
+    id: 'exp-revive',
+    role: 'Systems Engineer',
+    company: 'Revive Pharmacy',
+    period: 'Mar 2025 — Aug 2026',
+    description: 'Secured APIs, optimized databases, and shipped Docker CI/CD that cut deploy time by 75%.',
     image: {
       cdnUrl: '',
       localPath: '/src/content/assets/experience/exp-1.jpg',
-      alt: 'Experience placeholder',
+      alt: 'Revive Pharmacy',
     },
+  },
+  {
+    id: 'exp-volatility',
+    role: 'Frontend Developer',
+    company: 'Volatility',
+    period: 'Nov 2024 — Feb 2025',
+    description: 'High-converting landing pages, CMS-driven blog, and a webinar video platform.',
+    image: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/experience/exp-1.jpg',
+      alt: 'Volatility',
+    },
+  },
+  {
+    id: 'exp-agentsly',
+    role: 'Full Stack Engineer',
+    company: 'Agentsly',
+    period: 'Jun 2024 — Oct 2024',
+    description: 'OpenAI / Vercel AI SDK integrations, ShadCN UI, and AWS deployments at 99.9% uptime.',
+    image: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/experience/exp-1.jpg',
+      alt: 'Agentsly',
+    },
+  },
+]
+
+export const contributions: Contribution[] = [
+  {
+    id: 'contrib-revive',
+    role: 'Systems Engineer',
+    company: 'Revive Pharmacy',
+    period: 'Mar 2025 — Aug 2026',
+    highlights: [
+      'Rate limiting and API hardening against DDoS and abuse',
+      'Query and index work that cut response times by 40%',
+      'Docker + VPS CI/CD pipeline — 75% faster deploys',
+      'Unit test suites for critical backend services',
+    ],
+  },
+  {
+    id: 'contrib-volatility',
+    role: 'Frontend Developer',
+    company: 'Volatility',
+    period: 'Nov 2024 — Feb 2025',
+    highlights: [
+      'Landing page that lifted engagement and conversions by 22%',
+      'CMS-integrated dynamic blog for non-technical updates',
+      'Webinar video platform for live online events',
+      'UI bugfixes that reduced bounce from user feedback',
+    ],
+  },
+  {
+    id: 'contrib-agentsly',
+    role: 'Full Stack Engineer',
+    company: 'Agentsly',
+    period: 'Jun 2024 — Oct 2024',
+    highlights: [
+      'ChatGPT via Vercel AI SDK and OpenAI API',
+      'ShadCN UI system — 30% faster UI delivery',
+      'AWS deployments with 99.9% uptime',
+    ],
+  },
+  {
+    id: 'contrib-codebility',
+    role: 'Software Engineering Intern',
+    company: 'Codebility',
+    period: 'Nov 2023 — May 2024',
+    highlights: [
+      'Next.js rendering work — Core Web Vitals +35%',
+      'MySQL query optimization under load',
+      'Unit tests that cut manual regression effort by 50%',
+    ],
+  },
+  {
+    id: 'contrib-comelec',
+    role: 'Administrative Aide II · System Admin',
+    company: 'Commission on Elections',
+    period: 'Jul 2022 — Jul 2023',
+    highlights: [
+      'Trained municipal election volunteers on COMELEC systems',
+      'Routine updates and MySQL database maintenance',
+      'Custom cleanup scripts to resolve data errors',
+    ],
+  },
+]
+
+export const testimonials: Testimonial[] = [
+  {
+    id: 't-1',
+    quote: 'David ships end-to-end — UI, APIs, and infra — without losing the plot on reliability.',
+    name: 'Colleague Name',
+    title: 'Engineering Lead',
+    company: 'Placeholder Co.',
+  },
+  {
+    id: 't-2',
+    quote: 'Clear communicator who turns messy product requirements into stable, performant releases.',
+    name: 'Collaborator Name',
+    title: 'Product Manager',
+    company: 'Placeholder Co.',
+  },
+  {
+    id: 't-3',
+    quote: 'The kind of fullstack partner you want when systems design and integration actually matter.',
+    name: 'Teammate Name',
+    title: 'Senior Developer',
+    company: 'Placeholder Co.',
   },
 ]
 
@@ -290,7 +414,7 @@ export const sectionCopy = {
   },
   experience: {
     headline: 'Experience',
-    intro: 'Placeholder intro for the experience hotspot overlay.',
+    intro: 'Roles across systems, frontend, and full-stack delivery — deeper notes also live in Contributions above.',
   },
   skills: {
     headline: 'Skills',
@@ -298,7 +422,7 @@ export const sectionCopy = {
   },
   about: {
     headline: 'About',
-    intro: 'Placeholder intro for the about hotspot overlay.',
+    intro: 'Full-stack engineer — systems design, integration, and shipping end to end.',
   },
   contact: {
     headline: 'Contact',
