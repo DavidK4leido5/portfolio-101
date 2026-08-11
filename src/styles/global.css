@@ -884,6 +884,7 @@ canvas { display: block; }
   font-family: ui-monospace, Consolas, monospace;
   font-size: 13px;
   letter-spacing: 0.45em;
+  padding-right: 40px;
   text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 8px;
@@ -1302,6 +1303,7 @@ canvas { display: block; }
   position: absolute;
   top: 14px;
   right: 14px;
+  z-index: 2;
   width: 32px;
   height: 32px;
   display: grid;

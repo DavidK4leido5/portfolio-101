@@ -349,7 +349,7 @@ export function PortfolioUI() {
           className="indicators"
           ref={indicatorsRef}
           data-testid="sector-indicators"
-          data-sectors-ready={labelsPhase ? 'true' : 'false'}
+          data-sectors-ready={uiReady ? 'true' : 'false'}
           aria-hidden={!labelsLive}
         >
           {sections.map((s, i) => (
@@ -377,7 +377,7 @@ export function PortfolioUI() {
           className="sector-nav"
           ref={navRef}
           data-testid="sector-nav"
-          data-sectors-ready="true"
+          data-sectors-ready={uiReady ? 'true' : 'false'}
           aria-label="Portfolio sections"
           aria-hidden={!labelsLive}
         >
