@@ -42,10 +42,10 @@ export function LoadingScreen() {
   return (
     <div className="loader" ref={ref} data-testid="loading-screen" aria-hidden={loadPhase !== 'loading'}>
       <div className="loader-core">
-        <p className="loader-kicker">Neural Portfolio</p>
-        <h1 className="loader-title">
+        <p className="loader-kicker">The Adaptive Mind</p>
+        <p className="loader-title">
           {profile.hero.beats[0]?.text ?? profile.title}
-        </h1>
+        </p>
         <div className="loader-bar"><div className="loader-bar-fill" ref={barRef} /></div>
         <p className="loader-meta">MAPPING SURFACE NODES <span ref={pctRef}>0%</span></p>
       </div>

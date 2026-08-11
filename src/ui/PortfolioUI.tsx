@@ -15,6 +15,7 @@ import {
 import { SkillsPanel } from './SkillsPanel'
 import { ProjectsPanel } from './ProjectsPanel'
 import { ContactPanel } from './ContactPanel'
+import { SiteBrand } from './SiteBrand'
 import { outwardSlideX, runSectorLabelReveal } from './sectorLabelReveal'
 
 const prefersReduced = () =>
@@ -308,8 +309,7 @@ export function PortfolioUI() {
     >
       {isMobileNav ? (
         <div className="hud hud-profile-group" data-testid="hud-profile-group">
-          {profile.name}
-          <span className="hud-profile-title">{profile.title}</span>
+          <SiteBrand />
           <div className="hud-profile-meta">
             STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b>
             {' · '}
@@ -320,11 +320,13 @@ export function PortfolioUI() {
         </div>
       ) : (
         <>
-          <div className="hud tl">{profile.name}<br /><span>{profile.title}</span></div>
+          <div className="hud tl">
+            <SiteBrand />
+          </div>
           <div className="hud tr">STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b><br />NODES <b>{nodeCount}</b><br />SECTOR <b>{hudSector ?? 'CORE'}</b></div>
         </>
       )}
-      <div className="hud bl">NEURAL.PORTFOLIO <b>v1.0</b><br />{profile.tagline}</div>
+      <div className="hud bl">THE ADAPTIVE MIND <b>v1.0</b><br />{profile.tagline}</div>
       <div className="hud br">SYS.COLOR<span className="swatch" /><br />LINK <b>{inJourney ? 'JOURNEY' : phase.toUpperCase()}</b></div>
 
       {uiReady && inHero && (

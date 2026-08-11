@@ -647,6 +647,67 @@ canvas { display: block; }
 .hud.br { bottom: 22px; right: 26px; text-align: right; }
 .hud.tl span { color: rgba(235, 235, 255, 0.6); }
 
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  pointer-events: auto;
+  max-width: min(72vw, 340px);
+}
+.site-brand__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 18px rgba(0, 0, 0, 0.45);
+}
+.site-brand__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.25;
+}
+.site-brand__title {
+  margin: 0;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-brand__sub {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.45);
+}
+.site-brand:hover .site-brand__title,
+.site-brand:focus-visible .site-brand__title {
+  color: #fff;
+}
+.site-brand:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.ui[data-quality-tier="mobile"] .site-brand__logo {
+  width: 34px;
+  height: 34px;
+}
+.ui[data-quality-tier="mobile"] .site-brand__title {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
 .ui[data-quality-tier="mobile"] .hud-profile-group {
   top: max(14px, env(safe-area-inset-top, 0px));
   left: 16px;
@@ -994,8 +1055,10 @@ canvas { display: block; }
 
 .skills-detail__label {
   flex: 1;
+  margin: 0;
   font-family: ui-monospace, Consolas, monospace;
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   border: 1px solid rgba(255, 255, 255, 0.18);

@@ -39,7 +39,7 @@ function CategoryDetail({ category }: { category: SkillCategory }) {
         <span className="skills-detail__badge" aria-hidden>
           <SkillIcon name={category.icon} size={18} />
         </span>
-        <span className="skills-detail__label">{category.label}</span>
+        <h3 className="skills-detail__label">{category.label}</h3>
         <span className="skills-detail__score">{category.score.toFixed(0)}</span>
       </header>
       <ul className="skills-detail__list" ref={listRef}>
