@@ -80,8 +80,8 @@ export function CameraRig() {
   const wasJourneyRef = useRef(false)
 
   useFrame((_, delta) => {
-    if (useSceneStore.getState().loadPhase !== 'ready') return
     const s = useSceneStore.getState()
+    if (s.loadPhase !== 'ready' && s.loadPhase !== 'labels') return
 
     // Journey: home → sector0 → … → sectorN (scroll-scrubbed)
     if (s.scrollZone === 'journey') {

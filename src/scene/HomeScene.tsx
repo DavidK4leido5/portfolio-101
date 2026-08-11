@@ -75,10 +75,12 @@ function separateIndicators(pts: { x: number; y: number }[]) {
 function Projection() {
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
-  const ready = useSceneStore((s) => s.loadPhase === 'ready')
+  const ready = useSceneStore((s) => s.loadPhase === 'ready' || s.loadPhase === 'labels')
   const tier = useSceneStore((s) => s.qualityTier)
   useFrame(() => {
+    const loadPhase = useSceneStore.getState().loadPhase
     if (!ready || tier === 'mobile' || frame & 1) return
+    const revealing = loadPhase === 'labels'
     const pts = sections.map((_, i) => {
       hotspotWorld(i, projV).project(camera)
       return {
@@ -97,8 +99,11 @@ function Projection() {
     for (const p of pts) {
       const el = indicatorEls[p.i]
       if (!el) continue
-      el.style.opacity = p.hide ? '0' : ''
-      el.style.pointerEvents = p.hide ? 'none' : 'auto'
+      // During the cascade reveal, GSAP owns opacity — don't flash labels visible
+      if (!revealing) {
+        el.style.opacity = p.hide ? '0' : ''
+      }
+      el.style.pointerEvents = p.hide || revealing ? 'none' : 'auto'
       el.style.zIndex = String(20 - p.i)
       el.style.left = `${p.x}px`
       el.style.top = `${p.y}px`
@@ -139,7 +144,7 @@ function BrainScene({ pool }: { pool: number }) {
   useEffect(() => {
     const s = useSceneStore.getState()
     uniforms.uNodeCount.value = s.nodeCount
-    if (s.loadPhase === 'ready') {
+    if (s.loadPhase === 'ready' || s.loadPhase === 'labels') {
       uniforms.uSpawn.value = 1
       uniforms.uSliderSpawn.value = 1
       uniforms.uRevealFrom.value = 0

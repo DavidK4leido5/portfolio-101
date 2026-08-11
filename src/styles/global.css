@@ -684,6 +684,13 @@ canvas { display: block; }
    the .indicator buttons re-enable their own pointer events */
 .indicators { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 
+/* Pre-cascade: keep buttons invisible until the reveal timeline starts */
+.indicators[data-revealing="true"] .indicator,
+.sector-nav[data-revealing="true"] .sector-nav-btn {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .indicator {
   position: absolute;
   top: 0; left: 0;

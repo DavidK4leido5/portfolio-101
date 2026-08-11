@@ -80,12 +80,19 @@ export function HeroTypography() {
   useEffect(() => {
     const wrap = wrapRef.current
     const stack = stackRef.current
-    if (!wrap || !stack || loadPhase !== 'ready') return
+    if (!wrap || !stack || (loadPhase !== 'ready' && loadPhase !== 'labels')) return
 
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     const prev = prevPhaseRef.current
     const wasModal = prev === 'arrived' || prev === 'travel'
     prevPhaseRef.current = phase
+
+    // Labels cascade — keep hero text fully visible
+    if (loadPhase === 'labels') {
+      gsap.set(wrap, { autoAlpha: 1, y: 0, filter: 'none', visibility: 'visible' })
+      gsap.set(stack, { scale: 1 })
+      return
+    }
 
     const leavingForSector = phase !== 'idle' && scrollZone === 'hero'
 

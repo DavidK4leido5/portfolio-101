@@ -4,7 +4,8 @@ import { clampNodes, NODE_LIMITS } from '../lib/nodes'
 import type { SectionId } from '../data/sections'
 
 export type Phase = 'idle' | 'travel' | 'arrived'
-export type LoadPhase = 'loading' | 'intro' | 'ready'
+/** labels = sector callouts cascading in before the page becomes interactive */
+export type LoadPhase = 'loading' | 'intro' | 'labels' | 'ready'
 /** settle = 1vh home reset after cover, before sector journey */
 export type ScrollZone = 'hero' | 'cover' | 'settle' | 'journey' | 'end'
 
@@ -37,6 +38,7 @@ interface SceneState {
   setSceneReady: () => void
   startIntro: () => void
   finishIntro: () => void
+  finishLabels: () => void
   setNodeCount: (n: number) => void
   setScrollZone: (zone: ScrollZone) => void
   setJourneySection: (id: SectionId | null) => void
@@ -122,7 +124,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   },
   setSceneReady: () => set({ sceneReady: true }),
   startIntro: () => set({ loadPhase: 'intro' }),
-  finishIntro: () => set({ loadPhase: 'ready' }),
+  finishIntro: () => set({ loadPhase: 'labels' }),
+  finishLabels: () => set({ loadPhase: 'ready' }),
   setNodeCount: (n) => set({ nodeCount: clampNodes(n, get().qualityTier) }),
   setScrollZone: (zone) => {
     const prev = get().scrollZone

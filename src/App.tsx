@@ -30,9 +30,9 @@ export default function App() {
     return () => clearTimeout(t)
   }, [sceneReady, loadPhase])
 
-  // Lock page scroll during boot and while a click-opened sector modal is up
+  // Lock page scroll until labels finish cascading, and while a sector modal is up
   const scrollLocked =
-    loadPhase === 'loading' || phase === 'arrived' || phase === 'travel'
+    loadPhase !== 'ready' || phase === 'arrived' || phase === 'travel'
 
   useEffect(() => {
     if (!scrollLocked) return

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import {
   useSceneStore,
@@ -14,6 +14,7 @@ import {
 } from '../content/portfolio'
 import { SkillsPanel } from './SkillsPanel'
 import { ProjectsPanel } from './ProjectsPanel'
+import { outwardSlideX, runSectorLabelReveal } from './sectorLabelReveal'
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -84,7 +85,9 @@ export function PortfolioUI() {
   const journeyOverlayRef = useRef<HTMLDivElement>(null)
   const closingRef = useRef(false)
   const prevPhaseRef = useRef(phase)
+  const labelRevealRan = useRef(false)
   const uiReady = loadPhase === 'ready'
+  const labelsPhase = loadPhase === 'labels' || loadPhase === 'ready'
   const inHero = scrollZone === 'hero'
   const inJourney = scrollZone === 'journey' || scrollZone === 'end'
   const coverProgress = useSceneStore((s) => s.coverProgress)
@@ -97,7 +100,7 @@ export function PortfolioUI() {
     bridgeInProgress,
     journeyApproachProgress,
   })
-  const labelsLive = inClickZone && labelAlpha > 0.08 && phase === 'idle'
+  const labelsLive = uiReady && inClickZone && labelAlpha > 0.08 && phase === 'idle'
 
   const runClose = useCallback(() => {
     if (closingRef.current) return
@@ -135,21 +138,71 @@ export function PortfolioUI() {
     sections.forEach((_, i) => { indicatorEls[i] = null })
   }, [isMobileNav])
 
-  // Sector indicators / mobile nav — scrub with cover; animate in after modal close
+  // Hide every label before paint when entering the cascade phase (kills the flash)
+  useLayoutEffect(() => {
+    if (loadPhase !== 'labels') return
+    const root = isMobileNav ? navRef.current : indicatorsRef.current
+    if (!root) return
+    const selector = isMobileNav ? '.sector-nav-btn' : '.indicator'
+    const buttons = [...root.querySelectorAll<HTMLElement>(selector)]
+    gsap.set(buttons, { autoAlpha: 0, x: 0 })
+    gsap.set(root, { autoAlpha: 1, visibility: 'visible', y: 0 })
+    root.setAttribute('data-revealing', 'true')
+  }, [loadPhase, isMobileNav])
+
+  // Initial sector-label cascade (side-in + hover waves) before unlock
+  useEffect(() => {
+    if (loadPhase !== 'labels' || labelRevealRan.current) return
+    labelRevealRan.current = true
+
+    const root = isMobileNav ? navRef.current : indicatorsRef.current
+    if (!root) {
+      useSceneStore.getState().finishLabels()
+      return
+    }
+
+    const selector = isMobileNav ? '.sector-nav-btn' : '.indicator'
+    const buttons = [...root.querySelectorAll<HTMLElement>(selector)]
+    // Re-assert hidden (layout effect already did; keep them dark through the wait)
+    gsap.set(buttons, { autoAlpha: 0, x: 0 })
+
+    let cancelled = false
+    let tl: gsap.core.Timeline | null = null
+    const kick = () => {
+      if (cancelled) return
+      root.removeAttribute('data-revealing')
+      // Keep GSAP opacity at 0 until each beat's fromTo runs
+      gsap.set(buttons, { autoAlpha: 0 })
+      tl = runSectorLabelReveal(buttons, { reduced: prefersReduced() })
+    }
+    // Wait so Projection can place desktop indicators before measuring slide direction
+    const t = window.setTimeout(kick, 80)
+
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+      tl?.kill()
+      root.removeAttribute('data-revealing')
+    }
+  }, [loadPhase, isMobileNav])
+
+  // Sector indicators / mobile nav — scrub with cover; side-slide in after modal close
   useEffect(() => {
     const el = isMobileNav ? navRef.current : indicatorsRef.current
     if (!el) return
-    if (!uiReady) {
+    if (!labelsPhase) {
       gsap.set(el, { autoAlpha: 0 })
       return
     }
+    // Reveal timeline owns the labels phase
+    if (loadPhase === 'labels') return
 
     const prev = prevPhaseRef.current
     const wasModal = prev === 'arrived' || prev === 'travel'
     prevPhaseRef.current = phase
 
     if (phase !== 'idle') {
-      gsap.to(el, { autoAlpha: 0, y: -12, duration: 0.4, ease: 'power2.in', overwrite: 'auto' })
+      gsap.to(el, { autoAlpha: 0, y: 0, duration: 0.4, ease: 'power2.in', overwrite: 'auto' })
       return
     }
     const alpha = labelOpacityFromScroll({
@@ -157,29 +210,34 @@ export function PortfolioUI() {
       bridgeInProgress,
       journeyApproachProgress,
     })
-    const p = 1 - alpha
 
     if (wasModal && alpha > 0.08) {
-      gsap.fromTo(
-        el,
-        { autoAlpha: 0, y: -18, visibility: 'visible' },
-        {
-          autoAlpha: alpha,
-          y: -18 * p,
-          duration: 0.65,
-          ease: 'power3.out',
-          overwrite: 'auto',
-        },
-      )
+      const kids = [...el.querySelectorAll<HTMLElement>(isMobileNav ? '.sector-nav-btn' : '.indicator')]
+      gsap.set(el, { autoAlpha: 1, visibility: 'visible', y: 0 })
+      kids.forEach((kid, i) => {
+        const fromX = outwardSlideX(kid)
+        gsap.fromTo(
+          kid,
+          { autoAlpha: 0, x: fromX },
+          {
+            autoAlpha: 1,
+            x: 0,
+            duration: 0.55,
+            delay: i * 0.07,
+            ease: 'power3.out',
+            overwrite: 'auto',
+          },
+        )
+      })
       return
     }
 
     gsap.set(el, {
       autoAlpha: alpha,
-      y: -18 * p,
+      y: 0,
       visibility: alpha < 0.03 ? 'hidden' : 'visible',
     })
-  }, [phase, uiReady, isMobileNav, coverProgress, bridgeInProgress, journeyApproachProgress])
+  }, [phase, labelsPhase, loadPhase, isMobileNav, coverProgress, bridgeInProgress, journeyApproachProgress])
 
   // Journey panels — continuous triangular crossfade from journeyProgress
   useEffect(() => {
@@ -299,8 +357,8 @@ export function PortfolioUI() {
           className="indicators"
           ref={indicatorsRef}
           data-testid="sector-indicators"
-          data-sectors-ready={uiReady ? 'true' : 'false'}
-          aria-hidden={!uiReady || !labelsLive}
+          data-sectors-ready={labelsPhase ? 'true' : 'false'}
+          aria-hidden={!labelsLive}
         >
           {sections.map((s, i) => (
             <button
@@ -322,7 +380,7 @@ export function PortfolioUI() {
         </div>
       )}
 
-      {isMobileNav && uiReady && (
+      {isMobileNav && labelsPhase && (
         <nav
           className="sector-nav"
           ref={navRef}

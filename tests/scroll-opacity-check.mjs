@@ -36,10 +36,10 @@ assert(heroTextOpacityFromScroll({ coverProgress: 1, bridgeInProgress: 1, journe
 
 const n = 5
 assert(journeyPanelOpacity(0, 0, n) === 0, 'journey start no panel')
-assert(journeyPanelOpacity(1 / n, 0, n) === 1, 'projects peak')
-assert(Math.abs(journeyPanelOpacity(1.5 / n, 0, n) - 0.5) < 1e-9, 'projects fade')
-assert(Math.abs(journeyPanelOpacity(1.5 / n, 1, n) - 0.5) < 1e-9, 'experience rise')
+assert(journeyPanelOpacity(1 / n, 0, n) === 1, 'about peak')
+assert(Math.abs(journeyPanelOpacity(1.5 / n, 0, n) - 0.5) < 1e-9, 'about fade')
+assert(Math.abs(journeyPanelOpacity(1.5 / n, 1, n) - 0.5) < 1e-9, 'projects rise')
 assert(journeyPanelOpacity(1, 4, n) === 1, 'contact end peak')
-assert(journeyPanelOpacity(1, 0, n) === 0, 'projects gone at end')
+assert(journeyPanelOpacity(1, 0, n) === 0, 'about gone at end')
 
 console.log('scroll-opacity-check: PASS')
