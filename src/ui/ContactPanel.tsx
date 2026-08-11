@@ -3,7 +3,9 @@ import { contact } from '../content/portfolio'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
-const FORMSPREE_ID = (import.meta.env.VITE_FORMSPREE_ID as string | undefined)?.trim() ?? ''
+// Formspree endpoint id is public (same as form action URL). Env override optional.
+const FORMSPREE_ID =
+  ((import.meta.env.VITE_FORMSPREE_ID as string | undefined)?.trim() || 'mbgrolgv')
 
 export function ContactPanel() {
   const [name, setName] = useState('')
@@ -102,8 +104,7 @@ export function ContactPanel() {
 
         {!configured && (
           <p className="contact-form__hint">
-            Set <code>VITE_FORMSPREE_ID</code> in <code>.env</code> to enable sending
-            (Formspree free tier).
+            Contact form is not configured.
           </p>
         )}
 

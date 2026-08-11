@@ -39,6 +39,8 @@ jobs:
               - 'vite.config.ts'
               - 'tsconfig*.json'
               - '.github/workflows/**'
+              - '.env.production'
+              - '.env.example'
 
   build:
     needs: changes
