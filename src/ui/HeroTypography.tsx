@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import { useSceneStore } from '../store/sceneStore'
+import { useSceneStore, heroTextOpacityFromScroll } from '../store/sceneStore'
 import { profile } from '../content/portfolio'
 import { setHeroTextCallbacks } from '../scene/heroReel'
 
@@ -19,10 +19,15 @@ export function HeroTypography() {
   const loadPhase = useSceneStore((s) => s.loadPhase)
   const phase = useSceneStore((s) => s.phase)
   const tier = useSceneStore((s) => s.qualityTier)
+  const scrollZone = useSceneStore((s) => s.scrollZone)
+  const coverProgress = useSceneStore((s) => s.coverProgress)
+  const bridgeInProgress = useSceneStore((s) => s.bridgeInProgress)
+  const journeyApproachProgress = useSceneStore((s) => s.journeyApproachProgress)
   const wrapRef = useRef<HTMLDivElement>(null)
   const stackRef = useRef<HTMLDivElement>(null)
   const lineRef = useRef<HTMLParagraphElement>(null)
   const introRan = useRef(false)
+  const prevPhaseRef = useRef(phase)
   const [line, setLine] = useState(profile.hero.beats[0]?.text ?? '')
   const [beatIndex, setBeatIndex] = useState(0)
 
@@ -71,15 +76,86 @@ export function HeroTypography() {
     }
   }, [loadPhase])
 
+  // Scroll-height scrubbed opacity (cover out / settle bridge in / journey approach out)
   useEffect(() => {
     const wrap = wrapRef.current
-    if (!wrap || loadPhase !== 'ready') return
-    gsap.to(wrap, {
-      autoAlpha: phase === 'idle' ? 1 : 0,
-      duration: 0.45,
-      ease: 'power2.out',
+    const stack = stackRef.current
+    if (!wrap || !stack || (loadPhase !== 'ready' && loadPhase !== 'labels')) return
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const prev = prevPhaseRef.current
+    const wasModal = prev === 'arrived' || prev === 'travel'
+    prevPhaseRef.current = phase
+
+    // Labels cascade — keep hero text fully visible
+    if (loadPhase === 'labels') {
+      gsap.set(wrap, { autoAlpha: 1, y: 0, filter: 'none', visibility: 'visible' })
+      gsap.set(stack, { scale: 1 })
+      return
+    }
+
+    const leavingForSector = phase !== 'idle' && scrollZone === 'hero'
+
+    if (leavingForSector) {
+      gsap.to(wrap, {
+        autoAlpha: 0,
+        y: reduced ? 0 : -28,
+        filter: reduced ? 'none' : 'blur(12px)',
+        duration: 0.55,
+        ease: 'power2.in',
+        overwrite: 'auto',
+      })
+      gsap.to(stack, {
+        scale: reduced ? 1 : 0.94,
+        duration: 0.55,
+        ease: 'power2.in',
+        overwrite: 'auto',
+      })
+      return
+    }
+
+    const alpha = heroTextOpacityFromScroll({
+      coverProgress,
+      bridgeInProgress,
+      journeyApproachProgress,
     })
-  }, [phase, loadPhase])
+    const p = 1 - alpha
+    const y = reduced ? 0 : -36 * p
+    const blur = reduced ? 0 : 14 * p
+    const scale = reduced ? 1 : 1 - 0.06 * p
+
+    // After closing a sector modal — ease text back in instead of snapping
+    if (wasModal && phase === 'idle' && scrollZone === 'hero') {
+      gsap.fromTo(
+        wrap,
+        { autoAlpha: 0, y: reduced ? 0 : -22, filter: reduced ? 'none' : 'blur(10px)' },
+        {
+          autoAlpha: alpha,
+          y,
+          filter: blur > 0.01 ? `blur(${blur}px)` : 'none',
+          duration: 0.65,
+          ease: 'power3.out',
+          overwrite: 'auto',
+          onComplete: () => { if (blur < 0.01) gsap.set(wrap, { clearProps: 'filter' }) },
+        },
+      )
+      gsap.fromTo(
+        stack,
+        { scale: reduced ? 1 : 0.94 },
+        { scale, duration: 0.65, ease: 'power3.out', overwrite: 'auto' },
+      )
+      return
+    }
+
+    gsap.set(wrap, {
+      autoAlpha: alpha,
+      y,
+      filter: blur > 0.01 ? `blur(${blur}px)` : 'none',
+      visibility: alpha < 0.02 ? 'hidden' : 'visible',
+    })
+    gsap.set(stack, { scale })
+  }, [loadPhase, phase, scrollZone, coverProgress, bridgeInProgress, journeyApproachProgress])
+
 
   useEffect(() => {
     if (loadPhase !== 'ready') return
@@ -131,7 +207,11 @@ export function HeroTypography() {
       data-hero-beat={beatIndex}
       data-hero-first-beat={profile.hero.beats[0]?.text ?? ''}
       data-testid="hero-typography"
-      aria-hidden={phase !== 'idle'}
+      aria-hidden={phase !== 'idle' || heroTextOpacityFromScroll({
+        coverProgress,
+        bridgeInProgress,
+        journeyApproachProgress,
+      }) < 0.08}
     >
       <div className="hero-depth hero-depth--back">
         <div className="hero-stack hero-stack--single">

@@ -1,6 +1,6 @@
 import { brainHotspots } from './brainCloud'
 
-export const SECTION_IDS = ['projects', 'experience', 'skills', 'about', 'contact'] as const
+export const SECTION_IDS = ['about', 'projects', 'experience', 'skills', 'contact'] as const
 export type SectionId = (typeof SECTION_IDS)[number]
 
 export interface SectionDef {
@@ -13,7 +13,16 @@ export interface SectionDef {
 }
 
 // Hotspots derived from anatomical brain scan mesh (see brainCloud.ts)
+// Order matches SECTION_IDS — journey scroll visits in this sequence
 export const sections: SectionDef[] = [
+  {
+    id: 'about',
+    label: 'About',
+    position: [...brainHotspots.about] as [number, number, number],
+    cameraOffset: [-1.55, 0.55, 5.4],
+    radius: 0.9,
+    color: '#35e0c8',
+  },
   {
     id: 'projects',
     label: 'Projects',
@@ -37,14 +46,6 @@ export const sections: SectionDef[] = [
     cameraOffset: [1.75, -0.18, 4.9],
     radius: 0.95,
     color: '#4da6ff',
-  },
-  {
-    id: 'about',
-    label: 'About',
-    position: [...brainHotspots.about] as [number, number, number],
-    cameraOffset: [-1.55, 0.55, 5.4],
-    radius: 0.9,
-    color: '#35e0c8',
   },
   {
     id: 'contact',

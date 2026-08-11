@@ -6,21 +6,427 @@
   color-scheme: dark;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
 
-html, body, #root { height: 100%; }
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html {
+  height: 100%;
+  scroll-behavior: auto;
+  scrollbar-gutter: stable;
+}
 
 body {
+  min-height: 100%;
   background: #020204;
   color: #e8e8f0;
   font-family: 'Segoe UI', system-ui, sans-serif;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
+
+#root { min-height: 100%; }
 
 canvas { display: block; }
 
-.app-root { position: fixed; inset: 0; }
-.app-scene { position: absolute; inset: 0; z-index: 1; }
+.app-root {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Sticky brain stage — stays put while cover scrolls over, then reappears for journey */
+.app-scene {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.app-scene-parallax {
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.app-scene canvas {
+  pointer-events: auto;
+}
+
+.scroll-track {
+  /* No z-index — avoid a stacking context that traps .cover-section under fixed HUD */
+  position: relative;
+  margin-top: -100vh;
+  margin-top: -100dvh;
+  pointer-events: none;
+}
+
+.hero-spacer {
+  height: 100vh;
+  height: 100dvh;
+  pointer-events: none;
+}
+
+.journey-track {
+  position: relative;
+  pointer-events: none;
+}
+
+.settle-bridge {
+  height: 100vh;
+  height: 100dvh;
+  pointer-events: none;
+}
+
+.journey-beat {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.scroll-end {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  padding: 48px 24px 64px;
+  text-align: center;
+  background: #05050a;
+  color: rgba(232, 232, 240, 0.45);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Cover must paint above fixed .hero-type (6) and .ui (10) */
+.cover-section {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  background: #07070e;
+  color: #e8e8f0;
+  padding: clamp(64px, 10vh, 120px) clamp(20px, 5vw, 64px) clamp(80px, 12vh, 140px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 -40px 80px rgba(0, 0, 0, 0.55);
+}
+
+.cover-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cover-header {
+  margin-bottom: clamp(32px, 5vh, 56px);
+  max-width: 36rem;
+}
+
+.cover-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 80%, #fff);
+  margin-bottom: 10px;
+}
+
+.cover-title {
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+
+.cover-lead {
+  color: rgba(232, 232, 240, 0.62);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.cover-code {
+  font-size: 0.85em;
+  color: color-mix(in srgb, var(--accent) 75%, #fff);
+}
+
+.cover-header--spaced {
+  margin-top: clamp(56px, 10vh, 96px);
+}
+
+/* Full-bleed marquees inside padded cover */
+.client-work,
+.testimonial-marquee {
+  margin-inline: calc(-1 * clamp(20px, 5vw, 64px));
+  margin-top: clamp(8px, 2vh, 20px);
+}
+
+.client-work {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.client-work__row--offset {
+  opacity: 0.92;
+}
+
+.marquee {
+  --marquee-duration: 40s;
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.marquee__measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  display: flex;
+  width: max-content;
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-rtl var(--marquee-duration) linear infinite;
+}
+
+.marquee[data-direction='ltr'] .marquee__track {
+  animation-name: marquee-ltr;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__group {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.marquee__set {
+  display: flex;
+  gap: 14px;
+  padding-inline: 7px;
+  flex-shrink: 0;
+}
+
+@keyframes marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes marquee-ltr {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+.client-work__shot {
+  position: relative;
+  margin: 0;
+  width: min(42vw, 380px);
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #0a0a12;
+}
+
+.client-work__shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+
+.client-work__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 14px 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  color: rgba(232, 232, 240, 0.88);
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+}
+
+.testimonial-card {
+  margin: 0;
+  padding: clamp(28px, 3vw, 36px);
+  width: min(88vw, 480px);
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(10, 10, 18, 0.95);
+}
+
+.testimonial-quote {
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  line-height: 1.6;
+  color: rgba(232, 232, 240, 0.9);
+}
+
+.testimonial-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.testimonial-meta__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.testimonial-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--accent) 28%, #12121c);
+}
+
+.testimonial-avatar__initials {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: rgba(232, 232, 240, 0.92);
+}
+
+.testimonial-avatar__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.testimonial-name {
+  font-style: normal;
+  font-weight: 650;
+  font-size: 0.95rem;
+}
+
+.testimonial-role {
+  font-size: 0.8rem;
+  color: rgba(232, 232, 240, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+    mask-image: none;
+    -webkit-mask-image: none;
+    scrollbar-width: thin;
+  }
+
+  .marquee__track {
+    animation: none;
+    transform: none;
+  }
+
+  .marquee__group[aria-hidden='true'] {
+    display: none;
+  }
+}
+
+/* Cover hides HUD chrome; hero-type + indicators scrub via GSAP with coverProgress */
+.app-root[data-scroll-zone="cover"] .hud,
+.app-root[data-scroll-zone="cover"] .node-control,
+.app-root[data-scroll-zone="cover"] .overlay {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.app-root[data-scroll-zone="settle"] .hud,
+.app-root[data-scroll-zone="settle"] .node-control,
+.app-root[data-scroll-zone="settle"] .indicators,
+.app-root[data-scroll-zone="settle"] .sector-nav {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.app-root[data-scroll-zone="journey"] .hud,
+.app-root[data-scroll-zone="journey"] .node-control,
+.app-root[data-scroll-zone="journey"] .hero-type,
+.app-root[data-scroll-zone="end"] .hud,
+.app-root[data-scroll-zone="end"] .node-control,
+.app-root[data-scroll-zone="end"] .hero-type {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.app-root[data-scroll-zone="journey"] .indicators,
+.app-root[data-scroll-zone="journey"] .sector-nav,
+.app-root[data-scroll-zone="end"] .indicators,
+.app-root[data-scroll-zone="end"] .sector-nav {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Journey uses the real panel — hide close (scroll owns navigation) */
+.app-root[data-scroll-zone="journey"] .panel-close {
+  display: none;
+}
 
 /* Full-frame film grain — complements WebGL Noise on the canvas */
 .app-root[data-quality-tier="desktop"]::after,
@@ -278,6 +684,13 @@ canvas { display: block; }
    the .indicator buttons re-enable their own pointer events */
 .indicators { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
 
+/* Pre-cascade: keep buttons invisible until the reveal timeline starts */
+.indicators[data-revealing="true"] .indicator,
+.sector-nav[data-revealing="true"] .sector-nav-btn {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .indicator {
   position: absolute;
   top: 0; left: 0;
@@ -404,63 +817,68 @@ canvas { display: block; }
   background: linear-gradient(90deg, rgba(2, 2, 6, 0) 38%, rgba(2, 2, 6, 0.45) 62%, rgba(2, 2, 6, 0.72));
 }
 
+.overlay--journey {
+  /* Stack all sector panels; opacity scrubbed via GSAP */
+  display: grid;
+  align-items: center;
+  justify-items: end;
+}
+
+.overlay--journey > .panel--journey {
+  grid-area: 1 / 1;
+  will-change: opacity, transform;
+}
+
 .panel {
   pointer-events: auto;
   position: relative;
-  width: min(480px, 88vw);
+  width: min(480px, 92vw);
   max-height: 80vh;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(6, 6, 12, 0.66);
   backdrop-filter: blur(14px);
-  padding: 36px 38px;
-  /* Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
-}
-
-/* WebKit — thin HUD rail matching accent */
-.panel::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.panel::-webkit-scrollbar-track {
-  background: var(--scroll-track);
-  border-radius: 999px;
-  margin: 10px 0;
-}
-.panel::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    180deg,
-    var(--scroll-thumb) 0%,
-    color-mix(in srgb, var(--scroll-thumb) 70%, transparent) 100%
-  );
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--scroll-thumb) 40%, transparent);
-}
-.panel::-webkit-scrollbar-thumb:hover {
-  background: var(--scroll-thumb-hover);
-}
-.panel::-webkit-scrollbar-corner {
-  background: transparent;
+  padding: clamp(18px, 3.5vw, 36px) clamp(14px, 3.5vw, 38px);
 }
 
 .panel--skills {
-  width: min(520px, 90vw);
+  width: min(520px, 94vw);
   --skills-accent: #4da6ff;
   --scroll-thumb: color-mix(in srgb, var(--skills-accent) 48%, rgba(255, 255, 255, 0.16));
   --scroll-thumb-hover: color-mix(in srgb, var(--skills-accent) 78%, #fff);
 }
 
 .panel--projects {
-  width: min(520px, 90vw);
+  width: min(520px, 94vw);
   --projects-accent: #7c5cff;
   --scroll-thumb: color-mix(in srgb, var(--projects-accent) 48%, rgba(255, 255, 255, 0.16));
   --scroll-thumb-hover: color-mix(in srgb, var(--projects-accent) 78%, #fff);
 }
 
 @media (max-width: 900px) {
-  .overlay { justify-content: center; padding-right: 0; background: rgba(2, 2, 6, 0.55); }
+  .overlay {
+    justify-content: center;
+    padding-right: 0;
+    background: rgba(2, 2, 6, 0.72);
+    backdrop-filter: blur(16px) saturate(0.8);
+    -webkit-backdrop-filter: blur(16px) saturate(0.8);
+  }
+  .overlay--journey { justify-items: center; }
+
+  .panel {
+    width: min(520px, 94vw);
+    max-height: min(82vh, calc(100dvh - 20px));
+    padding: 16px 14px 18px;
+  }
+
+  .panel .intro {
+    margin-bottom: 16px;
+  }
+
+  .panel-close {
+    top: 10px;
+    right: 10px;
+  }
 }
 .panel h2 {
   font-family: ui-monospace, Consolas, monospace;
@@ -742,7 +1160,6 @@ canvas { display: block; }
 .card { border: 1px solid rgba(255, 255, 255, 0.07); padding: 18px 20px; margin-bottom: 14px; }
 .card h3 { font-size: 14px; letter-spacing: 0.08em; margin-bottom: 6px; }
 .card p { font-size: 12.5px; color: rgba(235, 235, 255, 0.55); line-height: 1.65; }
-.card .period { font-family: ui-monospace, monospace; font-size: 10px; color: var(--accent); margin-bottom: 6px; }
 .card img { width: 100%; max-height: 180px; object-fit: cover; margin-bottom: 12px; opacity: 0.85; }
 .card a {
   color: var(--accent);
@@ -761,6 +1178,123 @@ canvas { display: block; }
   color: var(--accent);
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
   padding: 3px 8px;
+}
+
+/* Contact form */
+.contact-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contact-panel__lead {
+  font-size: 12.5px;
+  color: rgba(235, 235, 255, 0.55);
+  line-height: 1.65;
+}
+
+.contact-panel__or {
+  font-size: 11px;
+  color: rgba(235, 235, 255, 0.45);
+  margin-top: 4px;
+}
+
+.contact-panel__or a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.contact-panel__or a:hover {
+  text-decoration: underline;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.5);
+}
+
+.contact-field input,
+.contact-field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #e8e8f0;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 12px;
+  border-radius: 2px;
+  outline: none;
+  resize: vertical;
+}
+
+.contact-field input:focus,
+.contact-field textarea:focus {
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.2));
+}
+
+.contact-field input:disabled,
+.contact-field textarea:disabled {
+  opacity: 0.55;
+}
+
+.contact-form__submit {
+  align-self: flex-start;
+  margin-top: 4px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #0a0a12;
+  background: var(--accent);
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.contact-form__submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.contact-form__submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.contact-form__hint {
+  font-size: 11px;
+  color: rgba(235, 235, 255, 0.4);
+  line-height: 1.45;
+}
+
+.contact-form__hint code {
+  font-size: 0.95em;
+  color: color-mix(in srgb, var(--accent) 70%, #fff);
+}
+
+.contact-form__status {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.contact-form__status--ok {
+  color: color-mix(in srgb, #35e0c8 80%, #fff);
+}
+
+.contact-form__status--err {
+  color: color-mix(in srgb, #ff5c9e 85%, #fff);
 }
 
 .panel-close {
@@ -798,7 +1332,7 @@ canvas { display: block; }
   display: grid;
   place-items: center;
   background: radial-gradient(ellipse at 50% 40%, #0a0a18 0%, #020204 55%, #000 100%);
-  pointer-events: none;
+  pointer-events: auto;
 }
 .loader-core { text-align: center; width: min(420px, 88vw); }
 .loader-kicker {
@@ -876,4 +1410,34 @@ canvas { display: block; }
   color: var(--accent);
   min-width: 3.5em;
   text-align: right;
+}
+
+/* —— Scroll journey HUD —— */
+.journey-progress {
+  position: absolute;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.journey-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.journey-dot.is-active {
+  background: var(--accent);
+  transform: scale(1.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .journey-dot { transition: none; }
 }

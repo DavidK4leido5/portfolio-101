@@ -29,7 +29,8 @@ function SceneUniforms() {
     uniforms.uMouse.value.lerp(tmpMouse.set(mouse.x, mouse.y), 0.05)
     const s = useSceneStore.getState()
     uniforms.uHovered.value = s.hoveredSection ? SECTION_IDS.indexOf(s.hoveredSection) : -1
-    uniforms.uActive.value = s.activeSection ? SECTION_IDS.indexOf(s.activeSection) : -1
+    const focusId = s.scrollZone === 'journey' ? s.journeySection : s.activeSection
+    uniforms.uActive.value = focusId ? SECTION_IDS.indexOf(focusId) : -1
     if ((frame++ & 31) === 0) document.documentElement.style.setProperty('--accent', accentHex(t))
   })
   return null
@@ -74,10 +75,12 @@ function separateIndicators(pts: { x: number; y: number }[]) {
 function Projection() {
   const camera = useThree((s) => s.camera)
   const size = useThree((s) => s.size)
-  const ready = useSceneStore((s) => s.loadPhase === 'ready')
+  const ready = useSceneStore((s) => s.loadPhase === 'ready' || s.loadPhase === 'labels')
   const tier = useSceneStore((s) => s.qualityTier)
   useFrame(() => {
+    const loadPhase = useSceneStore.getState().loadPhase
     if (!ready || tier === 'mobile' || frame & 1) return
+    const revealing = loadPhase === 'labels'
     const pts = sections.map((_, i) => {
       hotspotWorld(i, projV).project(camera)
       return {
@@ -96,8 +99,11 @@ function Projection() {
     for (const p of pts) {
       const el = indicatorEls[p.i]
       if (!el) continue
-      el.style.opacity = p.hide ? '0' : ''
-      el.style.pointerEvents = p.hide ? 'none' : 'auto'
+      // During the cascade reveal, GSAP owns opacity — don't flash labels visible
+      if (!revealing) {
+        el.style.opacity = p.hide ? '0' : ''
+      }
+      el.style.pointerEvents = p.hide || revealing ? 'none' : 'auto'
       el.style.zIndex = String(20 - p.i)
       el.style.left = `${p.x}px`
       el.style.top = `${p.y}px`
@@ -138,7 +144,7 @@ function BrainScene({ pool }: { pool: number }) {
   useEffect(() => {
     const s = useSceneStore.getState()
     uniforms.uNodeCount.value = s.nodeCount
-    if (s.loadPhase === 'ready') {
+    if (s.loadPhase === 'ready' || s.loadPhase === 'labels') {
       uniforms.uSpawn.value = 1
       uniforms.uSliderSpawn.value = 1
       uniforms.uRevealFrom.value = 0
@@ -166,7 +172,7 @@ export function HomeScene() {
       mouse.y = -((e.clientY / innerHeight) * 2 - 1)
       const el = document.elementFromPoint(e.clientX, e.clientY)
       setPointerOnScene(!el?.closest(
-        '.indicator, [data-testid="node-slider"], .panel, .back, [data-testid="sector-nav"]',
+        '.indicator, [data-testid="node-slider"], .panel, .back, [data-testid="sector-nav"], .cover-section, .journey-copy, .scroll-end',
       ))
     }
     addEventListener('pointermove', onMove)

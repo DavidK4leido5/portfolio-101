@@ -3,7 +3,7 @@ import { loadChromium } from './playwright-env.mjs'
 const chromium = await loadChromium()
 
 const URL = process.env.SMOKE_URL ?? 'http://localhost:5173'
-const SECTIONS = ['projects', 'experience', 'skills', 'about', 'contact']
+const SECTIONS = ['about', 'projects', 'experience', 'skills', 'contact']
 const LOOPS = Number(process.env.SMOKE_LOOPS ?? 2)
 const CI = !!process.env.CI
 // Headless software GL on GitHub runners is much slower than local dev
@@ -387,7 +387,7 @@ for (let loop = 1; loop <= LOOPS; loop++) {
     const mfx = await page.evaluate((sectionId) => ({
       focus: window.__scene?.uniforms.uFocus.value ?? -1,
       active: window.__scene?.uniforms.uActive.value ?? -2,
-      expected: ['projects', 'experience', 'skills', 'about', 'contact'].indexOf(sectionId),
+      expected: ['about', 'projects', 'experience', 'skills', 'contact'].indexOf(sectionId),
     }), s)
     if (mfx.active !== mfx.expected) fail(`section ${s}: uActive=${mfx.active}, expected ${mfx.expected}`)
     if (!(mfx.focus > 0.4)) fail(`section ${s}: uFocus=${mfx.focus}, expected >0.4`)

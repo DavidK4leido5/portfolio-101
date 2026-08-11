@@ -14,8 +14,8 @@ export function BrainTouchProbe() {
   const { camera } = useThree()
 
   useFrame((_, delta) => {
-    const { loadPhase, phase } = useSceneStore.getState()
-    const canTouch = loadPhase === 'ready' && phase === 'idle' && pointerOnScene
+    const { loadPhase, phase, scrollZone } = useSceneStore.getState()
+    const canTouch = loadPhase === 'ready' && phase === 'idle' && scrollZone === 'hero' && pointerOnScene
     let target = 0
 
     if (canTouch && meshRef.current) {

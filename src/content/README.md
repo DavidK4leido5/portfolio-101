@@ -2,6 +2,16 @@
 
 Edit **`portfolio.ts`** only when updating your personal copy, project list, skills, or image URLs.
 
+## Contact form
+
+The Contact panel posts to [Formspree](https://formspree.io). Copy `.env.example` → `.env` and set:
+
+```
+VITE_FORMSPREE_ID=your_form_id
+```
+
+Restart `pnpm dev` after changing env. Update `contact.email` / links in `portfolio.ts` for the mailto fallback.
+
 ## Images
 
 Each entry supports two sources (first non-empty wins via `resolveImage`):
@@ -19,9 +29,28 @@ assets/
   about.jpg
   contact.jpg
   experience/
+  client-work/   ← cover section screenshots (auto-loaded)
 ```
 
-Projects are text-only (no preview images) — edit the `projects` array in `portfolio.ts`.
+### Client work (cover marquee)
+
+Drop image files into `assets/client-work/` — they appear automatically (no URLs, no `portfolio.ts` edits).
+
+**Naming (required for ordering):** `projectname (n).ext`
+
+| Example | Project caption | Order |
+|---------|-----------------|-------|
+| `revivepharmacy (1).png` | Revive Pharmacy | 1st shot |
+| `revivepharmacy (2).png` | Revive Pharmacy | 2nd shot |
+| `agentsly (1).avif` | Agentsly | … |
+
+Shots are grouped by project, sorted by `(n)`, then split across the two slider rows (first half of projects on top, second half on bottom).
+
+Supported: `.png` `.jpg` `.webp` `.avif` `.svg` `.gif`
+
+Optional pretty names live in `clientWorks.ts` (`PROJECT_LABELS`).
+
+Personal projects stay in the Projects overlay — edit the `projects` array in `portfolio.ts` (text-only cards).
 
 ## Scene vs content
 
