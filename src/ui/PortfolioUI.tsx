@@ -38,7 +38,6 @@ function SectionContent({ id }: { id: SectionId }) {
         {experience.map((e) => (
           <article className="card" key={e.id}>
             <h3>{e.role} · {e.company}</h3>
-            <p className="period">{e.period}</p>
             <p>{e.description}</p>
           </article>
         ))}
@@ -84,15 +83,15 @@ export function PortfolioUI() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const journeyOverlayRef = useRef<HTMLDivElement>(null)
   const closingRef = useRef(false)
+  const prevPhaseRef = useRef(phase)
   const uiReady = loadPhase === 'ready'
   const inHero = scrollZone === 'hero'
-  const inSettle = scrollZone === 'settle'
   const inJourney = scrollZone === 'journey' || scrollZone === 'end'
   const coverProgress = useSceneStore((s) => s.coverProgress)
   const bridgeInProgress = useSceneStore((s) => s.bridgeInProgress)
   const journeyApproachProgress = useSceneStore((s) => s.journeyApproachProgress)
   const hudSector = inJourney ? journeySection : active
-  const inClickZone = inHero || inSettle
+  const inClickZone = inHero
   const labelAlpha = labelOpacityFromScroll({
     coverProgress,
     bridgeInProgress,
@@ -136,7 +135,7 @@ export function PortfolioUI() {
     sections.forEach((_, i) => { indicatorEls[i] = null })
   }, [isMobileNav])
 
-  // Sector indicators / mobile nav — scrub with cover / bridge / journey approach
+  // Sector indicators / mobile nav — scrub with cover; animate in after modal close
   useEffect(() => {
     const el = isMobileNav ? navRef.current : indicatorsRef.current
     if (!el) return
@@ -144,6 +143,11 @@ export function PortfolioUI() {
       gsap.set(el, { autoAlpha: 0 })
       return
     }
+
+    const prev = prevPhaseRef.current
+    const wasModal = prev === 'arrived' || prev === 'travel'
+    prevPhaseRef.current = phase
+
     if (phase !== 'idle') {
       gsap.to(el, { autoAlpha: 0, y: -12, duration: 0.4, ease: 'power2.in', overwrite: 'auto' })
       return
@@ -154,6 +158,22 @@ export function PortfolioUI() {
       journeyApproachProgress,
     })
     const p = 1 - alpha
+
+    if (wasModal && alpha > 0.08) {
+      gsap.fromTo(
+        el,
+        { autoAlpha: 0, y: -18, visibility: 'visible' },
+        {
+          autoAlpha: alpha,
+          y: -18 * p,
+          duration: 0.65,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        },
+      )
+      return
+    }
+
     gsap.set(el, {
       autoAlpha: alpha,
       y: -18 * p,

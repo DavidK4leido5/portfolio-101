@@ -22,7 +22,7 @@ interface SceneState {
   journeyProgress: number
   /** 0–1 as cover rises over the sticky brain (labels fade out) */
   coverProgress: number
-  /** 0–1 as settle bridge rises into view (labels fade in) */
+  /** 0–1 as settle bridge rises into view (kept for scroll sync; labels stay off) */
   bridgeInProgress: number
   /** 0–1 as journey section rises into view (labels fade out again) */
   journeyApproachProgress: number
@@ -47,8 +47,20 @@ interface SceneState {
   setSettleProgress: (p: number) => void
 }
 
-/** Scrubbed label/hero visibility 0–1 from scroll progress fields */
+/** Sector-label visibility — hero only (settle begins the journey, no labels). */
 export function labelOpacityFromScroll(s: {
+  coverProgress: number
+  bridgeInProgress: number
+  journeyApproachProgress: number
+}): number {
+  const cover = Math.min(1, Math.max(0, s.coverProgress))
+  void s.bridgeInProgress
+  void s.journeyApproachProgress
+  return Math.min(1, Math.max(0, 1 - cover))
+}
+
+/** Center hero typography — fades out into cover, back in on settle, out into journey. */
+export function heroTextOpacityFromScroll(s: {
   coverProgress: number
   bridgeInProgress: number
   journeyApproachProgress: number
@@ -56,7 +68,6 @@ export function labelOpacityFromScroll(s: {
   const cover = Math.min(1, Math.max(0, s.coverProgress))
   const bridgeIn = Math.min(1, Math.max(0, s.bridgeInProgress))
   const approach = Math.min(1, Math.max(0, s.journeyApproachProgress))
-  // Hero→cover: 1→0. After cover (cover=1): bridgeIn 0→1. Journey approaches: →0.
   const base = cover < 1 ? 1 - cover : bridgeIn
   return Math.min(1, Math.max(0, base * (1 - approach)))
 }
@@ -98,8 +109,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   settleProgress: 0,
   setHovered: (id) => set({ hoveredSection: id }),
   navigateTo: (id) => {
-    const zone = get().scrollZone
-    if (zone !== 'hero' && zone !== 'settle') return
+    // Click-to-open overlays only from the hero (settle is journey entry)
+    if (get().scrollZone !== 'hero') return
     set({ activeSection: id, phase: 'travel', returning: false, hoveredSection: null })
   },
   arrive: () => set({ phase: 'arrived' }),
@@ -116,10 +127,15 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   setScrollZone: (zone) => {
     const prev = get().scrollZone
     if (prev === zone) return
+    // Modal open on hero — ignore zone changes (scroll should be locked anyway)
+    const { phase } = get()
+    if ((phase === 'arrived' || phase === 'travel') && prev === 'hero' && zone !== 'hero') {
+      return
+    }
     if (prev === 'hero' && zone !== 'hero') {
-      const { phase, returnHome, settleHome } = get()
-      if (phase === 'arrived' || phase === 'travel') returnHome()
-      else if (phase === 'idle' && get().activeSection) settleHome()
+      const { phase: p, returnHome, settleHome } = get()
+      if (p === 'arrived' || p === 'travel') returnHome()
+      else if (p === 'idle' && get().activeSection) settleHome()
     }
     if (zone === 'journey') {
       set({ scrollZone: zone })

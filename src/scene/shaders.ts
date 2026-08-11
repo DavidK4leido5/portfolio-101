@@ -332,19 +332,27 @@ void main(){
   float shapeFade=1.0-uShapeAlt*0.88;
   float bright=mix(0.85,mix(0.4,1.25,isT),emphasis*hasSel*shapeFade);
   float pulse=0.78+0.22*sin(uTime*1.3+aSeed*6.2831853);
-  vAlpha=0.07*(0.35+0.5*pulse)*bright*uConnect;
+  // Stagger connection opacity by seed so lines cascade in/out with uConnect
+  float connectStagger=min(aSeed*0.78,0.88);
+  float connectReveal=spawnEase(clamp((uConnect-connectStagger)/max(1.0-connectStagger,0.001),0.0,1.0));
+  vAlpha=0.07*(0.35+0.5*pulse)*bright*connectReveal;
   vAlpha*=mix(1.0,0.32,uFocus*(1.0-isT)*hasSel);
   vAlpha*=smoothstep(0.82,1.0,morph);
-  // Brain-neighbor pairs scatter across alt shapes — the criss-cross web reads
-  // as fog, so lines dissolve completely once a morph starts
-  vAlpha*=1.0-smoothstep(0.0,0.45,max(uShapeAlt,uShapeMorph*1.6));
+  // Dissolve while leaving the brain (alt shapes / morph-away).
+  // Morphing *to* the brain (uShapeTo≈0) uses only uShapeAlt so lines can
+  // stagger back in as alt eases down — avoids a hard pop when morph snaps to 0.
+  float morphAway=uShapeTo<0.5?0.0:uShapeMorph*1.6;
+  float brainAway=smoothstep(0.0,0.45,max(uShapeAlt,morphAway));
+  float brainGate=1.0-brainAway;
+  float brainStagger=min(aSeed*0.72,0.85);
+  vAlpha*=smoothstep(brainStagger,brainStagger+0.28,brainGate);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
   vec3 baseCol=nodePalette(position,aSeed,aAffinity,-mv.z);
   float lit=isT*hasSel*min(emphasis*1.5,1.0)*shapeFade;
   vColor=mix(baseCol,sectionColor(aAffinity)*1.2,lit);
   float grey=(1.0-isT)*hasSel*uFocus*shapeFade;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
-  vColor+=brainActivity(position)*0.7*morph*uConnect*(1.0-uFocus*0.75)*(1.0-uShapeAlt*0.92);
+  vColor+=brainActivity(position)*0.7*morph*connectReveal*(1.0-uFocus*0.75)*(1.0-uShapeAlt*0.92);
   gl_Position=projectionMatrix*mv;
 }
 `

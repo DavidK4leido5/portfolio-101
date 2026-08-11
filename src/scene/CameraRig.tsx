@@ -180,7 +180,7 @@ export function CameraRig() {
       return
     }
 
-    if (active && (scrollZone === 'hero' || scrollZone === 'settle')) {
+    if (active && scrollZone === 'hero') {
       focusTlRef.current?.kill()
       travelTlRef.current?.kill()
       homeTlRef.current?.kill()
@@ -201,7 +201,7 @@ export function CameraRig() {
   }, [active, returning, camera, tier, scrollZone])
 
   useEffect(() => {
-    if (phase !== 'arrived' || !active || (scrollZone !== 'hero' && scrollZone !== 'settle')) {
+    if (phase !== 'arrived' || !active || scrollZone !== 'hero') {
       focusTlRef.current?.kill()
       return
     }

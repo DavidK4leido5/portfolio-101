@@ -40,17 +40,8 @@ export type Experience = {
   id: string
   role: string
   company: string
-  period: string
   description: string
   image: ImageSource
-}
-
-export type Contribution = {
-  id: string
-  role: string
-  company: string
-  period: string
-  highlights: string[]
 }
 
 export type Testimonial = {
@@ -59,6 +50,8 @@ export type Testimonial = {
   name: string
   title: string
   company: string
+  /** Drop a photo at localPath later — UI shows initials until then */
+  avatar: ImageSource
 }
 
 export type HeroShapeId = 'brain' | 'network' | 'stack'
@@ -274,7 +267,6 @@ export const experience: Experience[] = [
     id: 'exp-revive',
     role: 'Systems Engineer',
     company: 'Revive Pharmacy',
-    period: 'Mar 2025 — Aug 2026',
     description: 'Secured APIs, optimized databases, and shipped Docker CI/CD that cut deploy time by 75%.',
     image: {
       cdnUrl: '',
@@ -283,10 +275,31 @@ export const experience: Experience[] = [
     },
   },
   {
+    id: 'exp-tapup',
+    role: 'Fullstack Developer & Project Manager',
+    company: 'TapUp',
+    description: 'Led delivery end to end — product scope, fullstack implementation, and shipping the TapUp platform with the team.',
+    image: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/experience/exp-1.jpg',
+      alt: 'TapUp',
+    },
+  },
+  {
+    id: 'exp-palace',
+    role: 'Fullstack Developer',
+    company: 'The Palace Manila',
+    description: 'Built and maintained fullstack features for The Palace Manila’s digital product surfaces.',
+    image: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/experience/exp-1.jpg',
+      alt: 'The Palace Manila',
+    },
+  },
+  {
     id: 'exp-volatility',
     role: 'Frontend Developer',
     company: 'Volatility',
-    period: 'Nov 2024 — Feb 2025',
     description: 'High-converting landing pages, CMS-driven blog, and a webinar video platform.',
     image: {
       cdnUrl: '',
@@ -298,7 +311,6 @@ export const experience: Experience[] = [
     id: 'exp-agentsly',
     role: 'Full Stack Engineer',
     company: 'Agentsly',
-    period: 'Jun 2024 — Oct 2024',
     description: 'OpenAI / Vercel AI SDK integrations, ShadCN UI, and AWS deployments at 99.9% uptime.',
     image: {
       cdnUrl: '',
@@ -306,89 +318,71 @@ export const experience: Experience[] = [
       alt: 'Agentsly',
     },
   },
-]
-
-export const contributions: Contribution[] = [
   {
-    id: 'contrib-revive',
-    role: 'Systems Engineer',
-    company: 'Revive Pharmacy',
-    period: 'Mar 2025 — Aug 2026',
-    highlights: [
-      'Rate limiting and API hardening against DDoS and abuse',
-      'Query and index work that cut response times by 40%',
-      'Docker + VPS CI/CD pipeline — 75% faster deploys',
-      'Unit test suites for critical backend services',
-    ],
-  },
-  {
-    id: 'contrib-volatility',
-    role: 'Frontend Developer',
-    company: 'Volatility',
-    period: 'Nov 2024 — Feb 2025',
-    highlights: [
-      'Landing page that lifted engagement and conversions by 22%',
-      'CMS-integrated dynamic blog for non-technical updates',
-      'Webinar video platform for live online events',
-      'UI bugfixes that reduced bounce from user feedback',
-    ],
-  },
-  {
-    id: 'contrib-agentsly',
-    role: 'Full Stack Engineer',
-    company: 'Agentsly',
-    period: 'Jun 2024 — Oct 2024',
-    highlights: [
-      'ChatGPT via Vercel AI SDK and OpenAI API',
-      'ShadCN UI system — 30% faster UI delivery',
-      'AWS deployments with 99.9% uptime',
-    ],
-  },
-  {
-    id: 'contrib-codebility',
-    role: 'Software Engineering Intern',
+    id: 'exp-codebility',
+    role: 'Fullstack Developer',
     company: 'Codebility',
-    period: 'Nov 2023 — May 2024',
-    highlights: [
-      'Next.js rendering work — Core Web Vitals +35%',
-      'MySQL query optimization under load',
-      'Unit tests that cut manual regression effort by 50%',
-    ],
-  },
-  {
-    id: 'contrib-comelec',
-    role: 'Administrative Aide II · System Admin',
-    company: 'Commission on Elections',
-    period: 'Jul 2022 — Jul 2023',
-    highlights: [
-      'Trained municipal election volunteers on COMELEC systems',
-      'Routine updates and MySQL database maintenance',
-      'Custom cleanup scripts to resolve data errors',
-    ],
+    description: 'Fullstack work on the Codebility platform — Next.js performance, data layer improvements, and reliable delivery.',
+    image: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/experience/exp-1.jpg',
+      alt: 'Codebility',
+    },
   },
 ]
 
 export const testimonials: Testimonial[] = [
   {
-    id: 't-1',
-    quote: 'David ships end-to-end — UI, APIs, and infra — without losing the plot on reliability.',
-    name: 'Colleague Name',
-    title: 'Engineering Lead',
-    company: 'Placeholder Co.',
+    id: 't-fady',
+    quote:
+      'You’ve done an incredible job, and I’m really happy that I got to meet you and work with you for this long.',
+    name: 'Fady Ilias',
+    title: 'Director & Founder',
+    company: 'Web Divine',
+    avatar: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/testimonials/fady.jpg',
+      alt: 'Fady Ilias',
+    },
   },
   {
-    id: 't-2',
-    quote: 'Clear communicator who turns messy product requirements into stable, performant releases.',
-    name: 'Collaborator Name',
-    title: 'Product Manager',
-    company: 'Placeholder Co.',
+    id: 't-shawn',
+    quote:
+      'Thank you for sharing. The truth is today a client hunted down my cell phone and thanked us for finding her the best plan. She fell ill with cancer and is doing better now.',
+    name: 'Shawn Milner',
+    title: 'Founder',
+    company: 'Agentsly',
+    avatar: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/testimonials/shawn.jpg',
+      alt: 'Shawn Milner',
+    },
   },
   {
-    id: 't-3',
-    quote: 'The kind of fullstack partner you want when systems design and integration actually matter.',
-    name: 'Teammate Name',
-    title: 'Senior Developer',
-    company: 'Placeholder Co.',
+    id: 't-jzeff',
+    quote:
+      'David raised the bar on our Codebility platform — sharper Core Web Vitals, cleaner data work, and tests the team could trust. Exactly the kind of engineer you want early in a product.',
+    name: 'Jzeff Somera',
+    title: 'CEO',
+    company: 'Codebility',
+    avatar: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/testimonials/zeff.jpg',
+      alt: 'Jzeff Somera',
+    },
+  },
+  {
+    id: 't-daniel',
+    quote:
+      'As our Systems Engineer, David hardened our APIs, sped up the database layer, and stood up Docker CI/CD that made deploys dramatically faster. Reliable ownership end to end.',
+    name: 'Daniel Eskander',
+    title: 'Managing Director',
+    company: 'Revive Pharmacy',
+    avatar: {
+      cdnUrl: '',
+      localPath: '/src/content/assets/testimonials/daniel.jpg',
+      alt: 'Daniel Eskander',
+    },
   },
 ]
 
@@ -414,7 +408,7 @@ export const sectionCopy = {
   },
   experience: {
     headline: 'Experience',
-    intro: 'Roles across systems, frontend, and full-stack delivery — deeper notes also live in Contributions above.',
+    intro: 'Roles across systems, frontend, and full-stack delivery.',
   },
   skills: {
     headline: 'Skills',
@@ -430,6 +424,30 @@ export const sectionCopy = {
   },
 } as const
 
+const localAssets = import.meta.glob('./assets/**/*.{jpg,jpeg,png,webp,avif,gif,svg}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
 export function resolveImage({ cdnUrl, localPath }: ImageSource): string {
-  return cdnUrl.trim() || localPath
+  if (cdnUrl.trim()) return cdnUrl.trim()
+  const path = localPath.trim()
+  if (!path) return ''
+
+  // Match `/src/content/assets/foo.jpg` or `./assets/foo.jpg` → `./assets/foo.jpg`
+  const rel = path
+    .replace(/^\/src\/content\/assets\//, './assets/')
+    .replace(/^src\/content\/assets\//, './assets/')
+    .replace(/^\.?\/?assets\//, './assets/')
+
+  if (localAssets[rel]) return localAssets[rel]
+
+  const file = path.split('/').pop()
+  if (file) {
+    const hit = Object.entries(localAssets).find(([k]) => k.endsWith(`/${file}`))
+    if (hit) return hit[1]
+  }
+
+  return path
 }

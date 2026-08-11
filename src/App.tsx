@@ -10,6 +10,7 @@ import { detectTier } from './lib/quality'
 export default function App() {
   const sceneReady = useSceneStore((s) => s.sceneReady)
   const loadPhase = useSceneStore((s) => s.loadPhase)
+  const phase = useSceneStore((s) => s.phase)
   const tier = useSceneStore((s) => s.qualityTier)
   const scrollZone = useSceneStore((s) => s.scrollZone)
 
@@ -29,15 +30,42 @@ export default function App() {
     return () => clearTimeout(t)
   }, [sceneReady, loadPhase])
 
+  // Lock page scroll during boot and while a click-opened sector modal is up
+  const scrollLocked =
+    loadPhase === 'loading' || phase === 'arrived' || phase === 'travel'
+
   useEffect(() => {
-    const lock = loadPhase === 'loading'
-    document.documentElement.style.overflow = lock ? 'hidden' : ''
-    document.body.style.overflow = lock ? 'hidden' : ''
-    return () => {
-      document.documentElement.style.overflow = ''
-      document.body.style.overflow = ''
+    if (!scrollLocked) return
+
+    const html = document.documentElement
+    const body = document.body
+    const y = window.scrollY
+    const p = useSceneStore.getState().phase
+    const modalOpen = p === 'arrived' || p === 'travel'
+
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    // iOS: pin body so rubber-band can't shift the page under the modal
+    if (modalOpen) {
+      body.style.position = 'fixed'
+      body.style.top = `-${y}px`
+      body.style.width = '100%'
     }
-  }, [loadPhase])
+
+    return () => {
+      const pinned = body.style.position === 'fixed'
+      const top = body.style.top
+      html.style.overflow = ''
+      body.style.overflow = ''
+      body.style.position = ''
+      body.style.top = ''
+      body.style.width = ''
+      if (pinned) {
+        const restore = Math.abs(parseInt(top || '0', 10)) || 0
+        window.scrollTo(0, restore)
+      }
+    }
+  }, [scrollLocked])
 
   return (
     <div
@@ -45,6 +73,7 @@ export default function App() {
       data-quality-tier={tier}
       data-scroll-zone={scrollZone}
       data-load-phase={loadPhase}
+      data-modal={phase === 'arrived' || phase === 'travel' ? 'open' : 'closed'}
     >
       <div className="app-scene" data-testid="app-scene">
         <div className="app-scene-parallax" data-testid="app-scene-parallax">

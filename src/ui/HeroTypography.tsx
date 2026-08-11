@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import { useSceneStore, labelOpacityFromScroll } from '../store/sceneStore'
+import { useSceneStore, heroTextOpacityFromScroll } from '../store/sceneStore'
 import { profile } from '../content/portfolio'
 import { setHeroTextCallbacks } from '../scene/heroReel'
 
@@ -27,6 +27,7 @@ export function HeroTypography() {
   const stackRef = useRef<HTMLDivElement>(null)
   const lineRef = useRef<HTMLParagraphElement>(null)
   const introRan = useRef(false)
+  const prevPhaseRef = useRef(phase)
   const [line, setLine] = useState(profile.hero.beats[0]?.text ?? '')
   const [beatIndex, setBeatIndex] = useState(0)
 
@@ -75,14 +76,18 @@ export function HeroTypography() {
     }
   }, [loadPhase])
 
-  // Scroll-height scrubbed opacity (cover out / bridge in / journey approach out)
+  // Scroll-height scrubbed opacity (cover out / settle bridge in / journey approach out)
   useEffect(() => {
     const wrap = wrapRef.current
     const stack = stackRef.current
     if (!wrap || !stack || loadPhase !== 'ready') return
 
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
-    const leavingForSector = phase !== 'idle' && (scrollZone === 'hero' || scrollZone === 'settle')
+    const prev = prevPhaseRef.current
+    const wasModal = prev === 'arrived' || prev === 'travel'
+    prevPhaseRef.current = phase
+
+    const leavingForSector = phase !== 'idle' && scrollZone === 'hero'
 
     if (leavingForSector) {
       gsap.to(wrap, {
@@ -102,7 +107,7 @@ export function HeroTypography() {
       return
     }
 
-    const alpha = labelOpacityFromScroll({
+    const alpha = heroTextOpacityFromScroll({
       coverProgress,
       bridgeInProgress,
       journeyApproachProgress,
@@ -111,6 +116,30 @@ export function HeroTypography() {
     const y = reduced ? 0 : -36 * p
     const blur = reduced ? 0 : 14 * p
     const scale = reduced ? 1 : 1 - 0.06 * p
+
+    // After closing a sector modal — ease text back in instead of snapping
+    if (wasModal && phase === 'idle' && scrollZone === 'hero') {
+      gsap.fromTo(
+        wrap,
+        { autoAlpha: 0, y: reduced ? 0 : -22, filter: reduced ? 'none' : 'blur(10px)' },
+        {
+          autoAlpha: alpha,
+          y,
+          filter: blur > 0.01 ? `blur(${blur}px)` : 'none',
+          duration: 0.65,
+          ease: 'power3.out',
+          overwrite: 'auto',
+          onComplete: () => { if (blur < 0.01) gsap.set(wrap, { clearProps: 'filter' }) },
+        },
+      )
+      gsap.fromTo(
+        stack,
+        { scale: reduced ? 1 : 0.94 },
+        { scale, duration: 0.65, ease: 'power3.out', overwrite: 'auto' },
+      )
+      return
+    }
+
     gsap.set(wrap, {
       autoAlpha: alpha,
       y,
@@ -171,7 +200,7 @@ export function HeroTypography() {
       data-hero-beat={beatIndex}
       data-hero-first-beat={profile.hero.beats[0]?.text ?? ''}
       data-testid="hero-typography"
-      aria-hidden={phase !== 'idle' || labelOpacityFromScroll({
+      aria-hidden={phase !== 'idle' || heroTextOpacityFromScroll({
         coverProgress,
         bridgeInProgress,
         journeyApproachProgress,

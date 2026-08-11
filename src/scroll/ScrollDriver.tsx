@@ -142,7 +142,7 @@ export function ScrollDriver() {
         },
       })
 
-      // Bridge IN — settle rises; labels scrub back in (same pattern as cover out)
+      // Bridge IN — settle rises (journey entry; labels stay off after cover)
       ScrollTrigger.create({
         trigger: settle,
         start: 'top bottom',
@@ -153,7 +153,7 @@ export function ScrollDriver() {
         onLeaveBack: () => store().setBridgeInProgress(0),
       })
 
-      // Journey approaches — labels scrub out again
+      // Journey approaches
       ScrollTrigger.create({
         trigger: journey,
         start: 'top bottom',
