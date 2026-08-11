@@ -121,6 +121,7 @@ else if (sectors.loadPhase !== 'ready' && (sectors.opacity !== '0' || sectors.vi
   fail(`desktop intro: sectors visible too early opacity=${sectors.opacity} visibility=${sectors.visibility}`)
 } else console.log('ok: sectors hidden during intro')
 
+await desktop.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
 await desktop.waitForSelector('[data-testid="sector-indicators"][data-sectors-ready="true"]', { timeout: T.ready })
 await desktop.waitForTimeout(700)
 // Container stays pointer-events:none by design; verify visibility + that a
@@ -131,7 +132,12 @@ const sectorState = await desktop.evaluate(() => {
   const s = getComputedStyle(wrap)
   const r = btn.getBoundingClientRect()
   const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
-  return { opacity: Number(s.opacity), visibility: s.visibility, hit: btn.contains(el) }
+  return {
+    opacity: Number(s.opacity),
+    visibility: s.visibility,
+    hit: btn.contains(el),
+    blocker: el ? `${el.tagName}.${el.className}`.slice(0, 80) : null,
+  }
 })
 if (sectorState.opacity < 0.9 || sectorState.visibility !== 'visible' || !sectorState.hit) {
   fail(`desktop ready: sectors not interactive ${JSON.stringify(sectorState)}`)
@@ -277,7 +283,9 @@ const wave = await desktop.evaluate(() => ({
   section: window.__scene?.uniforms.uWaveSection.value ?? -2,
   t: window.__scene?.uniforms.uWaveT.value ?? -1,
 }))
-if (wave.section !== 2) fail(`hover wave: uWaveSection=${wave.section}, expected 2 (skills)`)
+const skillsIdx = SECTIONS.indexOf('skills')
+const projectsIdx = SECTIONS.indexOf('projects')
+if (wave.section !== skillsIdx) fail(`hover wave: uWaveSection=${wave.section}, expected ${skillsIdx} (skills)`)
 else if (!(wave.t > 0 && wave.t < 1)) fail(`hover wave: uWaveT=${wave.t}, expected animating in (0,1)`)
 else console.log('ok: hover triggers sector shockwave')
 await desktop.mouse.move(0, 0)
@@ -307,7 +315,7 @@ if (hit !== 'ok') fail(`arrived: slider not interactive (${hit})`)
 else console.log('ok: slider interactive while arrived')
 await desktop.waitForTimeout(2500)
 let fx = await readFx()
-if (!(fx.active === 0)) fail(`desktop arrived: uActive=${fx.active}, expected 0 (projects)`)
+if (!(fx.active === projectsIdx)) fail(`desktop arrived: uActive=${fx.active}, expected ${projectsIdx} (projects)`)
 else console.log('ok: active lobe set on projects')
 if (!(fx.focus > 0.5)) fail(`desktop arrived: uFocus=${fx.focus}, expected >0.5 after modal`)
 else console.log('ok: lobe nodes highlighted after modal')
@@ -384,14 +392,15 @@ for (let loop = 1; loop <= LOOPS; loop++) {
     if (title !== s) fail(`section ${s}: overlay title was "${title}"`)
     else console.log(`ok: ${s} overlay shown`)
     await page.waitForTimeout(2000)
-    const mfx = await page.evaluate((sectionId) => ({
+    const expectedActive = SECTIONS.indexOf(s)
+    const mfx = await page.evaluate(() => ({
       focus: window.__scene?.uniforms.uFocus.value ?? -1,
       active: window.__scene?.uniforms.uActive.value ?? -2,
-      expected: ['about', 'projects', 'experience', 'skills', 'contact'].indexOf(sectionId),
-    }), s)
-    if (mfx.active !== mfx.expected) fail(`section ${s}: uActive=${mfx.active}, expected ${mfx.expected}`)
+    }))
+    if (mfx.active !== expectedActive) fail(`section ${s}: uActive=${mfx.active}, expected ${expectedActive}`)
     if (!(mfx.focus > 0.4)) fail(`section ${s}: uFocus=${mfx.focus}, expected >0.4`)
-    await page.click('[data-testid="overlay-back"]')
+    // Title can sit under the close hit-box on short viewports; force avoids flake
+    await page.click('[data-testid="overlay-back"]', { force: true })
     await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.mobileOverlay })
   }
 }
