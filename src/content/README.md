@@ -2,6 +2,16 @@
 
 Edit **`portfolio.ts`** only when updating your personal copy, project list, skills, or image URLs.
 
+## Contact form
+
+The Contact panel posts to [Formspree](https://formspree.io). Copy `.env.example` → `.env` and set:
+
+```
+VITE_FORMSPREE_ID=your_form_id
+```
+
+Restart `pnpm dev` after changing env. Update `contact.email` / links in `portfolio.ts` for the mailto fallback.
+
 ## Images
 
 Each entry supports two sources (first non-empty wins via `resolveImage`):

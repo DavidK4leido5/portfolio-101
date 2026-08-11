@@ -10,10 +10,11 @@ import { NODE_LIMITS } from '../lib/nodes'
 import { indicatorEls } from '../scene/shared'
 import { animateNodeCount, triggerSectorWave } from '../scene/nodeAnimator'
 import {
-  profile, experience, contact, sectionCopy, resolveImage, type ImageSource,
+  profile, experience, sectionCopy, resolveImage, type ImageSource,
 } from '../content/portfolio'
 import { SkillsPanel } from './SkillsPanel'
 import { ProjectsPanel } from './ProjectsPanel'
+import { ContactPanel } from './ContactPanel'
 import { outwardSlideX, runSectorLabelReveal } from './sectorLabelReveal'
 
 const prefersReduced = () =>
@@ -51,17 +52,8 @@ function SectionContent({ id }: { id: SectionId }) {
         <p>{profile.about.body}</p>
       </article>
     )
-  return (
-    <article className="card">
-      <p>{contact.description}</p>
-      <p><a href={`mailto:${contact.email}`}>{contact.email}</a></p>
-      <div className="tags">
-        {contact.links.map((l) => (
-          <a key={l.label} href={l.url} target="_blank" rel="noreferrer">{l.label}</a>
-        ))}
-      </div>
-    </article>
-  )
+  if (id === 'contact') return <ContactPanel />
+  return null
 }
 
 export function PortfolioUI() {
