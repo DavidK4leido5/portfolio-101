@@ -381,13 +381,58 @@ else if (navState.opacity < 0.9 || navState.visibility !== 'visible' || !navStat
 
 const idle = () => page.waitForSelector('.ui[data-phase="idle"]', { timeout: T.idle })
 
+/** Open a sector from mobile nav; assert travel started so silent no-ops fail fast. */
+async function openMobileSection(section) {
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForSelector(
+    '.ui[data-load-phase="ready"][data-phase="idle"][data-scroll-zone="hero"]',
+    { timeout: T.ready },
+  )
+  // Nav re-entrance after modal close staggers labels; give skills/contact time to land
+  await page.waitForTimeout(CI ? 900 : 450)
+  await page.click(mobileSector(section), { force: true })
+  const started = await page
+    .waitForFunction(
+      () => {
+        const p = document.querySelector('.ui')?.getAttribute('data-phase')
+        return p === 'travel' || p === 'arrived'
+      },
+      { timeout: CI ? 8000 : 4000 },
+    )
+    .then(() => true)
+    .catch(() => false)
+  if (!started) {
+    const dump = await page.evaluate(() => ({
+      phase: document.querySelector('.ui')?.getAttribute('data-phase'),
+      zone: document.querySelector('.ui')?.getAttribute('data-scroll-zone'),
+      scrollY: window.scrollY,
+    }))
+    fail(`section ${section}: click did not start travel ${JSON.stringify(dump)}`)
+    return false
+  }
+  await page.waitForSelector('.ui[data-phase="arrived"]', { timeout: T.mobileOverlay })
+  // GSAP enter uses autoAlpha — wait attached, not visible
+  await page.waitForSelector('[data-testid="overlay-title"]', {
+    state: 'attached',
+    timeout: T.mobileOverlay,
+  })
+  return true
+}
+
+async function closeOverlay() {
+  await page.keyboard.press('Escape')
+  await page.waitForSelector('[data-testid="overlay-title"]', {
+    state: 'detached',
+    timeout: T.mobileOverlay,
+  })
+  await idle()
+}
+
 for (let loop = 1; loop <= LOOPS; loop++) {
   console.log(`--- loop ${loop}/${LOOPS} ---`)
   for (const s of SECTIONS) {
-    await page.waitForSelector('.ui[data-load-phase="ready"]', { timeout: T.ready })
-    await idle()
-    await page.click(mobileSector(s), { force: true })
-    await page.waitForSelector('[data-testid="overlay-title"]', { timeout: T.mobileOverlay })
+    const opened = await openMobileSection(s)
+    if (!opened) continue
     const title = (await page.textContent('[data-testid="overlay-title"]'))?.trim().toLowerCase()
     if (title !== s) fail(`section ${s}: overlay title was "${title}"`)
     else console.log(`ok: ${s} overlay shown`)
@@ -399,16 +444,12 @@ for (let loop = 1; loop <= LOOPS; loop++) {
     }))
     if (mfx.active !== expectedActive) fail(`section ${s}: uActive=${mfx.active}, expected ${expectedActive}`)
     if (!(mfx.focus > 0.4)) fail(`section ${s}: uFocus=${mfx.focus}, expected >0.4`)
-    // Title can sit under the close hit-box on short viewports; force avoids flake
-    await page.click('[data-testid="overlay-back"]', { force: true })
-    await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.mobileOverlay })
+    await closeOverlay()
   }
 }
 
 // Escape key path
-await idle()
-await page.click(mobileSector('projects'), { force: true })
-await page.waitForSelector('[data-testid="overlay-title"]', { timeout: T.mobileOverlay })
+await openMobileSection('projects')
 await page.keyboard.press('Escape')
 await page.waitForSelector('[data-testid="overlay-title"]', { state: 'detached', timeout: T.mobileOverlay })
 await idle()

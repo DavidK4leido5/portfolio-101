@@ -117,7 +117,11 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   },
   arrive: () => set({ phase: 'arrived' }),
   returnHome: () => set({ phase: 'travel', returning: true, hoveredSection: null }),
-  settleHome: () => set({ phase: 'idle', activeSection: null, returning: false }),
+  settleHome: () => {
+    // Keep click-to-open overlays reachable after modal lock/unlock cycles
+    if (typeof window !== 'undefined') window.scrollTo(0, 0)
+    set({ phase: 'idle', activeSection: null, returning: false, scrollZone: 'hero' })
+  },
   setTier: (t) => {
     const nodeCount = clampNodes(get().nodeCount, t)
     set({ qualityTier: t, nodeCount })
