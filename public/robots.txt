@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://davidk4leido5.github.io/portfolio-101/sitemap.xml
+Sitemap: https://stackwithdavid.qd.je/sitemap.xml
