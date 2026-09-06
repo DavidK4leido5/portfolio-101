@@ -71,27 +71,27 @@ export const clientWorks: ClientWork[] = Object.entries(modules)
     return a.index - b.index
   })
 
-/** Unique projects in display order */
-export const clientWorkProjects: string[] = [
-  ...new Set(clientWorks.map((w) => projectKey(w.project))),
-]
+export type ClientWorkGroup = {
+  key: string
+  /** Pretty project name */
+  label: string
+  shots: ClientWork[]
+}
 
-/**
- * Split projects across two marquee rows (keep each project's shots together).
- * Odd-count leftovers go to row A.
- */
-export function splitClientWorksByProject(): { rowA: ClientWork[]; rowB: ClientWork[] } {
-  const byProject = new Map<string, ClientWork[]>()
+/** Shots clustered by project, in display order. */
+export const clientWorkGroups: ClientWorkGroup[] = (() => {
+  const byProject = new Map<string, ClientWorkGroup>()
   for (const w of clientWorks) {
-    const k = projectKey(w.project)
-    const list = byProject.get(k) ?? []
-    list.push(w)
-    byProject.set(k, list)
+    const key = projectKey(w.project)
+    const group = byProject.get(key) ?? { key, label: w.alt, shots: [] }
+    group.shots.push(w)
+    byProject.set(key, group)
   }
+  return [...byProject.values()]
+})()
 
-  const keys = [...byProject.keys()]
-  const mid = Math.ceil(keys.length / 2)
-  const rowA = keys.slice(0, mid).flatMap((k) => byProject.get(k)!)
-  const rowB = keys.slice(mid).flatMap((k) => byProject.get(k)!)
-  return { rowA, rowB }
+/** Split projects across two marquee rows; odd-count leftovers go to row A. */
+export function splitClientWorkGroups(): { rowA: ClientWorkGroup[]; rowB: ClientWorkGroup[] } {
+  const mid = Math.ceil(clientWorkGroups.length / 2)
+  return { rowA: clientWorkGroups.slice(0, mid), rowB: clientWorkGroups.slice(mid) }
 }

@@ -259,6 +259,62 @@ canvas { display: block; }
   to { transform: translateX(0); }
 }
 
+/* Client work strip — shots clustered under the project they belong to */
+.client-work .marquee__set {
+  gap: clamp(32px, 4vw, 56px);
+  align-items: flex-start;
+}
+
+.work-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.work-group__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.work-group__name {
+  position: relative;
+  padding-left: 14px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(232, 232, 240, 0.92);
+  white-space: nowrap;
+}
+
+.work-group__name::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.work-group__role {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(232, 232, 240, 0.4);
+  white-space: nowrap;
+}
+
+.work-group__shots {
+  display: flex;
+  gap: 12px;
+}
+
 .client-work__shot {
   position: relative;
   margin: 0;
@@ -266,8 +322,9 @@ canvas { display: block; }
   flex-shrink: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  border-radius: 14px;
   background: #0a0a12;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
 }
 
 .client-work__shot img {
@@ -279,61 +336,70 @@ canvas { display: block; }
   pointer-events: none;
 }
 
-.client-work__caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 28px 14px 12px;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: capitalize;
-  color: rgba(232, 232, 240, 0.88);
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+/* Testimonials */
+.testimonial-marquee .marquee__set {
+  gap: 18px;
+  align-items: stretch;
 }
 
 .testimonial-card {
+  position: relative;
   margin: 0;
-  padding: clamp(28px, 3vw, 36px);
-  width: min(88vw, 480px);
-  min-height: 280px;
+  padding: clamp(30px, 3vw, 40px);
+  width: min(88vw, 500px);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 28px;
+  gap: 22px;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  background: rgba(10, 10, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 7%, rgba(13, 13, 22, 0.96)),
+      rgba(9, 9, 16, 0.96)
+    );
+}
+
+/* Fixed 22px box so the glyph's leading can never push into the quote */
+.testimonial-mark {
+  display: block;
+  height: 22px;
+  font: 700 3.4rem/1 Georgia, 'Times New Roman', serif;
+  color: color-mix(in srgb, var(--accent) 55%, transparent);
+  pointer-events: none;
 }
 
 .testimonial-quote {
-  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
-  line-height: 1.6;
-  color: rgba(232, 232, 240, 0.9);
+  flex: 1;
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  line-height: 1.68;
+  color: rgba(232, 232, 240, 0.88);
 }
 
 .testimonial-meta {
   display: flex;
   align-items: center;
   gap: 14px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .testimonial-meta__text {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
 .testimonial-avatar {
   position: relative;
   flex-shrink: 0;
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   background: color-mix(in srgb, var(--accent) 28%, #12121c);
 }
 
@@ -360,11 +426,19 @@ canvas { display: block; }
   font-style: normal;
   font-weight: 650;
   font-size: 0.95rem;
+  color: #e8e8f0;
 }
 
 .testimonial-role {
   font-size: 0.8rem;
-  color: rgba(232, 232, 240, 0.45);
+  color: rgba(232, 232, 240, 0.5);
+}
+
+.testimonial-company {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 78%, #fff);
 }
 
 @media (prefers-reduced-motion: reduce) {
