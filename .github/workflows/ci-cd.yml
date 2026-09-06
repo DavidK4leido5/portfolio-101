@@ -174,7 +174,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build for GitHub Pages
-        # Custom domain (stackwithdavid.qd.je) is served at /. Do not set
+        # Custom domain (stackwithdavid.is-a.dev) is served at /. Do not set
         # VITE_BASE_PATH=/repo-name/ — that prefixes asset URLs and 404s.
         run: pnpm build
 
