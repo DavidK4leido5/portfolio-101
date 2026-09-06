@@ -54,6 +54,18 @@ Optional pretty names live in `clientWorks.ts` (`PROJECT_LABELS`).
 
 Personal projects stay in the Projects overlay — edit the `projects` array in `portfolio.ts` (text-only cards).
 
+## Sitemap
+
+`public/sitemap.xml` lists the one real URL this site has. Every section is an overlay on the
+same page, so there is nothing else to list. Fragment URLs like `/#projects` do not belong in a
+sitemap because search engines strip the fragment and see the homepage again.
+
+Bump `<lastmod>` when you ship a real content change. Leave it alone for dependency bumps and
+refactors: a `lastmod` that moves on every build stops being a useful signal. `changefreq` and
+`priority` are deliberately absent, Google ignores both.
+
+If you ever give the sections their own routes, add one `<url>` entry each.
+
 ## Scene vs content
 
 - **`src/content/portfolio.ts`** — your data (this folder)
