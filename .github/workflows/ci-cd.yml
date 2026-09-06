@@ -174,8 +174,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build for GitHub Pages
-        # Custom domain (stackwithdavid.is-a.dev) is served at /. Do not set
-        # VITE_BASE_PATH=/repo-name/ — that prefixes asset URLs and 404s.
+        # Relative base (vite.config.ts) makes one build work at both the
+        # custom domain root and the github.io project URL. Do not set
+        # VITE_BASE_PATH; either absolute value breaks one of the two.
         run: pnpm build
 
       - name: Upload production build

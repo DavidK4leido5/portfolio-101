@@ -3,9 +3,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  // Custom domain is served at /. Only set VITE_BASE_PATH=/repo-name/ for
-  // github.io project URLs without a custom domain.
-  base: process.env.VITE_BASE_PATH ?? '/',
+  // Relative base emits ./assets/... so one build works at the custom domain
+  // root AND at davidk4leido5.github.io/portfolio-101/. An absolute '/' base
+  // 404s the JS on the project URL; '/repo-name/' 404s it on the custom domain.
+  base: process.env.VITE_BASE_PATH ?? './',
   server: { port: 5173, strictPort: true },
   preview: { port: 4173, strictPort: true },
 })
