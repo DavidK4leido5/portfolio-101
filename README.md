@@ -147,7 +147,7 @@ After the deploy job succeeds, the site is live at:
 
 **https://stackwithdavid.is-a.dev/**
 
-Custom domain deploys with `base: '/'`. Do not set `VITE_BASE_PATH=/repo-name/` — that prefixes JS/CSS as `/portfolio-101/assets/...` and 404s on the custom domain. `public/CNAME` keeps GitHub Pages pointed at `stackwithdavid.is-a.dev`.
+Deploys with a relative `base: './'`, so the same build works at the custom domain root and at `davidk4leido5.github.io/portfolio-101/`. Do not set `VITE_BASE_PATH`: an absolute `/` 404s the JS on the project URL, and `/repo-name/` 404s it on the custom domain. `public/CNAME` keeps GitHub Pages pointed at `stackwithdavid.is-a.dev`.
 
 > **Note:** GitHub Pages on free accounts requires a **public** repository. Private repos need GitHub Pro/Team for Pages.
 
