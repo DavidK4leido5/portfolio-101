@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "node tests/smoke.mjs",
     "bake:brain": "node scripts/bake-brain-cloud.mjs",
-    "bake:shapes": "node scripts/bake-shapes.mjs"
+    "bake:shapes": "node scripts/bake-shapes.mjs",
+    "bake:shots": "node scripts/bake-shots.mjs"
   },
   "devEngines": {
     "packageManager": {

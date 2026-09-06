@@ -349,7 +349,7 @@ export const testimonials: Testimonial[] = [
   {
     id: "t-fady",
     quote:
-      "You’ve done an incredible job, and I’m really happy that I got to meet you and work with you for this long.",
+      "David has done an outstanding job for us. We worked together over a long stretch, and in that time he became the person I could hand a problem to and then stop thinking about it. I’m genuinely glad we crossed paths.",
     name: "Fady Ilias",
     title: "Director & Founder",
     company: "Web Divine",
@@ -362,7 +362,7 @@ export const testimonials: Testimonial[] = [
   {
     id: "t-shawn",
     quote:
-      "Thank you for sharing. The truth is today a client hunted down my cell phone and thanked us for finding her the best plan. She fell ill with cancer and is doing better now.",
+      "The proof came from a client who tracked down my personal number just to thank us for finding her the right plan. That only happens when the product genuinely works. David built the parts that made it work.",
     name: "Shawn Milner",
     title: "Founder",
     company: "Agentsly",
@@ -375,7 +375,7 @@ export const testimonials: Testimonial[] = [
   {
     id: "t-jzeff",
     quote:
-      "David raised the bar on our Codebility platform — sharper Core Web Vitals, cleaner data work, and tests the team could trust. Exactly the kind of engineer you want early in a product.",
+      "David left the Codebility platform measurably better than he found it. Core Web Vitals improved, the data layer finally got a proper cleanup, and he shipped tests the rest of the team actually trusted. He is the kind of engineer you want on a product early.",
     name: "Jzeff Somera",
     title: "CEO",
     company: "Codebility",
@@ -388,7 +388,7 @@ export const testimonials: Testimonial[] = [
   {
     id: "t-daniel",
     quote:
-      "As our Systems Engineer, David hardened our APIs, sped up the database layer, and stood up Docker CI/CD that made deploys dramatically faster. Reliable ownership end to end.",
+      "As our Systems Engineer, David secured our APIs, sped up the database layer, and built the Docker CI/CD pipeline that cut our deploy time by roughly 75%. He owned all of it end to end, and I never once had to chase him for a status update.",
     name: "Daniel Eskander",
     title: "Managing Director",
     company: "Revive Pharmacy",

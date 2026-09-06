@@ -38,17 +38,19 @@ Drop image files into `assets/client-work/` — they appear automatically (no UR
 
 **Naming (required for ordering):** `projectname (n).ext`
 
-| Example | Project caption | Order |
-|---------|-----------------|-------|
+| Example | Project label | Order |
+|---------|---------------|-------|
 | `revivepharmacy (1).png` | Revive Pharmacy | 1st shot |
 | `revivepharmacy (2).png` | Revive Pharmacy | 2nd shot |
 | `agentsly (1).avif` | Agentsly | … |
 
-Shots are grouped by project, sorted by `(n)`, then split across the two slider rows (first half of projects on top, second half on bottom).
+Shots are grouped by project, sorted by `(n)`, then split across the two slider rows (first half of projects on top, second half on bottom). Each group shows the project name plus the matching role from `experience`, so companies you add here should use the same name in both places.
 
 Supported: `.png` `.jpg` `.webp` `.avif` `.svg` `.gif`
 
 Optional pretty names live in `clientWorks.ts` (`PROJECT_LABELS`).
+
+**Run `pnpm bake:shots` after adding PNG or JPG shots.** It rewrites them as 1024 px WebP in place. Raw 1080p screenshots decode to about 7 MB of pixels each, and the marquee mounts roughly 160 `<img>` tags, which stalled the main thread on decode and made the sticky 3D scene stutter while scrolling.
 
 Personal projects stay in the Projects overlay — edit the `projects` array in `portfolio.ts` (text-only cards).
 
