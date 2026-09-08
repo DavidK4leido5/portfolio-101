@@ -112,29 +112,64 @@ const beatCentres = await page.evaluate(() =>
     return Math.round(r.top + window.scrollY + r.height / 2 - window.innerHeight / 2)
   }))
 
-if (beatCentres.length === 0) fail('projects walkthrough missing')
+const readWords = (beat) => page.evaluate((b) => {
+  const el = document.querySelector(`[data-beat="${b}"]`)
+  if (!el) return { count: 0 }
+  const words = [...el.querySelectorAll('.word')].map((w) => Number(getComputedStyle(w).opacity))
+  const mask = el.querySelector('.mask-line')
+  return {
+    first: words[0],
+    last: words[words.length - 1],
+    min: Math.min(...words),
+    count: words.length,
+    mask: mask ? getComputedStyle(mask).transform : 'none',
+  }
+}, beat)
+
+/*
+ * Not beat 0: ProjectJourney clamps its position to >= 0 so the first beat is
+ * already settled when you arrive rather than sitting dim, which means it can
+ * never show an approach. Beat 6 opens the third project, so it has the masked
+ * heading as well as the word body.
+ */
+const PROBE_BEAT = 6
+
+if (beatCentres.length <= PROBE_BEAT) fail('projects walkthrough missing beats')
 else {
-  // Centre of the first beat: heading settled, words resolving front to back
-  await goTo(beatCentres[0])
-  const settled = await page.evaluate(() => {
-    const beat = document.querySelector('[data-beat="0"]')
-    if (!beat) return { count: 0 }
-    const words = [...beat.querySelectorAll('.word')].map((w) => Number(getComputedStyle(w).opacity))
-    const mask = beat.querySelector('.mask-line')
-    return {
-      first: words[0],
-      last: words[words.length - 1],
-      count: words.length,
-      mask: getComputedStyle(mask).transform,
-    }
-  })
-  if (settled.count < 5) fail(`expected the beat body to be split into words, got ${settled.count}`)
-  else if (!(settled.first > 0.95)) fail(`first word not resolved: ${settled.first}`)
-  else if (!(settled.last < settled.first)) {
-    fail(`no word stagger: first ${settled.first}, last ${settled.last}`)
+  /*
+   * The stagger belongs to the beat's approach, and every word has to be fully
+   * resolved by the time the beat is centred. It used to run so that the tail
+   * of a long paragraph never got past about 0.7 even at the centre, so the
+   * copy sat permanently half-loaded — which is why this checks the two
+   * positions separately rather than looking for a gradient at the centre.
+   */
+  /*
+   * Scan the approach rather than trusting one magic offset: where the spread
+   * is widest depends on the beat's pitch and on the row's own place in the
+   * stagger, and the window has moved before.
+   */
+  let widest = { spread: -1 }
+  for (const back of [560, 460, 380, 300, 220]) {
+    await goTo(beatCentres[PROBE_BEAT] - back)
+    const at = await readWords(PROBE_BEAT)
+    const spread = (at.first ?? 0) - (at.last ?? 0)
+    if (spread > widest.spread) widest = { ...at, back, spread }
+  }
+  if (!widest.count || widest.count < 5) {
+    fail(`expected the beat body to be split into words, got ${widest.count}`)
+  } else if (!(widest.spread > 0.05)) {
+    fail(`no word stagger anywhere on the approach (widest spread ${widest.spread.toFixed(2)})`)
+  } else {
+    console.log(`ok: words stagger on approach (${widest.first.toFixed(2)} → ${widest.last.toFixed(2)} at ${widest.back}px out)`)
+  }
+
+  await goTo(beatCentres[PROBE_BEAT])
+  const settled = await readWords(PROBE_BEAT)
+  if (!(settled.min > 0.95)) {
+    fail(`beat not fully resolved at its centre: dimmest word ${settled.min}`)
   } else if (settled.mask !== 'none' && settled.mask !== 'matrix(1, 0, 0, 1, 0, 0)') {
     fail(`masked heading not settled at the beat centre: ${settled.mask}`)
-  } else console.log(`ok: word stagger live (${settled.first.toFixed(2)} → ${settled.last.toFixed(2)}) and heading settled`)
+  } else console.log('ok: every word and the heading are fully resolved at the beat centre')
 
   // Mid-handover: the outgoing project's last card holds while the next wipes in.
   // Three beats per project, so halfway between beat 2 and beat 3 is the seam.

@@ -4,8 +4,18 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSceneStore } from '../store/sceneStore'
 import { TRACE_COUNT, traceStages } from '../content/requestTrace'
 import { SectionsSpine } from '../ui/SectionsSpine'
+import { SiteFooter } from '../ui/SiteFooter'
 
 gsap.registerPlugin(ScrollTrigger)
+
+/*
+ * Mobile browsers fire `resize` when the address bar slides in or out, which
+ * happens as a direct result of scrolling. ScrollTrigger's refresh restores
+ * the scroll position as part of its work, so every one of those resizes
+ * yanked the page somewhere else about a moment after the reader stopped
+ * scrolling. This makes it ignore height-only resizes on touch devices.
+ */
+ScrollTrigger.config({ ignoreMobileResize: true })
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -93,13 +103,21 @@ export function ScrollDriver() {
       })
     }, root)
 
+    /*
+     * Only a width change is a real layout change here. A height-only resize
+     * on mobile is the address bar moving, and refreshing ScrollTrigger for it
+     * shifts the scroll position mid-read.
+     */
+    let lastWidth = innerWidth
     let resizeTo: ReturnType<typeof setTimeout> | undefined
     const onResize = () => {
+      const widthChanged = innerWidth !== lastWidth
+      lastWidth = innerWidth
       clearTimeout(resizeTo)
       resizeTo = setTimeout(() => {
         cacheZones()
         syncZone()
-        ScrollTrigger.refresh()
+        if (widthChanged) ScrollTrigger.refresh()
       }, 150)
     }
     addEventListener('resize', onResize)
@@ -146,9 +164,7 @@ export function ScrollDriver() {
       {/* First thing to paint over the brain — the canvas stands down from here */}
       <div className="scene-cover-sentinel" data-testid="scene-cover-sentinel" aria-hidden />
       <SectionsSpine />
-      <footer className="scroll-end" data-testid="scroll-end">
-        <p>Scroll up to return to the brain</p>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

@@ -66,8 +66,20 @@ export function observeFit(root: ParentNode, trackingEm = -0.035): () => void {
   run()
   document.fonts?.ready.then(run).catch(() => {})
 
+  /*
+   * Width is the only input, so a height-only resize is not worth a re-fit —
+   * and on mobile those fire constantly as the address bar moves, each one
+   * changing every title's size and so the height of the page above the
+   * reader.
+   */
+  let lastWidth = innerWidth
   let to: ReturnType<typeof setTimeout>
-  const onResize = () => { clearTimeout(to); to = setTimeout(run, 120) }
+  const onResize = () => {
+    if (innerWidth === lastWidth) return
+    lastWidth = innerWidth
+    clearTimeout(to)
+    to = setTimeout(run, 120)
+  }
   addEventListener('resize', onResize)
   return () => { clearTimeout(to); removeEventListener('resize', onResize) }
 }

@@ -53,6 +53,9 @@ function CategoryDetail({ category }: { category: SkillCategory }) {
               <SkillIcon name={t.icon} size={15} />
             </span>
             <span className="skills-row__name" aria-hidden>{t.name}</span>
+            <span className="skills-row__pct" aria-hidden>
+              {Math.round(Math.min(100, Math.max(0, t.score * 10)))}%
+            </span>
             <span className="skills-bar" aria-hidden>
               <span
                 className="skills-bar__fill"

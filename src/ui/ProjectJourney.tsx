@@ -159,11 +159,20 @@ export function ProjectJourney() {
           }
 
           if (row.words.length) {
-            // Words resolve one after another across a fixed slice of the beat
+            /*
+             * Words resolve one after another as the beat comes in, and every
+             * one of them is fully resolved by the time it is centred.
+             *
+             * The spread is added back into the window rather than just
+             * subtracted per word: without it the last word of a long
+             * paragraph was still short of full opacity at the beat's own
+             * centre, so the tail of every project's intro sat permanently
+             * dimmed and the copy read as half-loaded.
+             */
             row.el.style.opacity = '1'
             const step = WORD_SPREAD / row.words.length
             row.words.forEach((word, i) => {
-              const wo = clamp01((0.55 - (rd + i * step)) / 0.3)
+              const wo = clamp01((0.55 + WORD_SPREAD - (rd + i * step)) / 0.3)
               word.style.opacity = String(WORD_FLOOR + (1 - WORD_FLOOR) * wo)
               word.style.transform = `translate3d(0, ${((1 - wo) * 14).toFixed(1)}px, 0)`
             })

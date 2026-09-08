@@ -156,19 +156,6 @@ canvas { display: block; }
   pointer-events: none;
 }
 
-.scroll-end {
-  position: relative;
-  z-index: 20;
-  pointer-events: auto;
-  padding: 48px 24px 64px;
-  text-align: center;
-  background: #05050a;
-  color: rgba(232, 232, 240, 0.45);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 /* The gutter negation that makes these full-bleed lives on the section that
    holds them, since only it knows its own padding */
 .client-work,
@@ -793,11 +780,24 @@ canvas { display: block; }
   gap: 9px;
 }
 
+/* Phone: icon, name, number. The bar says less than the number does in the
+   width available, so it only turns up on the desktop card. */
 .skills-row {
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) minmax(72px, 42%);
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
+}
+
+.skills-row .skills-bar {
+  display: none;
+}
+
+.skills-row__pct {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--skills-accent, #4da6ff) 78%, #fff);
 }
 
 .skills-row__icon {
@@ -1016,6 +1016,12 @@ canvas { display: block; }
   background: rgba(4, 6, 14, 0.4);
   padding: 0 0 16px;
   overflow: hidden;
+}
+
+/* The screenshot is what provides the top inset on the other cards, so an
+   engagement with no shot needs it back or its title sits on the border */
+.card--exp-bare {
+  padding-top: 18px;
 }
 
 .card__shot {
@@ -2403,12 +2409,22 @@ canvas { display: block; }
     font-size: calc(clamp(3rem, 22vw, 7rem) * var(--ghost-scale));
   }
 
-  .trace-ghost[data-place='center'] > b,
+  /*
+   * Every placement collapses to the top band on a phone. There is no room
+   * for a word this size to sit anywhere else: the bottom half is the copy
+   * block, and a ghost placed there ended up behind the text with neither
+   * legible.
+   */
+  .trace-ghost > b,
+  .trace-ghost[data-place='top-left'] > b,
+  .trace-ghost[data-place='top-right'] > b,
   .trace-ghost[data-place='left'] > b,
-  .trace-ghost[data-place='right'] > b {
+  .trace-ghost[data-place='right'] > b,
+  .trace-ghost[data-place='center'] > b,
+  .trace-ghost[data-place='bottom-right'] > b {
     align-self: start;
     justify-self: center;
-    margin: 16vh 0 0;
+    margin: 15vh 0 0;
   }
 
   .hero-notes {
@@ -2431,19 +2447,30 @@ canvas { display: block; }
     display: none;
   }
 
+  /* Flush to the bottom edge, no gap. The safe-area inset goes inside as
+     padding so the bar itself still reaches the physical edge of the screen. */
   .section-nav {
     top: auto;
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    bottom: 0;
     right: 0;
     left: 0;
     transform: none;
     flex-direction: row;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0;
-    background: rgba(4, 4, 12, 0.86);
-    backdrop-filter: blur(12px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(4, 4, 12, 0.88);
+    backdrop-filter: blur(14px);
     border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .section-nav__item {
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 15px 2px;
+    font-size: 9px;
+    letter-spacing: 0.14em;
   }
 
   .section-nav__label {
@@ -2514,4 +2541,299 @@ canvas { display: block; }
    padding back rather than the gutter negation's flush edge */
 .spine-section > .project-journey {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ==== Skills: desktop gets room ====
+   The stacked radar / list / index column was built for a 660px side panel and
+   just floated in the middle of a full-bleed section. With the width available
+   the radar becomes the feature it was drawn to be and every tech gets its own
+   card. */
+
+@media (min-width: 901px) {
+  .skills-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    grid-template-areas:
+      'radar detail'
+      'index index';
+    gap: clamp(28px, 3.5vw, 52px);
+    align-items: start;
+  }
+
+  .skills-radar {
+    grid-area: radar;
+    max-width: none;
+    margin: 0;
+  }
+
+  .skills-detail {
+    grid-area: detail;
+    padding: 22px 24px 22px;
+  }
+
+  .skills-index {
+    grid-area: index;
+    margin-top: 6px;
+  }
+
+  .skills-detail__label {
+    font-size: 13px;
+  }
+
+  .skills-detail__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 12px;
+  }
+
+  /* One card per tech: logo, percentage, name, bar */
+  .skills-row {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'icon pct'
+      'name name'
+      'bar bar';
+    align-items: center;
+    gap: 12px 10px;
+    padding: 14px 15px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(6, 8, 18, 0.6);
+    transition: border-color 0.25s, background 0.25s;
+  }
+
+  .skills-row:hover {
+    border-color: color-mix(in srgb, var(--skills-accent, #4da6ff) 40%, rgba(255, 255, 255, 0.12));
+    background: rgba(9, 12, 24, 0.75);
+  }
+
+  .skills-row__icon {
+    grid-area: icon;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .skills-row__icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .skills-row__pct {
+    grid-area: pct;
+    justify-self: end;
+    font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 1.32rem;
+    letter-spacing: -0.03em;
+    color: #f2f2f8;
+  }
+
+  .skills-row__name {
+    grid-area: name;
+    font-size: 12.5px;
+    color: rgba(235, 235, 255, 0.72);
+  }
+
+  .skills-row .skills-bar {
+    grid-area: bar;
+    display: block;
+  }
+}
+
+/* ==== Hero CTA ==== */
+
+.hero-cta {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  transition: opacity 0.35s var(--ease-soft);
+}
+
+.hero-cta__btn {
+  appearance: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 30px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #f4f4fa;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 26%, rgba(6, 6, 14, 0.86)),
+      rgba(6, 6, 14, 0.9)
+    );
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, 0.5),
+    0 0 32px color-mix(in srgb, var(--accent) 22%, transparent);
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s var(--ease-soft);
+}
+
+.hero-cta__btn:hover,
+.hero-cta__btn:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 85%, #fff);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.55),
+    0 0 46px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.hero-cta__arrow {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--accent) 70%, #fff);
+}
+
+.hero-cta__note {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.4);
+}
+
+/* Sits above the density slider on desktop; on a phone there is no slider but
+   there is a nav bar, so it clears that instead */
+@media (max-width: 900px) {
+  .hero-cta {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .hero-cta__btn {
+    padding: 14px 24px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+  }
+
+  /*
+   * The version and tagline readout is the first thing to go on a phone: the
+   * brand and status are already along the top, and the CTA needs this corner.
+   */
+  .hud.bl {
+    display: none;
+  }
+}
+
+/* Nothing over the brain once the sections take the page */
+.app-root[data-scroll-zone='sections'] .hero-cta,
+.app-root[data-scroll-zone='trace'] .hero-cta {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ==== Site footer ==== */
+
+.site-foot {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  background: #05050a;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: clamp(56px, 9vh, 104px) clamp(20px, 5vw, 64px) clamp(48px, 7vh, 80px);
+}
+
+.site-foot__inner {
+  max-width: 1180px;
+  margin-inline: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(24px, 4vw, 56px);
+}
+
+.site-foot__kicker {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+  margin-bottom: 12px;
+}
+
+.site-foot__mail {
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.35rem, 3.4vw, 2.5rem);
+  letter-spacing: -0.03em;
+  color: #f4f4fa;
+  text-decoration: none;
+  transition: color 0.25s;
+  word-break: break-word;
+}
+
+.site-foot__mail:hover,
+.site-foot__mail:focus-visible {
+  color: color-mix(in srgb, var(--accent) 70%, #fff);
+  outline: none;
+}
+
+.site-foot__links {
+  display: flex;
+  gap: 18px;
+}
+
+.site-foot__links a {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.55);
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+.site-foot__links a:hover,
+.site-foot__links a:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+.site-foot__meta {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-top: clamp(24px, 4vh, 40px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.32);
+}
+
+/*
+ * Reserve the strip the fixed nav parks over, so the footer's own content is
+ * never underneath it. This is what makes the nav read as the footer's own
+ * bar once the reader reaches the end of the page.
+ */
+@media (max-width: 900px) {
+  .site-foot {
+    padding-bottom: calc(30px + var(--nav-h, 46px) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .site-foot__inner {
+    align-items: flex-start;
+  }
 }

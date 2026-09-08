@@ -10,7 +10,10 @@ export function ExperienceList() {
       {experience.map((e) => {
         const shot = e.slug ? shotBySlug.get(e.slug) : undefined
         return (
-          <article className="card card--exp" key={e.id}>
+          <article
+            className={`card card--exp${shot ? '' : ' card--exp-bare'}`}
+            key={e.id}
+          >
             {shot && (
               <img className="card__shot" src={shot} alt="" loading="lazy" decoding="async" />
             )}
