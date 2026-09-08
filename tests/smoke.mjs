@@ -642,22 +642,22 @@ if (spine.scrollWidth > spine.clientWidth) {
 } else console.log("ok: no horizontal overflow");
 
 // Section nav has to actually land on its section
-// const navJump = await desktop.evaluate(async () => {
-//   const btn = document.querySelector(
-//     '.section-nav__item[data-section="skills"]',
-//   );
-//   if (!btn) return { missing: true };
-//   btn.click();
-//   await new Promise((r) => setTimeout(r, 2500));
-//   const target = document
-//     .getElementById("section-skills")
-//     .getBoundingClientRect();
-//   return { top: Math.round(target.top) };
-// });
-// if (navJump.missing) fail("section nav missing");
-// else if (Math.abs(navJump.top) > 200)
-//   fail(`section nav: skills landed at ${navJump.top}px, expected near 0`);
-// else console.log("ok: section nav jumps to its section");
+const navJump = await desktop.evaluate(async () => {
+  const btn = document.querySelector(
+    '.section-nav__item[data-section="skills"]',
+  );
+  if (!btn) return { missing: true };
+  btn.click();
+  await new Promise((r) => setTimeout(r, 2500));
+  const target = document
+    .getElementById("section-skills")
+    .getBoundingClientRect();
+  return { top: Math.round(target.top) };
+});
+if (navJump.missing) fail("section nav missing");
+else if (Math.abs(navJump.top) > 200)
+  fail(`section nav: skills landed at ${navJump.top}px, expected near 0`);
+else console.log("ok: section nav jumps to its section");
 
 /*
  * The giant titles have to animate in, not just appear. The line rides up from
@@ -665,36 +665,36 @@ if (spine.scrollWidth > spine.clientWidth) {
  * clip, the reveal observer has to be on the mask: put it on the line and the
  * title can never see enough of itself to trigger, so it stays hidden forever.
  */
-// const titleReveal = await desktop.evaluate(async () => {
-//   document.getElementById("section-experience").scrollIntoView();
-//   await new Promise((r) => setTimeout(r, 2600));
-//   const mask = document.querySelector("#section-experience .spine-title__mask");
-//   const line = mask?.querySelector(".spine-title__line");
-//   if (!mask || !line) return { missing: true };
-//   return {
-//     observedOnMask: mask.hasAttribute("data-reveal"),
-//     isIn: mask.classList.contains("is-in"),
-//     settled: getComputedStyle(line).transform,
-//     animates:
-//       line.getAnimations().length > 0 ||
-//       getComputedStyle(line).transitionDuration !== "0s",
-//     onScreen: Math.round(line.getBoundingClientRect().top),
-//   };
-// });
-// if (titleReveal.missing) fail("section title mask missing");
-// else if (!titleReveal.observedOnMask) {
-//   fail(
-//     "section title reveal is observed on the line, which hides itself out of view",
-//   );
-// } else if (!titleReveal.isIn) fail("section title never revealed");
-// else if (!titleReveal.animates)
-//   fail("section title has no transition — it would just appear");
-// else if (
-//   titleReveal.settled !== "none" &&
-//   titleReveal.settled !== "matrix(1, 0, 0, 1, 0, 0)"
-// ) {
-//   fail(`section title did not settle: ${titleReveal.settled}`);
-// } else console.log("ok: section titles ride up from under their mask");
+const titleReveal = await desktop.evaluate(async () => {
+  document.getElementById("section-experience").scrollIntoView();
+  await new Promise((r) => setTimeout(r, 2600));
+  const mask = document.querySelector("#section-experience .spine-title__mask");
+  const line = mask?.querySelector(".spine-title__line");
+  if (!mask || !line) return { missing: true };
+  return {
+    observedOnMask: mask.hasAttribute("data-reveal"),
+    isIn: mask.classList.contains("is-in"),
+    settled: getComputedStyle(line).transform,
+    animates:
+      line.getAnimations().length > 0 ||
+      getComputedStyle(line).transitionDuration !== "0s",
+    onScreen: Math.round(line.getBoundingClientRect().top),
+  };
+});
+if (titleReveal.missing) fail("section title mask missing");
+else if (!titleReveal.observedOnMask) {
+  fail(
+    "section title reveal is observed on the line, which hides itself out of view",
+  );
+} else if (!titleReveal.isIn) fail("section title never revealed");
+else if (!titleReveal.animates)
+  fail("section title has no transition — it would just appear");
+else if (
+  titleReveal.settled !== "none" &&
+  titleReveal.settled !== "matrix(1, 0, 0, 1, 0, 0)"
+) {
+  fail(`section title did not settle: ${titleReveal.settled}`);
+} else console.log("ok: section titles ride up from under their mask");
 
 const ghostLetters = await desktop.evaluate(() => {
   const chars = document.querySelectorAll(
