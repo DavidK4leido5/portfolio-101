@@ -171,6 +171,76 @@ else {
     fail(`masked heading not settled at the beat centre: ${settled.mask}`)
   } else console.log('ok: every word and the heading are fully resolved at the beat centre')
 
+  /*
+   * The copy must never reverse direction. The reveal offsets used to be driven
+   * off the unsigned distance to the beat's centre, so every word and row that
+   * had just risen into place turned round and sank again the moment the beat
+   * passed centre — read as the whole column juddering rather than scrolling.
+   * Past the centre the offsets have to stay put and only fade.
+   */
+  const readY = () => page.evaluate((b) => {
+    const el = document.querySelector(`[data-beat="${b}"]`)
+    const y = (node) => {
+      const t = getComputedStyle(node).transform
+      return t === 'none' ? 0 : new DOMMatrixReadOnly(t).m42
+    }
+    const words = [...el.querySelectorAll('.word')]
+    return {
+      // Worst offender, so one stubborn word cannot hide behind an average
+      maxWord: Math.max(...words.map(y)),
+      rows: [...el.querySelectorAll('[data-row]')].map(y),
+    }
+  }, PROBE_BEAT)
+
+  const samples = []
+  for (const off of [-320, -140, 0, 140, 320, 520]) {
+    await goTo(beatCentres[PROBE_BEAT] + off)
+    samples.push({ off, ...(await readY()) })
+  }
+  const past = samples.filter((s) => s.off >= 0)
+  const roseAgain = past.find((s) => s.maxWord > 1 || s.rows.some((v) => v > 1))
+  const approached = samples.find((s) => s.off < 0 && s.maxWord > 1)
+  if (!approached) {
+    fail('no word offset anywhere on the approach, so the reversal check proves nothing')
+  } else if (roseAgain) {
+    fail(
+      `copy re-offsets after the beat centre (${roseAgain.off}px past: ` +
+        `word ${roseAgain.maxWord.toFixed(1)}px, rows ${JSON.stringify(
+          roseAgain.rows.map((v) => Math.round(v)),
+        )})`,
+    )
+  } else {
+    console.log(
+      `ok: copy rises in (${approached.maxWord.toFixed(1)}px at ${approached.off}px) and holds past centre`,
+    )
+  }
+
+  /*
+   * `will-change` on every one of the ~630 word spans put each on its own
+   * compositor layer for the whole page, and the layer tree then had to be
+   * rebuilt on every scroll frame. Only the beats actually animating should
+   * carry the hint.
+   */
+  await goTo(beatCentres[PROBE_BEAT])
+  const hinted = await page.evaluate(() => {
+    const words = [...document.querySelectorAll('.project-beat .word')]
+    return {
+      total: words.length,
+      hinted: words.filter((w) => getComputedStyle(w).willChange !== 'auto').length,
+      nearBeats: document.querySelectorAll('.project-beat.is-near').length,
+      beats: document.querySelectorAll('.project-beat').length,
+    }
+  })
+  if (hinted.nearBeats === 0) fail('no beat got is-near, so nothing is hinted to the compositor')
+  else if (hinted.hinted === 0) fail('the animating beat got no will-change hint')
+  else if (hinted.hinted > hinted.total * 0.5) {
+    fail(`will-change left on ${hinted.hinted}/${hinted.total} words — the hint is not gated`)
+  } else {
+    console.log(
+      `ok: will-change limited to ${hinted.nearBeats}/${hinted.beats} beats (${hinted.hinted}/${hinted.total} words)`,
+    )
+  }
+
   // Mid-handover: the outgoing project's last card holds while the next wipes in.
   // Three beats per project, so halfway between beat 2 and beat 3 is the seam.
   await goTo(Math.round((beatCentres[2] + beatCentres[3]) / 2))
