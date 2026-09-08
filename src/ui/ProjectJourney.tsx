@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { projectStories } from '../content/projects'
 import { toWords } from './textReveal'
 
@@ -36,12 +36,17 @@ const WORD_FLOOR = 0.06
  */
 const COPY_PARALLAX = 0.45
 
+/** Beats within this many beat-lengths of centre get the `will-change` hint. */
+const NEAR_RANGE = 1.4
+
 type BeatEl = {
   el: HTMLElement
   index: number
   inner: HTMLElement | null
   /** Animated rows in document order, each with its own offset in the stagger */
   rows: { el: HTMLElement; words: HTMLElement[]; mask: HTMLElement | null }[]
+  /** Last `is-near` state, so the class is only touched when it actually flips */
+  near: boolean
 }
 
 /**
@@ -63,6 +68,12 @@ export function ProjectJourney() {
   const railRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef(0)
   const [active, setActive] = useState(0)
+  /**
+   * Re-reads the mounted deck and repaints, without the beat re-measure. Set by
+   * the scroll effect so the `active` commit can pick up the cards React just
+   * mounted — that effect no longer re-runs on a handover.
+   */
+  const syncDeckRef = useRef<() => void>(() => {})
 
   const stories = projectStories
   const total = stories.length * BEATS_PER_PROJECT
@@ -84,6 +95,11 @@ export function ProjectJourney() {
       return r.top + scrollY + r.height / 2
     }
 
+    /** Cheap: no layout reads, so a handover does not force a reflow */
+    const collectCards = () => {
+      cardEls = [...root.querySelectorAll<HTMLElement>('[data-shot]')]
+    }
+
     const measure = () => {
       vh = Math.max(1, innerHeight)
       const beatEls = [...root.querySelectorAll<HTMLElement>('[data-beat]')]
@@ -98,8 +114,9 @@ export function ProjectJourney() {
           words: [...row.querySelectorAll<HTMLElement>('.word')],
           mask: row.querySelector<HTMLElement>('.mask-line'),
         })),
+        near: el.classList.contains('is-near'),
       }))
-      cardEls = [...root.querySelectorAll<HTMLElement>('[data-shot]')]
+      collectCards()
       if (!beatEls.length) return
       firstCentre = centreOf(beatEls[0])
       // Beats can be shorter than a viewport, so measure the spacing rather
@@ -140,9 +157,27 @@ export function ProjectJourney() {
         beat.el.toggleAttribute('inert', o < 0.05)
         if (reduced) continue
 
-        if (beat.inner && d < 1.2) {
+        const near = d < NEAR_RANGE
+        if (near !== beat.near) {
+          beat.near = near
+          beat.el.classList.toggle('is-near', near)
+        }
+
+        /*
+         * Everything below rides in on approach and only fades on the way out.
+         * Driving the offsets off `d` in both directions meant every row and
+         * every word reversed direction the instant the beat passed centre, so
+         * the copy kicked backwards mid-scroll — which is the judder, not the
+         * frame rate.
+         */
+        const inbound = signed <= 0
+
+        if (beat.inner) {
+          // Clamped rather than skipped: freezing the transform outside a window
+          // leaves a stale offset to jump from when a fast scroll re-enters it
+          const held = Math.max(-1.2, Math.min(1.2, signed))
           beat.inner.style.transform =
-            `translate3d(0, ${(signed * pitch * COPY_PARALLAX).toFixed(1)}px, 0)`
+            `translate3d(0, ${(held * pitch * COPY_PARALLAX).toFixed(1)}px, 0)`
         }
 
         beat.rows.forEach((row, k) => {
@@ -153,8 +188,9 @@ export function ProjectJourney() {
           if (row.mask) {
             // Masked heading: rides up from under its own clip with a slight tilt
             row.el.style.opacity = '1'
-            row.mask.style.transform =
-              `translate3d(0, ${((1 - ro) * 105).toFixed(1)}%, 0) rotate(${((1 - ro) * 3.5).toFixed(2)}deg)`
+            row.mask.style.transform = inbound
+              ? `translate3d(0, ${((1 - ro) * 105).toFixed(1)}%, 0) rotate(${((1 - ro) * 3.5).toFixed(2)}deg)`
+              : 'none'
             return
           }
 
@@ -174,13 +210,17 @@ export function ProjectJourney() {
             row.words.forEach((word, i) => {
               const wo = clamp01((0.55 + WORD_SPREAD - (rd + i * step)) / 0.3)
               word.style.opacity = String(WORD_FLOOR + (1 - WORD_FLOOR) * wo)
-              word.style.transform = `translate3d(0, ${((1 - wo) * 14).toFixed(1)}px, 0)`
+              word.style.transform = inbound
+                ? `translate3d(0, ${((1 - wo) * 14).toFixed(1)}px, 0)`
+                : 'none'
             })
             return
           }
 
           row.el.style.opacity = String(ro)
-          row.el.style.transform = `translate3d(0, ${((1 - ro) * (22 + k * 6)).toFixed(1)}px, 0)`
+          row.el.style.transform = inbound
+            ? `translate3d(0, ${((1 - ro) * (22 + k * 6)).toFixed(1)}px, 0)`
+            : 'none'
         })
       }
 
@@ -294,6 +334,8 @@ export function ProjectJourney() {
       }, 150)
     }
 
+    syncDeckRef.current = () => { collectCards(); apply() }
+
     measure()
     apply()
     addEventListener('scroll', onScroll, { passive: true })
@@ -322,8 +364,89 @@ export function ProjectJourney() {
       ro?.disconnect()
       removeEventListener('scroll', onScroll)
       removeEventListener('resize', onResize)
+      syncDeckRef.current = () => {}
     }
-  }, [total, stories, active])
+    /*
+     * `active` is deliberately not a dependency. It changes at every project
+     * handover, and listing it tore the listeners down and re-measured every
+     * beat mid-scroll six times over the section. The handler reads the active
+     * index off `activeRef`, so it never needs the state value.
+     */
+  }, [total, stories])
+
+  /*
+   * A handover mounts the next project's cards. The scroll handler holds them
+   * in a cached list, so it has to be told to re-read it — otherwise the fresh
+   * cards keep their stylesheet defaults and the deck reads as empty.
+   */
+  useEffect(() => { syncDeckRef.current() }, [active])
+
+  /*
+   * The copy column is static markup — ~630 word spans, none of which depend on
+   * `active`. Without this it was re-created and diffed on every project
+   * handover, which is a re-render landing in the middle of a scroll.
+   */
+  const copy = useMemo(
+    () => (
+      <div className="project-journey__copy">
+        {stories.map((s, si) =>
+          s.beats.map((b, bi) => (
+            <article
+              className="project-beat"
+              data-beat={si * BEATS_PER_PROJECT + bi}
+              key={`${s.id}-${b.id}`}
+            >
+              <div className="project-beat__inner">
+                {bi === 0 && (
+                  <header className="project-beat__head">
+                    <span className="project-beat__num" data-row>{pad(si + 1)}</span>
+                    <h3 className="project-beat__title" data-row>
+                      <span className="mask-line">{s.title}</span>
+                    </h3>
+                    <p className="project-beat__role" data-row>
+                      {s.role}
+                      {s.period ? ` · ${s.period}` : ''}
+                    </p>
+                  </header>
+                )}
+                <p className="project-beat__label" data-row>{b.label}</p>
+                <p className="project-beat__body" data-row>
+                  <span className="sr-only">{b.body}</span>
+                  <span className="words" aria-hidden="true">
+                    {toWords(b.body).map((w, wi) => (
+                      // Space lives outside the span so words still wrap
+                      <Fragment key={`${wi}-${w}`}>
+                        <span className="word">{w}</span>{' '}
+                      </Fragment>
+                    ))}
+                  </span>
+                </p>
+                {b.id === 'tech' && s.stack.length > 0 && (
+                  <ul className="project-beat__stack" data-row>
+                    {s.stack.map((x) => (
+                      <li key={x}>{x}</li>
+                    ))}
+                  </ul>
+                )}
+                {b.id === 'build' && s.domain && (
+                  <a
+                    className="project-beat__link"
+                    data-row
+                    href={s.domain}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {hostOf(s.domain)} →
+                  </a>
+                )}
+              </div>
+            </article>
+          )),
+        )}
+      </div>
+    ),
+    [stories],
+  )
 
   if (total === 0) return null
 
@@ -388,62 +511,7 @@ export function ProjectJourney() {
           </div>
         </div>
 
-        <div className="project-journey__copy">
-          {stories.map((s, si) =>
-            s.beats.map((b, bi) => (
-              <article
-                className="project-beat"
-                data-beat={si * BEATS_PER_PROJECT + bi}
-                key={`${s.id}-${b.id}`}
-              >
-                <div className="project-beat__inner">
-                  {bi === 0 && (
-                    <header className="project-beat__head">
-                      <span className="project-beat__num" data-row>{pad(si + 1)}</span>
-                      <h3 className="project-beat__title" data-row>
-                        <span className="mask-line">{s.title}</span>
-                      </h3>
-                      <p className="project-beat__role" data-row>
-                        {s.role}
-                        {s.period ? ` · ${s.period}` : ''}
-                      </p>
-                    </header>
-                  )}
-                  <p className="project-beat__label" data-row>{b.label}</p>
-                  <p className="project-beat__body" data-row>
-                    <span className="sr-only">{b.body}</span>
-                    <span className="words" aria-hidden="true">
-                      {toWords(b.body).map((w, wi) => (
-                        // Space lives outside the span so words still wrap
-                        <Fragment key={`${wi}-${w}`}>
-                          <span className="word">{w}</span>{' '}
-                        </Fragment>
-                      ))}
-                    </span>
-                  </p>
-                  {b.id === 'tech' && s.stack.length > 0 && (
-                    <ul className="project-beat__stack" data-row>
-                      {s.stack.map((x) => (
-                        <li key={x}>{x}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {b.id === 'build' && s.domain && (
-                    <a
-                      className="project-beat__link"
-                      data-row
-                      href={s.domain}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {hostOf(s.domain)} →
-                    </a>
-                  )}
-                </div>
-              </article>
-            )),
-          )}
-        </div>
+        {copy}
       </div>
     </div>
   )

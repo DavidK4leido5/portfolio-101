@@ -88,13 +88,11 @@ canvas { display: block; }
 
 .words .word {
   display: inline-block;
-  will-change: opacity, transform;
 }
 
 /* Parent clips; the inner line rides up from under the mask */
 .mask-line {
   display: inline-block;
-  will-change: transform;
 }
 
 /* One-shot arrival for anything scrolled past once */
@@ -1534,6 +1532,18 @@ canvas { display: block; }
    itself — only the rows inside it do. */
 .project-beat [data-row] {
   opacity: 0;
+}
+
+/*
+ * There are ~630 word spans down this column. Hinting all of them at once put
+ * every one on its own compositor layer, and the layer tree then had to be
+ * updated on every scroll frame, which is what made the copy judder instead of
+ * scroll. `is-near` is set from the scroll handler on the two or three beats
+ * that are actually animating, so the hint costs about 100 spans, not 630.
+ */
+.project-beat.is-near [data-row],
+.project-beat.is-near .word,
+.project-beat.is-near .mask-line {
   will-change: opacity, transform;
 }
 
