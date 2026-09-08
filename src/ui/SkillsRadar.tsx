@@ -85,7 +85,7 @@ export function SkillsRadar({ categories, activeId, onSelect }: Props) {
   }, [activeId, reduced])
 
   return (
-    <div className="skills-radar" data-testid="skills-radar">
+    <div className="skills-radar" data-testid="skills-radar" data-reveal="card">
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} width="100%" height="100%" role="group" aria-label="Skills radar">
         <defs>
           <linearGradient id="skills-poly-fill" x1="0%" y1="0%" x2="100%" y2="100%">

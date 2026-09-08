@@ -97,6 +97,150 @@ else {
   else if (!state.opacity.some((o) => o > 0.9)) {
     fail(`about reveals stuck invisible: ${JSON.stringify(state)}`)
   } else console.log(`ok: ${state.shown}/${state.total} about-section reveals fired`)
+
+}
+
+/* —— Image wipes ——
+ *
+ * The image variant is a clip wipe rather than a fade, so that it leaves the
+ * resting opacity the screenshots on this page are set at alone — a reveal that
+ * animated opacity would have to override that value and then hand it back.
+ * Checked as "not 1 and all the same" rather than against a number, since the
+ * resting value is a design choice and one of these has moved before.
+ *
+ * Scrolled to the first screenshot's own position rather than to an offset into
+ * its section: the section opens with an index, a display title and a lede, so
+ * a fixed offset from the top lands well short of any card.
+ */
+const shotTop = await page.evaluate(() => {
+  const el = document.querySelector('.card__shot[data-wipe]')
+  if (!el) return null
+  const r = el.getBoundingClientRect()
+  return Math.round(r.top + window.scrollY + r.height / 2 - window.innerHeight / 2)
+})
+if (shotTop == null) fail('no experience screenshots tagged for the wipe')
+else {
+  await goTo(shotTop)
+  await page
+    .waitForFunction(
+      () => document.querySelectorAll('.card__shot[data-wipe].is-in').length > 0,
+      { timeout: SETTLE },
+    )
+    .catch(() => {})
+  const wipes = await page.evaluate(() => {
+    const els = [...document.querySelectorAll('.card__shot[data-wipe]')]
+    const seen = els.filter((e) => e.classList.contains('is-in'))
+    return {
+      total: els.length,
+      shown: seen.length,
+      clips: seen.map((e) => getComputedStyle(e).clipPath),
+      opacities: seen.map((e) => Number(getComputedStyle(e).opacity)),
+    }
+  })
+  if (wipes.total === 0) fail('the experience screenshots are not tagged for the wipe')
+  else if (wipes.shown === 0) fail(`image wipes never fired (${wipes.total} tagged)`)
+  else if (wipes.clips.some((c) => c.includes('100%'))) {
+    fail(`an image wipe stayed clipped shut: ${JSON.stringify(wipes.clips)}`)
+  } else if (wipes.opacities.some((o) => o > 0.999 || o < 0.05)) {
+    fail(`the wipe drove a screenshot's opacity: ${JSON.stringify(wipes.opacities)}`)
+  } else if (new Set(wipes.opacities).size !== 1) {
+    fail(`screenshots left at different opacities: ${JSON.stringify(wipes.opacities)}`)
+  } else {
+    console.log(
+      `ok: ${wipes.shown}/${wipes.total} image wipes opened, resting opacity intact (${wipes.opacities[0]})`,
+    )
+  }
+}
+
+/* —— Stagger containers hand out increasing delays —— */
+const stagger = await page.evaluate(() => {
+  const group = document.querySelector('[data-reveal-stagger]')
+  if (!group) return null
+  const items = [...group.querySelectorAll('[data-reveal],[data-wipe]')]
+  return items.map((e) => parseFloat(e.style.getPropertyValue('--reveal-delay')) || 0)
+})
+if (!stagger) fail('no [data-reveal-stagger] container found')
+else if (stagger.length < 2) fail('stagger container has nothing to cascade')
+else if (!(stagger[stagger.length - 1] > stagger[0])) {
+  fail(`stagger delays did not increase: ${JSON.stringify(stagger)}`)
+} else console.log(`ok: stagger delays cascade (${stagger[0]}s -> ${stagger[stagger.length - 1]}s)`)
+
+/*
+ * —— Progressive enhancement ——
+ *
+ * The copy is in the markup, so the hidden state must be the thing that needs
+ * the script, not the visible one. Dropping the class observeReveal adds stands
+ * in for the script never having arrived: everything it was hiding has to read
+ * as ordinary content, including the section titles, which are the largest text
+ * on the page and hide themselves with their own transform.
+ */
+const wasArmed = await page.evaluate(() => {
+  const html = document.documentElement
+  const armed = html.classList.contains('reveal-armed')
+  // Mark what is still waiting before unarming, so the read below can tell the
+  // difference between "the unarmed state is visible" and "it had already run"
+  for (const el of document.querySelectorAll('[data-reveal],[data-wipe]')) {
+    if (!el.classList.contains('is-in')) el.setAttribute('data-pending', '')
+  }
+  html.classList.remove('reveal-armed')
+  return armed
+})
+/*
+ * Long enough for the section titles' 1.25s transition to settle. Unarming
+ * takes them from under their mask back to nothing, and reading that in flight
+ * reports a position they are only passing through.
+ */
+await page.waitForTimeout(2200)
+const bare = await page.evaluate(() => ({
+  reveals: [...document.querySelectorAll('[data-reveal][data-pending]')].map((e) => ({
+    opacity: Number(getComputedStyle(e).opacity),
+    transform: getComputedStyle(e).transform,
+  })),
+  wipes: [...document.querySelectorAll('[data-wipe][data-pending]')].map(
+    (e) => getComputedStyle(e).clipPath,
+  ),
+  titles: [...document.querySelectorAll('.spine-title__line')].map(
+    (e) => getComputedStyle(e).transform,
+  ),
+}))
+bare.armed = wasArmed
+bare.pending = bare.reveals.length
+await page.evaluate((armed) => {
+  for (const el of document.querySelectorAll('[data-pending]')) {
+    el.removeAttribute('data-pending')
+  }
+  document.documentElement.classList.toggle('reveal-armed', armed)
+}, wasArmed)
+/**
+ * Undisplaced, rather than exactly identity. A settled transition leaves a
+ * sub-pixel residue in the matrix — visually flat, and failing on it would be
+ * testing the easing curve's last frame rather than the layout.
+ */
+const flat = (t) => {
+  if (t === 'none') return true
+  const n = t.match(/^matrix\(([^)]+)\)$/)?.[1].split(',').map(Number)
+  if (!n || n.length !== 6 || n.some(Number.isNaN)) return false
+  const [a, b, c, d, e, f] = n
+  const scaled = Math.abs(a - 1) > 0.01 || Math.abs(d - 1) > 0.01
+  const skewed = Math.abs(b) > 0.01 || Math.abs(c) > 0.01
+  const moved = Math.abs(e) > 2 || Math.abs(f) > 2
+  return !scaled && !skewed && !moved
+}
+if (!bare.armed) fail('observeReveal never armed the hidden state')
+else if (bare.pending === 0) {
+  fail('every reveal had already fired, so this proves nothing about the unarmed state')
+} else if (bare.reveals.some((r) => r.opacity < 0.9)) {
+  fail(`unarmed reveals are still transparent: ${JSON.stringify(bare.reveals.slice(0, 3))}`)
+} else if (bare.reveals.some((r) => !flat(r.transform))) {
+  fail(`unarmed reveals are still displaced: ${JSON.stringify(bare.reveals.slice(0, 3))}`)
+} else if (bare.wipes.some((c) => c !== 'none')) {
+  fail(`unarmed image wipes are still clipped: ${JSON.stringify(bare.wipes)}`)
+} else if (bare.titles.some((t) => !flat(t))) {
+  fail(`unarmed section titles are still under their mask: ${JSON.stringify(bare.titles)}`)
+} else {
+  console.log(
+    `ok: unarmed page reads as plain content (${bare.pending} pending reveals, ${bare.titles.length} titles)`,
+  )
 }
 
 // —— Projects walkthrough: word stagger and masked heading ——

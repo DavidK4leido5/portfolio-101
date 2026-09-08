@@ -63,10 +63,10 @@ export function ContactPanel() {
 
   return (
     <div className="contact-panel" data-testid="contact-panel">
-      <p className="contact-panel__lead">{contact.description}</p>
+      <p className="contact-panel__lead" data-reveal>{contact.description}</p>
 
-      <form className="contact-form" onSubmit={onSubmit} noValidate>
-        <label className="contact-field">
+      <form className="contact-form" onSubmit={onSubmit} noValidate data-reveal-stagger>
+        <label className="contact-field" data-reveal>
           <span>Name</span>
           <input
             type="text"
@@ -78,7 +78,7 @@ export function ContactPanel() {
             required
           />
         </label>
-        <label className="contact-field">
+        <label className="contact-field" data-reveal>
           <span>Email</span>
           <input
             type="email"
@@ -90,7 +90,7 @@ export function ContactPanel() {
             required
           />
         </label>
-        <label className="contact-field">
+        <label className="contact-field" data-reveal>
           <span>Message</span>
           <textarea
             name="message"
@@ -129,20 +129,22 @@ export function ContactPanel() {
         )}
       </form>
 
-      <a className="contact-panel__email" href={`mailto:${contact.email}`}>
+      <a className="contact-panel__email" href={`mailto:${contact.email}`} data-reveal="card">
         <span className="contact-panel__email-label">Or email me directly</span>
         <span className="contact-panel__email-value">{contact.email}</span>
       </a>
 
-      <div className="tags">
+      <div className="tags" data-reveal-stagger>
         {contact.links.map((l) => (
-          <a key={l.label} href={l.url} target="_blank" rel="noreferrer">{l.label}</a>
+          <a key={l.label} href={l.url} target="_blank" rel="noreferrer" data-reveal="left">
+            {l.label}
+          </a>
         ))}
       </div>
 
-      <dl className="contact-panel__meta">
+      <dl className="contact-panel__meta" data-reveal-stagger>
         {contact.meta.map((m) => (
-          <div key={m.label}>
+          <div key={m.label} data-reveal="left">
             <dt>{m.label}</dt>
             <dd>{m.value}</dd>
           </div>

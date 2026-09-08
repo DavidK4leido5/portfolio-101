@@ -50,8 +50,15 @@ export function SectionsSpine() {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    const stopFit = observeFit(root)
+    /*
+     * Reveals first. Arming adds the class the titles' hidden transform hangs
+     * off, and `observeFit` measures those titles with getBoundingClientRect —
+     * which includes the transform. Fitting before the class lands and
+     * re-fitting after it (webfonts do that) would solve two different sizes
+     * for the same line.
+     */
     const stopReveal = observeReveal(root)
+    const stopFit = observeFit(root)
     return () => { stopFit(); stopReveal() }
   }, [])
 
