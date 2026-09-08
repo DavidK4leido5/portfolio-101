@@ -25,7 +25,9 @@ const SUB = 'ENGINEER'
 
 /**
  * Per tier: the share of the viewport width the block spans, and the chrome to
- * keep clear above and below it.
+ * keep clear above and below it. The bottom figure reserves the contact CTA
+ * and the density slider, not just the viewport edge — the ENGINEER line used
+ * to land straight through the middle of the button.
  *
  * The measure is held in against the brain's own footprint on purpose — run the
  * words edge to edge and the outer letters have no cloud behind them, which is
@@ -35,9 +37,11 @@ const SUB = 'ENGINEER'
  * brain, not on the viewport.
  */
 const LAYOUT = {
-  desktop: { measure: 0.76, top: 96, bottom: 150 },
-  tablet: { measure: 0.72, top: 96, bottom: 148 },
-  mobile: { measure: 0.6, top: 184, bottom: 160 },
+  desktop: { measure: 0.76, top: 96, bottom: 224 },
+  tablet: { measure: 0.72, top: 96, bottom: 216 },
+  // Mobile's band is deliberately lopsided: the brain sits low in a portrait
+  // frame, and the block has to sit on it rather than above it
+  mobile: { measure: 0.62, top: 248, bottom: 210 },
 } as const
 /**
  * Gap between one line's baseline and the next line's cap, as a share of the

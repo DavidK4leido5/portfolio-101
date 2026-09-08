@@ -5,7 +5,7 @@ import { traceStages } from '../content/requestTrace'
 import { NODE_LIMITS } from '../lib/nodes'
 import { animateNodeCount } from '../scene/nodeAnimator'
 import { scrollToSection } from '../scroll/traceNav'
-import { profile } from '../content/portfolio'
+import { contact, profile } from '../content/portfolio'
 import { SiteBrand } from './SiteBrand'
 import { RequestTrace } from './RequestTrace'
 
@@ -48,6 +48,7 @@ export function PortfolioUI() {
   const nodeCount = useSceneStore((s) => s.nodeCount)
   const scrollZone = useSceneStore((s) => s.scrollZone)
   const traceStage = useSceneStore((s) => s.traceStage)
+  const heroExit = useSceneStore((s) => s.heroExitProgress)
   const setNodeCount = useSceneStore((s) => s.setNodeCount)
   const limits = NODE_LIMITS[tier]
   const uiReady = loadPhase === 'ready'
@@ -99,6 +100,32 @@ export function PortfolioUI() {
       <div className="hud bl">
         THE ADAPTIVE MIND <b>v1.0</b><br />{profile.tagline}
       </div>
+
+      {/*
+        Contact is the last of five sections, which is a long way to scroll to
+        find the one thing a visitor might actually want to do. This puts it one
+        click from the first frame. It fades on the hero's own exit curve rather
+        than on the zone flip, so it leaves with the rest of the hero chrome.
+      */}
+      {uiReady && (
+        <div
+          className="hero-cta"
+          style={{ opacity: Math.max(0, 1 - heroExit / 0.4) }}
+          aria-hidden={heroExit > 0.3}
+        >
+          <button
+            type="button"
+            className="hero-cta__btn"
+            data-testid="hero-cta"
+            tabIndex={heroExit > 0.3 ? -1 : 0}
+            onClick={() => scrollToSection('contact')}
+          >
+            <span>Start a project</span>
+            <span className="hero-cta__arrow" aria-hidden>↗</span>
+          </button>
+          <p className="hero-cta__note">{contact.meta[0]?.value ?? 'Open to work'}</p>
+        </div>
+      )}
 
       {uiReady && inHero && !isMobile && (
         <div className="node-control">
