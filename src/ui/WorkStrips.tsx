@@ -32,6 +32,29 @@ function WorkGroup({ group }: { group: ClientWorkGroup }) {
   )
 }
 
+/** Two counter-scrolling rows of client screenshots, grouped by product. */
+export function ClientWorkStrip() {
+  const { rowA, rowB } = splitClientWorkGroups()
+  if (rowA.length + rowB.length === 0) return null
+
+  return (
+    <div className="client-work" data-testid="client-work-marquee">
+      <Marquee direction="rtl" speedPx={28} fill aria-label="Client work screenshots">
+        {rowA.map((g) => (
+          <WorkGroup key={g.key} group={g} />
+        ))}
+      </Marquee>
+      {rowB.length > 0 && (
+        <Marquee direction="ltr" speedPx={24} className="client-work__row--offset" fill decorative>
+          {rowB.map((g) => (
+            <WorkGroup key={g.key} group={g} />
+          ))}
+        </Marquee>
+      )}
+    </div>
+  )
+}
+
 function initialsOf(name: string) {
   return name
     .split(/\s+/)
@@ -79,58 +102,16 @@ function TestimonialCard({ t }: { t: Testimonial }) {
   )
 }
 
-export function CoverSection() {
-  const { rowA, rowB } = splitClientWorkGroups()
-  const hasShots = rowA.length + rowB.length > 0
-  const projectCount = rowA.length + rowB.length
-
+/** References from the people who hired him, as one scrolling row. */
+export function TestimonialStrip() {
+  if (testimonials.length === 0) return null
   return (
-    <section className="cover-section" data-testid="cover-section" aria-label="Client work and testimonials">
-      <div className="cover-inner">
-        <header className="cover-header">
-          <p className="cover-eyebrow">Client work</p>
-          <h2 className="cover-title">Shipped, and running in production</h2>
-          <p className="cover-lead">
-            {projectCount} client engagements across systems, frontend, and full-stack delivery.
-            Each strip below groups the screens by the product they belong to.
-          </p>
-        </header>
-      </div>
-
-      {hasShots && (
-        <div className="client-work" data-testid="client-work-marquee">
-          <Marquee direction="rtl" speedPx={28} fill aria-label="Client work screenshots">
-            {rowA.map((g) => (
-              <WorkGroup key={g.key} group={g} />
-            ))}
-          </Marquee>
-          {rowB.length > 0 && (
-            <Marquee direction="ltr" speedPx={24} className="client-work__row--offset" fill decorative>
-              {rowB.map((g) => (
-                <WorkGroup key={g.key} group={g} />
-              ))}
-            </Marquee>
-          )}
-        </div>
-      )}
-
-      <div className="cover-inner">
-        <header className="cover-header cover-header--spaced">
-          <p className="cover-eyebrow">References</p>
-          <h2 className="cover-title">What the people who hired me say</h2>
-          <p className="cover-lead">
-            Founders and directors I reported to directly, on the work I owned for them.
-          </p>
-        </header>
-      </div>
-
-      <div className="testimonial-marquee" data-testid="testimonial-marquee">
-        <Marquee direction="ltr" speedPx={22} fill aria-label="Testimonials">
-          {testimonials.map((t) => (
-            <TestimonialCard key={t.id} t={t} />
-          ))}
-        </Marquee>
-      </div>
-    </section>
+    <div className="testimonial-marquee" data-testid="testimonial-marquee">
+      <Marquee direction="ltr" speedPx={22} fill aria-label="Testimonials">
+        {testimonials.map((t) => (
+          <TestimonialCard key={t.id} t={t} />
+        ))}
+      </Marquee>
+    </div>
   )
 }

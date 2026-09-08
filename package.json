@@ -9,6 +9,8 @@
     "build:smoke": "tsc --noEmit && VITE_SMOKE=true vite build",
     "preview": "vite preview",
     "test": "node tests/smoke.mjs",
+    "test:scene": "node tests/scene-visibility-check.mjs",
+    "test:reveal": "node tests/reveal-check.mjs",
     "bake:brain": "node scripts/bake-brain-cloud.mjs",
     "bake:shapes": "node scripts/bake-shapes.mjs",
     "bake:shots": "node scripts/bake-shots.mjs"

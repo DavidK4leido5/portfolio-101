@@ -3,16 +3,30 @@ import { useSceneStore } from './store/sceneStore'
 import { HomeScene } from './scene/HomeScene'
 import { PortfolioUI } from './ui/PortfolioUI'
 import { LoadingScreen } from './ui/LoadingScreen'
-import { HeroTypography } from './ui/HeroTypography'
+import { HeroMark } from './ui/HeroMark'
 import { ScrollDriver } from './scroll/ScrollDriver'
+import { useSceneVisibility } from './scene/useSceneVisibility'
 import { detectTier } from './lib/quality'
 
 export default function App() {
   const sceneReady = useSceneStore((s) => s.sceneReady)
   const loadPhase = useSceneStore((s) => s.loadPhase)
-  const phase = useSceneStore((s) => s.phase)
   const tier = useSceneStore((s) => s.qualityTier)
   const scrollZone = useSceneStore((s) => s.scrollZone)
+  // Brain stage stops rendering once the cover paints over it, then unmounts if
+  // the user stays down there. See useSceneVisibility.
+  const sceneState = useSceneVisibility('[data-testid="scene-cover-sentinel"]')
+
+  /*
+   * Own the scroll position on load. Every visual state on this page is
+   * scrubbed from scroll, so restoring the browser's remembered offset drops
+   * the reader into the middle of the trace with the intro sequence still
+   * running and the mask still closed — a worse first frame than the top.
+   */
+  useEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+    window.scrollTo(0, 0)
+  }, [])
 
   useEffect(() => {
     let to: ReturnType<typeof setTimeout>
@@ -30,42 +44,18 @@ export default function App() {
     return () => clearTimeout(t)
   }, [sceneReady, loadPhase])
 
-  // Lock page scroll until labels finish cascading, and while a sector modal is up
-  const scrollLocked =
-    loadPhase !== 'ready' || phase === 'arrived' || phase === 'travel'
-
+  // Hold the page still until the sector labels finish cascading in
   useEffect(() => {
-    if (!scrollLocked) return
-
+    if (loadPhase === 'ready') return
     const html = document.documentElement
     const body = document.body
-    const y = window.scrollY
-    const p = useSceneStore.getState().phase
-    const modalOpen = p === 'arrived' || p === 'travel'
-
     html.style.overflow = 'hidden'
     body.style.overflow = 'hidden'
-    // iOS: pin body so rubber-band can't shift the page under the modal
-    if (modalOpen) {
-      body.style.position = 'fixed'
-      body.style.top = `-${y}px`
-      body.style.width = '100%'
-    }
-
     return () => {
-      const pinned = body.style.position === 'fixed'
-      const top = body.style.top
       html.style.overflow = ''
       body.style.overflow = ''
-      body.style.position = ''
-      body.style.top = ''
-      body.style.width = ''
-      if (pinned) {
-        const restore = Math.abs(parseInt(top || '0', 10)) || 0
-        window.scrollTo(0, restore)
-      }
     }
-  }, [scrollLocked])
+  }, [loadPhase])
 
   return (
     <div
@@ -73,15 +63,13 @@ export default function App() {
       data-quality-tier={tier}
       data-scroll-zone={scrollZone}
       data-load-phase={loadPhase}
-      data-modal={phase === 'arrived' || phase === 'travel' ? 'open' : 'closed'}
+      data-scene-state={sceneState}
     >
       <div className="app-scene" data-testid="app-scene">
-        <div className="app-scene-parallax" data-testid="app-scene-parallax">
-          <HomeScene />
-        </div>
+        {sceneState !== 'off' && <HomeScene paused={sceneState === 'paused'} />}
       </div>
       <ScrollDriver />
-      <HeroTypography />
+      <HeroMark />
       <LoadingScreen />
       <PortfolioUI />
     </div>

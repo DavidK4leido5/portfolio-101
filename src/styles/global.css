@@ -1,4 +1,8 @@
 :root {
+  /* Easing curves lifted from ownthepatch.co.uk: a long slow tail is what
+     makes text arrive rather than snap */
+  --ease-osmo: cubic-bezier(0.625, 0.05, 0, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
   --accent: #8b5cf6;
   --scroll-track: rgba(255, 255, 255, 0.04);
   --scroll-thumb: color-mix(in srgb, var(--accent) 42%, rgba(255, 255, 255, 0.18));
@@ -67,7 +71,55 @@ canvas { display: block; }
   min-height: 100%;
 }
 
-/* Sticky brain stage — stays put while cover scrolls over, then reappears for journey */
+/* —— Text reveal primitives —— */
+
+/* Real sentence for screen readers; the split copy beside it is aria-hidden */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.words .word {
+  display: inline-block;
+  will-change: opacity, transform;
+}
+
+/* Parent clips; the inner line rides up from under the mask */
+.mask-line {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* One-shot arrival for anything scrolled past once */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 34px, 0);
+  transition:
+    opacity 0.9s var(--ease-soft) var(--reveal-delay, 0s),
+    transform 1s var(--ease-osmo) var(--reveal-delay, 0s);
+}
+
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Sticky brain stage — held under the hero and the whole request trace */
 .app-scene {
   position: sticky;
   top: 0;
@@ -80,20 +132,12 @@ canvas { display: block; }
   overflow: hidden;
 }
 
-.app-scene-parallax {
-  width: 100%;
-  height: 100%;
-  transform-origin: center center;
-  will-change: transform;
-  pointer-events: none;
-}
-
 .app-scene canvas {
   pointer-events: auto;
 }
 
 .scroll-track {
-  /* No z-index — avoid a stacking context that traps .cover-section under fixed HUD */
+  /* No z-index — avoid a stacking context that traps the sections under the fixed HUD */
   position: relative;
   margin-top: -100vh;
   margin-top: -100dvh;
@@ -106,20 +150,10 @@ canvas { display: block; }
   pointer-events: none;
 }
 
-.journey-track {
-  position: relative;
+/* Marks where content starts painting over the brain — see useSceneVisibility */
+.scene-cover-sentinel {
+  height: 1px;
   pointer-events: none;
-}
-
-.settle-bridge {
-  height: 100vh;
-  height: 100dvh;
-  pointer-events: none;
-}
-
-.journey-beat {
-  height: 100vh;
-  height: 100dvh;
 }
 
 .scroll-end {
@@ -135,64 +169,10 @@ canvas { display: block; }
   text-transform: uppercase;
 }
 
-/* Cover must paint above fixed .hero-type (6) and .ui (10) */
-.cover-section {
-  position: relative;
-  z-index: 20;
-  pointer-events: auto;
-  background: #07070e;
-  color: #e8e8f0;
-  padding: clamp(64px, 10vh, 120px) clamp(20px, 5vw, 64px) clamp(80px, 12vh, 140px);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 -40px 80px rgba(0, 0, 0, 0.55);
-}
-
-.cover-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.cover-header {
-  margin-bottom: clamp(32px, 5vh, 56px);
-  max-width: 36rem;
-}
-
-.cover-eyebrow {
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent) 80%, #fff);
-  margin-bottom: 10px;
-}
-
-.cover-title {
-  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  margin-bottom: 14px;
-}
-
-.cover-lead {
-  color: rgba(232, 232, 240, 0.62);
-  font-size: 1rem;
-  line-height: 1.55;
-}
-
-.cover-code {
-  font-size: 0.85em;
-  color: color-mix(in srgb, var(--accent) 75%, #fff);
-}
-
-.cover-header--spaced {
-  margin-top: clamp(56px, 10vh, 96px);
-}
-
-/* Full-bleed marquees inside padded cover */
+/* The gutter negation that makes these full-bleed lives on the section that
+   holds them, since only it knows its own padding */
 .client-work,
 .testimonial-marquee {
-  margin-inline: calc(-1 * clamp(20px, 5vw, 64px));
   margin-top: clamp(8px, 2vh, 20px);
 }
 
@@ -459,49 +439,6 @@ canvas { display: block; }
   }
 }
 
-/* Cover hides HUD chrome; hero-type + indicators scrub via GSAP with coverProgress */
-.app-root[data-scroll-zone="cover"] .hud,
-.app-root[data-scroll-zone="cover"] .node-control,
-.app-root[data-scroll-zone="cover"] .overlay {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-.app-root[data-scroll-zone="settle"] .hud,
-.app-root[data-scroll-zone="settle"] .node-control,
-.app-root[data-scroll-zone="settle"] .indicators,
-.app-root[data-scroll-zone="settle"] .sector-nav {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-.app-root[data-scroll-zone="journey"] .hud,
-.app-root[data-scroll-zone="journey"] .node-control,
-.app-root[data-scroll-zone="journey"] .hero-type,
-.app-root[data-scroll-zone="end"] .hud,
-.app-root[data-scroll-zone="end"] .node-control,
-.app-root[data-scroll-zone="end"] .hero-type {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-.app-root[data-scroll-zone="journey"] .indicators,
-.app-root[data-scroll-zone="journey"] .sector-nav,
-.app-root[data-scroll-zone="end"] .indicators,
-.app-root[data-scroll-zone="end"] .sector-nav {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* Journey uses the real panel — hide close (scroll owns navigation) */
-.app-root[data-scroll-zone="journey"] .panel-close {
-  display: none;
-}
-
 /* Full-frame film grain — complements WebGL Noise on the canvas */
 .app-root[data-quality-tier="desktop"]::after,
 .app-root[data-quality-tier="tablet"]::after {
@@ -525,184 +462,98 @@ canvas { display: block; }
   100% { transform: translate(2%, -2%); }
 }
 
+/* Below the sections (20): everything in here belongs to the brain stage, so
+   a section rising over the page should cover it. The section nav is the one
+   exception and lives outside this layer. */
 .ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
-/* Poster hero — centered on brain, woven depth + chromatic aberration */
-.hero-type {
+/* ---- Hero mark: FULL / STACK punched out of a veil over the brain ---- */
+
+.hero-mark {
   position: fixed;
   inset: 0;
   z-index: 6;
   pointer-events: none;
-  visibility: hidden;
-  --hero-occlude-w: 20%;
-  --hero-occlude-h: 26%;
 }
 
-.hero-depth {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 0 clamp(10px, 2.5vw, 32px);
-}
-
-.hero-depth--back {
-  z-index: 1;
-}
-
-.hero-depth--front {
-  z-index: 2;
-  -webkit-mask-image: radial-gradient(
-    ellipse var(--hero-occlude-w) var(--hero-occlude-h) at 50% 51%,
-    transparent 0%,
-    transparent 58%,
-    #000 86%
-  );
-  mask-image: radial-gradient(
-    ellipse var(--hero-occlude-w) var(--hero-occlude-h) at 50% 51%,
-    transparent 0%,
-    transparent 58%,
-    #000 86%
-  );
-}
-
-.hero-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+.hero-mark__svg {
+  display: block;
   width: 100%;
-  max-width: 100vw;
-  --chroma-offset: 4px;
+  height: 100%;
 }
 
-.hero-line {
-  margin: 0;
-  line-height: 0.8;
+/* The sheet the words are cut out of. Dark enough that the cloud inside the
+   letterforms is the brightest thing on screen, sheer enough that the brain
+   still reads as a whole shape behind it. */
+.hero-mark__veil {
+  fill: rgba(3, 3, 8, 0.82);
 }
 
-.hero-stack--single {
-  justify-content: center;
-}
-
-.chromat {
-  display: inline-block;
-  position: relative;
-}
-
-.chromat-base,
-.chromat-r,
-.chromat-b {
+.hero-mark__glyph {
   font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
   font-weight: 800;
-  font-size: clamp(2.2rem, 10.8vw, 7.25rem);
-  letter-spacing: -0.045em;
   text-transform: uppercase;
-  line-height: 0.8;
-  white-space: nowrap;
 }
 
-.chromat-base {
-  position: relative;
-  z-index: 2;
-  display: block;
-  color: #fff;
-  text-shadow: 0 0 80px color-mix(in srgb, var(--accent) 22%, transparent);
+.hero-mark__stroke {
+  fill: none;
+  stroke: rgba(244, 237, 228, 0.5);
+  /* Sized against the glyph, not in px: a fixed hairline vanishes on a 340px
+     letter and looks heavy on a phone */
+  stroke-width: 0.008em;
+  paint-order: stroke;
 }
 
-.chromat--subtle .chromat-base {
-  color: rgba(255, 255, 255, 0.34);
-  text-shadow: none;
+.hero-mark__sub {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  fill: rgba(235, 235, 255, 0.55);
+  text-transform: uppercase;
 }
 
-.chromat--subtle .chromat-r,
-.chromat--subtle .chromat-b {
-  opacity: 0.35;
-}
-
-.chromat-r,
-.chromat-b {
+/* Small annotations set against the giant mark. The contrast in scale is the
+   design, so these stay genuinely small. */
+.hero-notes {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  mix-blend-mode: screen;
-  opacity: 0.8;
 }
 
-.chromat-r {
-  color: #ff2a5c;
-  transform: translate(calc(var(--chroma-offset) * -1), calc(var(--chroma-offset) * 0.15));
+.hero-note {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 12rem;
 }
 
-.chromat-b {
-  color: #24e8ff;
-  transform: translate(var(--chroma-offset), calc(var(--chroma-offset) * -0.12));
+.hero-note--left {
+  left: clamp(20px, 4vw, 66px);
+  top: 33%;
 }
 
-.hero-type[data-load-phase="ready"] .chromat:not(.chromat--subtle) .chromat-r {
-  animation: chroma-r-drift 3.6s ease-in-out infinite;
+.hero-note--right {
+  right: clamp(20px, 4vw, 66px);
+  top: 59%;
+  text-align: right;
+  align-items: flex-end;
 }
 
-.hero-type[data-load-phase="ready"] .chromat:not(.chromat--subtle) .chromat-b {
-  animation: chroma-b-drift 3.6s ease-in-out infinite;
+.hero-note__value {
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+  letter-spacing: -0.02em;
+  color: #f2f2f8;
 }
 
-@keyframes chroma-r-drift {
-  0%, 100% { transform: translate(-3px, 0.5px); opacity: 0.6; }
-  40% { transform: translate(-7px, 1px); opacity: 0.92; }
-  70% { transform: translate(-4px, 0.3px); opacity: 0.72; }
-}
-
-@keyframes chroma-b-drift {
-  0%, 100% { transform: translate(3px, -0.4px); opacity: 0.6; }
-  40% { transform: translate(7px, -0.8px); opacity: 0.92; }
-  70% { transform: translate(4px, -0.2px); opacity: 0.72; }
-}
-
-.hero-type[data-quality-tier="mobile"] {
-  --hero-occlude-w: 30%;
-  --hero-occlude-h: 34%;
-}
-
-.hero-line--ghost .chromat-base {
-  color: rgba(255, 255, 255, 0.34);
-  text-shadow: none;
-}
-
-.hero-line--ghost .chromat-r,
-.hero-line--ghost .chromat-b {
-  opacity: 0.28;
-}
-
-.hero-type[data-quality-tier="mobile"] .hero-line .chromat-base,
-.hero-type[data-quality-tier="mobile"] .hero-line .chromat-r,
-.hero-type[data-quality-tier="mobile"] .hero-line .chromat-b {
-  font-size: clamp(1.35rem, 7.8vw, 3.2rem);
-  white-space: normal;
-  max-width: 92vw;
-  line-height: 0.92;
-  letter-spacing: -0.035em;
-}
-
-@media (max-width: 480px) {
-  .chromat-base,
-  .chromat-r,
-  .chromat-b {
-    font-size: clamp(0.95rem, 7.4vw, 2rem);
-    letter-spacing: -0.03em;
-  }
-
-  .hero-type {
-    --hero-occlude-w: 36%;
-    --hero-occlude-h: 38%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-type .chromat:not(.chromat--subtle) .chromat-r,
-  .hero-type .chromat:not(.chromat--subtle) .chromat-b {
-    animation: none;
-  }
+.hero-note__label {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  line-height: 1.6;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.42);
 }
 
 .hud {
@@ -713,6 +564,7 @@ canvas { display: block; }
   text-transform: uppercase;
   color: rgba(235, 235, 255, 0.38);
   line-height: 1.9;
+  transition: opacity 0.3s ease;
 }
 .hud b { color: var(--accent); font-weight: 500; }
 .hud.tl { top: 22px; left: 26px; }
@@ -791,12 +643,6 @@ canvas { display: block; }
   line-height: 1.55;
 }
 
-.hud-profile-title {
-  display: block;
-  margin-top: 2px;
-  color: rgba(235, 235, 255, 0.6);
-}
-
 .hud-profile-meta {
   margin-top: 8px;
   font-size: 9px;
@@ -815,220 +661,12 @@ canvas { display: block; }
   box-shadow: 0 0 8px var(--accent);
 }
 
-/* Full-screen layer must never eat clicks meant for the slider/HUD beneath it;
-   the .indicator buttons re-enable their own pointer events */
-.indicators { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
-
-/* Pre-cascade: keep buttons invisible until the reveal timeline starts */
-.indicators[data-revealing="true"] .indicator,
-.sector-nav[data-revealing="true"] .sector-nav-btn {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.indicator {
-  position: absolute;
-  top: 0; left: 0;
-  transform: translate(-3px, -50%);
-  pointer-events: auto;
-  background: none; border: none; cursor: pointer;
-  display: flex; align-items: center; gap: 8px;
-  padding: 4px;
-  --section-color: var(--accent);
-}
-.indicator .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--section-color);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--section-color) 70%, transparent);
-  flex-shrink: 0;
-}
-.indicator .line {
-  width: 44px; height: 1px;
-  background: linear-gradient(90deg, var(--section-color), transparent);
-  opacity: 0.75;
-  flex-shrink: 0;
-}
-.indicator .label-wrap {
-  background: rgba(4, 4, 12, 0.78);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 2px solid var(--section-color);
-  padding: 6px 12px;
-  border-radius: 2px;
-  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.5), 0 0 24px color-mix(in srgb, var(--section-color) 12%, transparent);
-}
-.indicator .label {
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(245, 245, 255, 0.94);
-  white-space: nowrap;
-  transition: color 0.25s;
-}
-.indicator:hover .label-wrap,
-.indicator:focus-visible .label-wrap {
-  background: rgba(8, 8, 16, 0.9);
-  border-color: color-mix(in srgb, var(--section-color) 45%, rgba(255, 255, 255, 0.12));
-  box-shadow: 0 2px 22px rgba(0, 0, 0, 0.55), 0 0 28px color-mix(in srgb, var(--section-color) 28%, transparent);
-}
-.indicator:hover .label,
-.indicator:focus-visible .label { color: #fff; }
-.indicator:focus-visible { outline: none; }
-.indicator:focus-visible .label-wrap { outline: 1px solid var(--section-color); outline-offset: 2px; }
-
-/* Mobile: fixed sector bar — brain labels are hidden (they drift off-screen) */
-.sector-nav {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: auto;
-  display: flex;
-  gap: 6px;
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
-  background: rgba(4, 4, 12, 0.9);
-  backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  visibility: hidden;
-}
-.sector-nav::-webkit-scrollbar { display: none; }
-
-.sector-nav-btn {
-  flex: 1 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 40px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 2px solid var(--section-color);
-  border-radius: 2px;
-  cursor: pointer;
-  --section-color: var(--accent);
-}
-.sector-nav-btn .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--section-color);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--section-color) 70%, transparent);
-  flex-shrink: 0;
-}
-.sector-nav-btn .label {
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 9px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(245, 245, 255, 0.88);
-  white-space: nowrap;
-}
-.sector-nav-btn[aria-current="page"] {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: color-mix(in srgb, var(--section-color) 35%, rgba(255, 255, 255, 0.1));
-}
-.sector-nav-btn:focus-visible {
-  outline: 1px solid var(--section-color);
-  outline-offset: 2px;
-}
-
 .ui[data-quality-tier="mobile"] .node-control {
   bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   min-width: min(360px, 94vw);
 }
 .ui[data-quality-tier="mobile"] .hud.bl {
   bottom: calc(64px + env(safe-area-inset-bottom, 0px));
-}
-
-.overlay {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: flex-end;
-  padding-right: 5vw;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(2, 2, 6, 0) 38%, rgba(2, 2, 6, 0.45) 62%, rgba(2, 2, 6, 0.72));
-}
-
-.overlay--journey {
-  /* Stack all sector panels; opacity scrubbed via GSAP */
-  display: grid;
-  align-items: center;
-  justify-items: end;
-}
-
-.overlay--journey > .panel--journey {
-  grid-area: 1 / 1;
-  will-change: opacity, transform;
-}
-
-.panel {
-  pointer-events: auto;
-  position: relative;
-  width: min(480px, 92vw);
-  max-height: 80vh;
-  overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(6, 6, 12, 0.66);
-  backdrop-filter: blur(14px);
-  padding: clamp(18px, 3.5vw, 36px) clamp(14px, 3.5vw, 38px);
-}
-
-.panel--skills {
-  width: min(520px, 94vw);
-  --skills-accent: #4da6ff;
-  --scroll-thumb: color-mix(in srgb, var(--skills-accent) 48%, rgba(255, 255, 255, 0.16));
-  --scroll-thumb-hover: color-mix(in srgb, var(--skills-accent) 78%, #fff);
-}
-
-.panel--projects {
-  width: min(520px, 94vw);
-  --projects-accent: #7c5cff;
-  --scroll-thumb: color-mix(in srgb, var(--projects-accent) 48%, rgba(255, 255, 255, 0.16));
-  --scroll-thumb-hover: color-mix(in srgb, var(--projects-accent) 78%, #fff);
-}
-
-@media (max-width: 900px) {
-  .overlay {
-    justify-content: center;
-    padding-right: 0;
-    background: rgba(2, 2, 6, 0.72);
-    backdrop-filter: blur(16px) saturate(0.8);
-    -webkit-backdrop-filter: blur(16px) saturate(0.8);
-  }
-  .overlay--journey { justify-items: center; }
-
-  .panel {
-    width: min(520px, 94vw);
-    max-height: min(82vh, calc(100dvh - 20px));
-    padding: 16px 14px 18px;
-  }
-
-  .panel .intro {
-    margin-bottom: 16px;
-  }
-
-  .panel-close {
-    top: 10px;
-    right: 10px;
-  }
-}
-.panel h2 {
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 13px;
-  letter-spacing: 0.45em;
-  padding-right: 40px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
-}
-.panel .intro {
-  color: rgba(235, 235, 255, 0.55);
-  font-size: 13px;
-  margin-bottom: 28px;
-  letter-spacing: 0.04em;
 }
 
 /* —— Skills radar HUD —— */
@@ -1196,6 +834,77 @@ canvas { display: block; }
   transform-origin: left center;
 }
 
+/* Every category at a glance under the radar */
+.skills-index {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.skills-index__row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 84px 22px;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  background: none;
+  border: 1px solid transparent;
+  color: rgba(235, 235, 255, 0.55);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.skills-index__row:hover,
+.skills-index__row:focus-visible {
+  color: rgba(245, 245, 255, 0.9);
+  border-color: color-mix(in srgb, var(--skills-accent, var(--accent)) 32%, transparent);
+  outline: none;
+}
+
+.skills-index__row.is-active {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--skills-accent, var(--accent)) 55%, transparent);
+  background: color-mix(in srgb, var(--skills-accent, var(--accent)) 10%, transparent);
+}
+
+.skills-index__icon {
+  display: grid;
+  place-items: center;
+  color: var(--skills-accent, var(--accent));
+}
+
+.skills-index__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skills-index__meter {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.skills-index__meter span {
+  display: block;
+  height: 100%;
+  background: var(--skills-accent, var(--accent));
+}
+
+.skills-index__score {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  text-align: right;
+  color: rgba(235, 235, 255, 0.42);
+}
+
 /* —— Projects list —— */
 .projects-panel {
   display: flex;
@@ -1230,24 +939,19 @@ canvas { display: block; }
   color: rgba(245, 245, 255, 0.95);
 }
 
-.project-card__status {
-  font-family: ui-monospace, Consolas, monospace;
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(235, 235, 255, 0.65);
+.project-card__shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top center;
+  margin-bottom: 12px;
+  opacity: 0.72;
+  transition: opacity 0.25s;
 }
 
-.project-card__status--live {
-  border-color: color-mix(in srgb, var(--projects-accent, var(--accent)) 55%, transparent);
-  color: var(--projects-accent, var(--accent));
-}
-
-.project-card__status--wip {
-  border-color: rgba(255, 180, 80, 0.4);
-  color: rgba(255, 196, 110, 0.9);
+.project-card:hover .project-card__shot {
+  opacity: 1;
 }
 
 .project-card__desc {
@@ -1307,6 +1011,211 @@ canvas { display: block; }
   text-decoration: none;
 }
 
+/* —— Experience cards —— */
+.card--exp {
+  background: rgba(4, 6, 14, 0.4);
+  padding: 0 0 16px;
+  overflow: hidden;
+}
+
+.card__shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top center;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+
+.card--exp .card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 6px;
+}
+
+.card--exp .card__head h3 {
+  margin-bottom: 0;
+}
+
+.card__period {
+  flex: none;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.45);
+  white-space: nowrap;
+}
+
+.card--exp p {
+  padding: 0 20px;
+}
+
+/* —— About sector —— */
+.about-panel {
+  --about-accent: #35e0c8;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.about-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.about-avatar {
+  position: relative;
+  flex: none;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--about-accent) 55%, transparent);
+  box-shadow: 0 0 0 5px rgba(53, 224, 200, 0.06);
+  /* Deliberately-empty look until a photo is dropped in */
+  background-color: rgba(8, 10, 18, 0.75);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(53, 224, 200, 0.07) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+.about-avatar__initials {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 34px;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  color: color-mix(in srgb, var(--about-accent) 70%, #fff);
+}
+
+.about-avatar__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Photos go black and white here, so any crop can be dropped in as-is */
+  filter: grayscale(1) contrast(1.05);
+}
+
+.about-panel__id {
+  min-width: 0;
+}
+
+.about-panel__name {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(245, 245, 255, 0.96);
+  margin-bottom: 6px;
+}
+
+.about-panel__role {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--about-accent);
+  margin-bottom: 4px;
+}
+
+.about-panel__loc {
+  font-size: 12px;
+  color: rgba(235, 235, 255, 0.45);
+}
+
+.about-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-panel__body p {
+  font-size: 13px;
+  line-height: 1.72;
+  color: rgba(235, 235, 255, 0.62);
+}
+
+.about-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.about-facts__row {
+  min-width: 0;
+}
+
+.about-facts dt {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+  margin-bottom: 3px;
+}
+
+.about-facts dd {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(235, 235, 255, 0.78);
+}
+
+.about-numbers {
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.about-numbers__title {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+  margin-bottom: 16px;
+}
+
+.about-numbers ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+
+.about-numbers li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 12px;
+  border-left: 1px solid color-mix(in srgb, var(--about-accent) 40%, transparent);
+}
+
+.about-numbers__value {
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: color-mix(in srgb, var(--about-accent) 70%, #fff);
+}
+
+.about-numbers__label {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: rgba(235, 235, 255, 0.5);
+}
+
 .tags { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 .tags span, .tags a {
   font-family: ui-monospace, monospace;
@@ -1331,19 +1240,60 @@ canvas { display: block; }
   line-height: 1.65;
 }
 
-.contact-panel__or {
-  font-size: 11px;
-  color: rgba(235, 235, 255, 0.45);
-  margin-top: 4px;
-}
-
-.contact-panel__or a {
-  color: var(--accent);
+.contact-panel__email {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 18px;
   text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(4, 6, 14, 0.4);
+  transition: border-color 0.25s, background 0.25s;
 }
 
-.contact-panel__or a:hover {
-  text-decoration: underline;
+.contact-panel__email:hover,
+.contact-panel__email:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: rgba(8, 8, 18, 0.55);
+  outline: none;
+}
+
+.contact-panel__email-label {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+}
+
+.contact-panel__email-value {
+  font-size: 15px;
+  color: color-mix(in srgb, var(--accent) 70%, #fff);
+  word-break: break-all;
+}
+
+.contact-panel__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 20px;
+  margin-top: 6px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.contact-panel__meta dt {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+  margin-bottom: 3px;
+}
+
+.contact-panel__meta dd {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(235, 235, 255, 0.78);
 }
 
 .contact-form {
@@ -1435,31 +1385,6 @@ canvas { display: block; }
   color: color-mix(in srgb, #ff5c9e 85%, #fff);
 }
 
-.panel-close {
-  pointer-events: auto;
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(235, 235, 255, 0.65);
-  cursor: pointer;
-  padding: 0;
-  transition: border-color 0.25s, color 0.25s, background 0.25s;
-}
-.panel-close:hover,
-.panel-close:focus-visible {
-  border-color: var(--accent);
-  color: #fff;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  outline: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
@@ -1518,6 +1443,7 @@ canvas { display: block; }
   left: 50%;
   bottom: 22px;
   transform: translateX(-50%);
+  transition: left 0.35s ease, bottom 0.35s ease;
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -1551,32 +1477,1041 @@ canvas { display: block; }
   text-align: right;
 }
 
-/* —— Scroll journey HUD —— */
-.journey-progress {
-  position: absolute;
-  left: 50%;
-  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  pointer-events: none;
-  z-index: 12;
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 
-.journey-dot {
+/* —— Projects scroll journey (below the brain journey) —— */
+.project-journey {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  background: #05050a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 -40px 80px rgba(0, 0, 0, 0.55);
+}
+
+/*
+ * Watched by useSceneVisibility: once this line is above the viewport top the
+ * brain is covered. Sitting slightly above the section makes the scene wake a
+ * little before it is uncovered, which hides the remount cost on the way back.
+ */
+.project-journey__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+  gap: clamp(24px, 4vw, 64px);
+  padding-inline: clamp(20px, 5vw, 64px);
+}
+
+/* Stage is first in the DOM for the mobile layout; put the copy back on the left */
+.project-journey__copy {
+  order: 1;
+  min-width: 0;
+}
+
+.project-beat {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+}
+
+.project-beat__inner {
+  max-width: 34rem;
+  padding-block: 10vh;
+  will-change: transform;
+}
+
+/* Rows are driven individually so the block assembles in reading order on the
+   way in and disassembles on the way out. Scoped to [data-row] rather than
+   direct children, because the heading block is a wrapper that never animates
+   itself — only the rows inside it do. */
+.project-beat [data-row] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.project-beat__head {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.project-beat__num {
+  display: block;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: clamp(2.6rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 45%, transparent);
+  margin-bottom: 10px;
+}
+
+.project-beat__title {
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  /* Mask for the line reveal. The padding keeps descenders off the clip edge */
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: calc(8px - 0.1em);
+}
+
+.project-beat__role {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.45);
+}
+
+.project-beat__label {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 80%, #fff);
+  margin-bottom: 12px;
+}
+
+.project-beat__body {
+  font-size: clamp(0.95rem, 1.2vw, 1.06rem);
+  line-height: 1.7;
+  color: rgba(232, 232, 240, 0.66);
+}
+
+.project-beat__stack {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 20px;
+}
+
+.project-beat__stack li {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 85%, #fff);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  padding: 4px 8px;
+}
+
+.project-beat__link {
+  display: inline-block;
+  margin-top: 22px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--accent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  padding-bottom: 3px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.project-beat__link:hover,
+.project-beat__link:focus-visible {
+  color: #fff;
+  border-color: #fff;
+}
+
+.project-journey__stage {
+  order: 2;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding-block: 8vh;
+  min-width: 0;
+}
+
+/*
+ * The deck. Cards are siblings in one perspective, so the next shots read as
+ * physical layers behind the current one instead of a flat crossfade.
+ * `overflow: visible` on purpose: the stack is meant to spill past the frame.
+ */
+.project-journey__deck {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 68vh;
+  perspective: 1500px;
+  perspective-origin: 62% 45%;
+  transform-style: preserve-3d;
+}
+
+.project-journey__card {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  background: #07070e;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 40px 70px -30px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(0, 0, 0, 0.5);
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+
+/* Top edge catches the light, so a stacked card still reads as a card */
+.project-journey__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.09),
+    rgba(255, 255, 255, 0) 38%
+  );
+}
+
+/* Browser chrome, so a screenshot reads as a site that shipped */
+.project-journey__bar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  height: 30px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding-inline: 12px;
+  background: rgba(16, 16, 24, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project-journey__dots {
+  display: flex;
+  gap: 5px;
+}
+
+.project-journey__dots i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  transition: background 0.3s, transform 0.3s;
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.journey-dot.is-active {
+.project-journey__url {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.42);
+  white-space: nowrap;
+}
+
+.project-journey__screen {
+  position: absolute;
+  inset: 30px 0 0 0;
+  overflow: hidden;
+}
+
+.project-journey__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.project-journey__caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.project-journey__caption-name {
+  color: rgba(235, 235, 255, 0.6);
+}
+
+.project-journey__counter {
+  color: var(--accent);
+}
+
+/* Six segments, one per project; the current one fills as you read it */
+.project-journey__rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+}
+
+.project-journey__tick {
+  position: relative;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.project-journey__tick::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
   background: var(--accent);
-  transform: scale(1.35);
+}
+
+.project-journey__tick.is-done::after {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.project-journey__tick.is-active::after {
+  width: calc(var(--rail-q, 0) * 100%);
+}
+
+@media (max-width: 900px) {
+  /* Block flow so the sticky stage pins against the whole section, not one grid row */
+  .project-journey__grid {
+    display: block;
+  }
+
+  /*
+   * Fixed stage height, then the copy is pulled back up by the same amount.
+   * Without that the stage's own flow height offsets every beat, so a beat is
+   * never centred when its scroll position is reached and the first one gets
+   * pushed off the bottom of the screen.
+   */
+  .project-journey__stage {
+    height: 44dvh;
+    padding-block: 10px;
+    gap: 8px;
+    background: #05050a;
+    box-shadow: 0 18px 24px -18px rgba(0, 0, 0, 0.9);
+    z-index: 2;
+  }
+
+  .project-journey__deck {
+    flex: 1;
+    aspect-ratio: auto;
+    max-height: none;
+    perspective: 1100px;
+    perspective-origin: 60% 45%;
+  }
+
+  .project-journey__copy {
+    margin-top: -44dvh;
+  }
+
+  /* Beats stay a viewport tall; the padding lands the copy in the band the
+     sticky stage leaves free */
+  .project-beat__inner {
+    padding-top: 47dvh;
+    padding-bottom: 4vh;
+    max-width: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .journey-dot { transition: none; }
+  .project-beat [data-row],
+  .project-beat .word,
+  .project-beat .mask-line {
+    opacity: 1;
+    transform: none;
+  }
+  .project-journey__card {
+    box-shadow: none;
+  }
+}
+
+/* ==== Request trace: the hero scroll journey ==== */
+
+/* Each stage gets more than a viewport so it can be read, not glimpsed */
+.trace-track {
+  position: relative;
+  pointer-events: none;
+}
+
+.trace-track__beat {
+  height: 150vh;
+  height: 150dvh;
+}
+
+.trace {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  /* minmax(0, 1fr), not the implicit `auto`: an auto column is sized from its
+     widest child's min-content, so the nowrap opening line pushed the column
+     past the viewport and every stretched callout overflowed with it */
+  grid-template-columns: minmax(0, 1fr);
+  pointer-events: none;
+}
+
+.trace__opening {
+  grid-area: 1 / 1;
+  z-index: 3;
+  align-self: start;
+  justify-self: center;
+  margin-top: clamp(84px, 12vh, 132px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.42);
+  white-space: nowrap;
+  transition: opacity 0.5s var(--ease-soft);
+}
+
+.trace__opening[aria-hidden='true'] {
+  opacity: 0;
+}
+
+.trace__rule {
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/*
+ * The ghost layer: one enormous low-contrast word per stage, placed somewhere
+ * different each beat and allowed to run off the frame. This is what fills the
+ * space around the brain — without it the frame is a small object in a lot of
+ * black. Clipped to the viewport so the bleed never escapes into layout.
+ */
+.trace__ghosts {
+  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.trace-ghost {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  will-change: opacity, transform;
+  --ghost-scale: 1;
+  --stage-color: var(--accent);
+}
+
+.trace-ghost > b {
+  display: block;
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: calc(clamp(4.5rem, 19vw, 17rem) * var(--ghost-scale));
+  line-height: 0.78;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /*
+   * Clips the letters at rest so they climb out from under the line. clip-path
+   * with a negative top rather than `overflow: hidden`, because the display
+   * line-height here is under 1 — the caps sit above the line box, and a plain
+   * overflow clip would shave their tops off. The parent is what GSAP moves,
+   * so this clip stays put while the letters travel through it.
+   */
+  clip-path: inset(-45% 0 -0.02em 0);
+  /* Tinted rather than flat grey, so the word belongs to its stage */
+  color: color-mix(in srgb, var(--stage-color) 20%, transparent);
+}
+
+/* Each letter trails the one before it, so the word assembles left to right
+   instead of arriving as one slab */
+.trace-ghost__ch {
+  display: inline-block;
+  transform: translate3d(0, 105%, 0);
+  transition: transform 1s var(--ease-osmo) calc(var(--ch) * 42ms);
+}
+
+.trace-ghost.is-in .trace-ghost__ch {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace-ghost__ch {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Clear of the corner readouts: a word this size crossing the brand line
+   makes both unreadable */
+.trace-ghost[data-place='top-left'] > b {
+  align-self: start;
+  justify-self: start;
+  margin: 11vh 0 0 -3vw;
+}
+
+.trace-ghost[data-place='top-right'] > b {
+  align-self: start;
+  justify-self: end;
+  margin: 13vh -4vw 0 0;
+}
+
+/* Barely any bleed on the side placements: the words that land there are the
+   short ones, so a viewport-relative overhang eats most of the word */
+.trace-ghost[data-place='left'] > b {
+  align-self: center;
+  justify-self: start;
+  margin-left: 0;
+}
+
+.trace-ghost[data-place='right'] > b {
+  align-self: center;
+  justify-self: end;
+  margin-right: 0;
+}
+
+.trace-ghost[data-place='center'] > b {
+  align-self: center;
+  justify-self: center;
+}
+
+.trace-ghost[data-place='bottom-right'] > b {
+  align-self: end;
+  justify-self: end;
+  margin: 0 -1vw 13vh 0;
+}
+
+/* The copy block sits in the corner and leaves the middle to the brain */
+.trace__blocks {
+  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.trace-beat {
+  position: absolute;
+  left: clamp(22px, 5vw, 72px);
+  bottom: clamp(88px, 15vh, 148px);
+  width: min(400px, 34vw);
+  pointer-events: auto;
+  will-change: opacity, transform;
+  --stage-color: var(--accent);
+}
+
+/* The copy sits over a live point cloud. Without a scrim the nodes run
+   straight through the lede and it stops being readable. */
+.trace-beat::before {
+  content: '';
+  position: absolute;
+  inset: -40px -64px -48px -48px;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse at 30% 60%,
+    rgba(3, 3, 8, 0.94) 0%,
+    rgba(3, 3, 8, 0.8) 48%,
+    rgba(3, 3, 8, 0) 78%
+  );
+}
+
+/* Rows assemble in reading order once the stage has properly landed */
+.trace-beat > * {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition:
+    opacity 0.8s var(--ease-soft),
+    transform 0.9s var(--ease-osmo);
+}
+
+.trace-beat.is-in > * {
+  opacity: 1;
+  transform: none;
+}
+
+.trace-beat.is-in > *:nth-child(2) { transition-delay: 0.06s; }
+.trace-beat.is-in > *:nth-child(3) { transition-delay: 0.12s; }
+.trace-beat.is-in > *:nth-child(4) { transition-delay: 0.18s; }
+
+.trace-beat__index {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--stage-color);
+  margin-bottom: 12px;
+}
+
+.trace-beat__index i {
+  font-style: normal;
+  color: rgba(235, 235, 255, 0.3);
+}
+
+/* Sentence case and moderate: the shouting is the ghost word's job, and two
+   competing display sizes in one frame cancel each other out */
+.trace-beat__title {
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 650;
+  font-size: clamp(1.45rem, 2.5vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.022em;
+  color: #f3f3f9;
+  margin-bottom: 14px;
+}
+
+.trace-beat__lede {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: rgba(235, 235, 255, 0.6);
+  margin-bottom: 18px;
+}
+
+.trace-beat__stack {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trace-beat__stack li {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  color: rgba(240, 240, 250, 0.78);
+  border: 1px solid color-mix(in srgb, var(--stage-color) 30%, rgba(255, 255, 255, 0.1));
+  background: color-mix(in srgb, var(--stage-color) 7%, rgba(4, 4, 12, 0.6));
+}
+
+.trace-rail {
+  grid-area: 1 / 1;
+  z-index: 3;
+  align-self: end;
+  justify-self: center;
+  margin-bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.trace-rail__cap {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.32);
+  padding-inline: 10px;
+}
+
+/* Small mark, finger-sized target */
+.trace-rail__tick {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  width: 26px;
+  height: 26px;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  --stage-color: var(--accent);
+}
+
+.trace-rail__tick::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.trace-rail__tick:hover::after {
+  background: rgba(255, 255, 255, 0.75);
+  transform: scale(1.2);
+}
+
+.trace-rail__tick.is-active::after {
+  background: var(--stage-color);
+  transform: scale(1.4);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--stage-color) 60%, transparent);
+}
+
+.trace-rail__tick:focus-visible {
+  outline: 1px solid var(--stage-color);
+  outline-offset: -4px;
+}
+
+/* ==== Section spine ==== */
+
+.spine {
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  display: block;
+}
+
+.spine-section {
+  --gutter: clamp(20px, 5vw, 64px);
+  position: relative;
+  background: #05050a;
+  color: #e8e8f0;
+  padding: clamp(72px, 12vh, 148px) var(--gutter) clamp(80px, 14vh, 168px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  --section-color: var(--accent);
+}
+
+/* The first one rises over the brain, so it carries the handover shadow */
+.spine-section:first-child {
+  box-shadow: 0 -40px 90px rgba(0, 0, 0, 0.6);
+}
+
+/* The section nav rides the right edge from here up, so the sections give it a
+   rail of its own rather than letting it sit on the content */
+@media (min-width: 901px) {
+  .spine-section {
+    padding-right: calc(var(--gutter) + 124px);
+  }
+}
+
+.spine-inner {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.spine-head {
+  margin-bottom: clamp(36px, 6vh, 72px);
+}
+
+.spine-index {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--section-color);
+  margin-bottom: clamp(12px, 2vh, 22px);
+}
+
+.spine-index i {
+  font-style: normal;
+  color: rgba(235, 235, 255, 0.28);
+}
+
+/* Fitted to the measure by observeFit — the inline size it lands on is the
+   whole point, so do not set font-size here */
+.spine-title {
+  display: block;
+  margin-bottom: clamp(16px, 3vh, 30px);
+}
+
+/* Clips the line at rest. Negative top for the same reason as the ghost: at a
+   line-height of 0.84 the caps overshoot the line box, so an overflow clip
+   would cut them. */
+.spine-title__mask {
+  display: block;
+  clip-path: inset(-35% 0 -0.03em 0);
+}
+
+/* The mask is only the reveal's trigger — it must not move or fade itself,
+   or it would drag the clip along with the line it is supposed to clip */
+.spine-title__mask[data-reveal] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* inline-block, not block: fitToWidth measures the element's own box, and a
+   block one is always exactly its container's width, so the fit solves to the
+   reference size and never grows */
+.spine-title__line {
+  display: inline-block;
+  font-family: 'Inter Tight', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 0.84;
+  text-transform: uppercase;
+  color: #f4f4fa;
+  white-space: nowrap;
+}
+
+/* At this scale a fade reads as nothing happening, so the line rides up from
+   under its own mask with a slight tilt instead */
+.spine-title__line {
+  transform: translate3d(0, 108%, 0) rotate(2.2deg);
+  transform-origin: 0% 100%;
+  transition: transform 1.25s var(--ease-osmo);
+}
+
+.spine-title__mask.is-in .spine-title__line {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spine-title__line {
+    transform: none;
+    transition: none;
+  }
+}
+
+.spine-lede {
+  max-width: 46rem;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.6;
+  color: rgba(235, 235, 255, 0.6);
+}
+
+.spine-body {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+/* Extras break out of the section gutter and run full bleed */
+.spine-section > .client-work,
+.spine-section > .testimonial-marquee,
+.spine-section > .project-journey {
+  margin-inline: calc(-1 * var(--gutter));
+  margin-top: clamp(48px, 8vh, 96px);
+}
+
+.spine-section > .project-journey {
+  margin-bottom: calc(-1 * clamp(80px, 14vh, 168px));
+}
+
+/* ==== Section nav ==== */
+
+.section-nav {
+  position: fixed;
+  z-index: 30;
+  top: 50%;
+  right: clamp(14px, 2vw, 26px);
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s var(--ease-soft);
+}
+
+/* Only useful once the sections exist — it would only clutter the brain */
+.app-root[data-scroll-zone='sections'] .section-nav {
+  opacity: 1;
+  visibility: visible;
+}
+
+.section-nav__item {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 7px 6px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.38);
+  transition: color 0.25s;
+  --section-color: var(--accent);
+}
+
+.section-nav__item:hover,
+.section-nav__item:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+.section-nav__item.is-current {
+  color: #fff;
+}
+
+.section-nav__item.is-current .section-nav__num {
+  opacity: 1;
+}
+
+/* A rule in the section's own colour, so the mark reads as "you are here" */
+.section-nav__item.is-current .section-nav__label {
+  box-shadow: inset 0 -1px 0 0 var(--section-color);
+}
+
+.section-nav__num {
+  color: var(--section-color);
+  opacity: 0.75;
+}
+
+.section-nav__label {
+  min-width: 7.2em;
+  text-align: right;
+}
+
+.section-nav__item:focus-visible .section-nav__label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ==== Zone chrome ==== */
+
+/* The trace owns the screen: no density slider, no bottom-left readout */
+.app-root[data-scroll-zone='trace'] .node-control,
+.app-root[data-scroll-zone='trace'] .hud.bl,
+.app-root[data-scroll-zone='trace'] .hero-mark,
+.app-root[data-scroll-zone='sections'] .hero-mark,
+.app-root[data-scroll-zone='sections'] .hud,
+.app-root[data-scroll-zone='sections'] .node-control,
+.app-root[data-scroll-zone='sections'] .trace {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 900px) {
+  .trace {
+    /* No room for a side column: the callout takes the lower half and the
+       brain keeps the top */
+    align-items: end;
+  }
+
+  .trace-beat {
+    left: clamp(16px, 5vw, 28px);
+    right: clamp(16px, 5vw, 28px);
+    bottom: clamp(78px, 13vh, 120px);
+    width: auto;
+    background: linear-gradient(180deg, rgba(4, 4, 10, 0), rgba(4, 4, 10, 0.86) 22%);
+    padding-top: 40px;
+  }
+
+  .trace-beat::before {
+    display: none;
+  }
+
+  /* A word this size on a phone is just a smear across the brain */
+  .trace-ghost > b {
+    font-size: calc(clamp(3rem, 22vw, 7rem) * var(--ghost-scale));
+  }
+
+  .trace-ghost[data-place='center'] > b,
+  .trace-ghost[data-place='left'] > b,
+  .trace-ghost[data-place='right'] > b {
+    align-self: start;
+    justify-self: center;
+    margin: 16vh 0 0;
+  }
+
+  .hero-notes {
+    display: none;
+  }
+
+  .trace-beat__lede {
+    font-size: 13.5px;
+  }
+
+  .trace__opening {
+    font-size: 9px;
+    gap: 10px;
+    white-space: normal;
+    text-align: center;
+    max-width: min(88vw, 30rem);
+  }
+
+  .trace__rule {
+    display: none;
+  }
+
+  .section-nav {
+    top: auto;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    right: 0;
+    left: 0;
+    transform: none;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    background: rgba(4, 4, 12, 0.86);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .section-nav__label {
+    min-width: 0;
+  }
+
+  .section-nav__num {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace-beat > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .trace-rail__tick::after { transition: none; }
+}
+
+/* ==== Section body measures ====
+   The section bodies inherited a layout built for a 660px side panel. Running
+   prose and form fields at the full 1180px measure is unreadable, so each
+   section gets the width its content actually wants. */
+
+.spine-body {
+  max-width: 980px;
+}
+
+.spine-section--projects .spine-body,
+.spine-section--skills .spine-body {
+  max-width: 1180px;
+}
+
+.spine-section--contact .spine-body {
+  max-width: 660px;
+}
+
+.spine-section--experience .spine-body {
+  max-width: 920px;
+}
+
+/* Two up once there is room: one 1000px-wide card per row is a lot of scroll
+   for six projects */
+@media (min-width: 980px) {
+  .projects-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+
+  .project-card {
+    margin-bottom: 0;
+  }
+
+  .experience-list {
+    columns: 2;
+    column-gap: 20px;
+  }
+
+  .experience-list .card--exp {
+    break-inside: avoid;
+  }
+}
+
+/* The walkthrough is its own full-bleed run, so it needs the section's bottom
+   padding back rather than the gutter negation's flush edge */
+.spine-section > .project-journey {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }

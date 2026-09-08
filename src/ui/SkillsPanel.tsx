@@ -80,6 +80,29 @@ export function SkillsPanel() {
         onSelect={setActiveId}
       />
       <CategoryDetail category={active} />
+
+      {/* Every category at a glance, and a second way into the radar */}
+      <ul className="skills-index" data-testid="skills-index">
+        {skills.map((c) => (
+          <li key={c.id}>
+            <button
+              type="button"
+              className={`skills-index__row${c.id === active.id ? ' is-active' : ''}`}
+              onClick={() => setActiveId(c.id)}
+              aria-pressed={c.id === active.id}
+            >
+              <span className="skills-index__icon" aria-hidden>
+                <SkillIcon name={c.icon} size={14} />
+              </span>
+              <span className="skills-index__label">{c.label}</span>
+              <span className="skills-index__meter" aria-hidden>
+                <span style={{ width: `${Math.min(100, Math.max(0, c.score))}%` }} />
+              </span>
+              <span className="skills-index__score">{c.score.toFixed(0)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

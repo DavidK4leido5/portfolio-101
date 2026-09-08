@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useCallback } from 'react'
+import { useFrame } from '@react-three/fiber'
 import type { BufferGeometry } from 'three'
 import { buildConnections } from '../lib/spatialHash'
 import { QUALITY } from '../lib/quality'
@@ -69,16 +70,26 @@ export function ConnectionSystem({ cloud }: { cloud: Cloud }) {
     geo.setDrawRange(0, count * 2)
   }, [cloud, cfg, buffers])
 
-  useEffect(() => {
-    rebuild()
-    const id = setInterval(() => {
-      if (uniforms.uConnect.value > 0.05) rebuild()
-    }, cfg.rebuildMs)
-    return () => clearInterval(id)
-  }, [rebuild, cfg])
+  /*
+   * The node cloud's positions are fixed at creation — the shader does the
+   * morphing on the GPU — so the only input that can change the wiring is how
+   * many nodes are active. Rebuilding on a timer regardless recomputed an
+   * identical spatial hash every 650ms for the life of the page, including
+   * while the canvas was paused. Rebuild when the count actually moves, no
+   * faster than the tier's interval so a slider sweep can't rebuild per frame.
+   */
+  const builtCount = useRef(-1)
+  const builtAt = useRef(0)
 
-  const nodeCount = useSceneStore((s) => s.nodeCount)
-  useEffect(() => { rebuild() }, [nodeCount, rebuild])
+  useFrame(() => {
+    const active = uniforms.uConnect.value > 0.05 ? Math.floor(uniforms.uNodeCount.value) : 0
+    if (active === builtCount.current) return
+    const now = performance.now()
+    if (now - builtAt.current < cfg.rebuildMs) return
+    builtAt.current = now
+    builtCount.current = active
+    rebuild()
+  })
 
   const material = useMemo(() => makeMaterial(connectionVert, connectionFrag), [])
   useEffect(() => () => material.dispose(), [material])

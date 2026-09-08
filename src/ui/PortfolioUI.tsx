@@ -1,119 +1,60 @@
-import { useEffect, useRef, useCallback, useLayoutEffect } from 'react'
-import gsap from 'gsap'
-import {
-  useSceneStore,
-  labelOpacityFromScroll,
-  journeyPanelOpacity,
-} from '../store/sceneStore'
-import { sections, SECTION_IDS, type SectionId } from '../data/sections'
+import { useCallback, useEffect, useState } from 'react'
+import { useSceneStore } from '../store/sceneStore'
+import { SECTION_IDS, sections } from '../data/sections'
+import { traceStages } from '../content/requestTrace'
 import { NODE_LIMITS } from '../lib/nodes'
-import { indicatorEls } from '../scene/shared'
-import { animateNodeCount, triggerSectorWave } from '../scene/nodeAnimator'
-import {
-  profile, experience, sectionCopy, resolveImage, type ImageSource,
-} from '../content/portfolio'
-import { SkillsPanel } from './SkillsPanel'
-import { ProjectsPanel } from './ProjectsPanel'
-import { ContactPanel } from './ContactPanel'
+import { animateNodeCount } from '../scene/nodeAnimator'
+import { scrollToSection } from '../scroll/traceNav'
+import { profile } from '../content/portfolio'
 import { SiteBrand } from './SiteBrand'
-import { outwardSlideX, runSectorLabelReveal } from './sectorLabelReveal'
+import { RequestTrace } from './RequestTrace'
 
-const prefersReduced = () =>
-  typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
+/** Whichever section currently owns the upper third of the viewport. */
+function useCurrentSection(active: boolean) {
+  const [current, setCurrent] = useState<string | null>(null)
 
-function Img({ image }: { image: ImageSource }) {
-  return (
-    <img
-      src={resolveImage(image)}
-      alt={image.alt}
-      loading="lazy"
-      onError={(e) => { e.currentTarget.style.display = 'none' }}
-    />
-  )
+  useEffect(() => {
+    if (!active || typeof IntersectionObserver === 'undefined') return
+    const targets = SECTION_IDS.map((id) => document.getElementById(`section-${id}`)).filter(
+      (el): el is HTMLElement => !!el,
+    )
+    if (targets.length === 0) return
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setCurrent(entry.target.getAttribute('data-section'))
+        }
+      },
+      // A band across the upper third, so the section whose heading you are
+      // reading is the one marked, not whichever happens to be tallest
+      { rootMargin: '-20% 0px -66% 0px', threshold: 0 },
+    )
+    for (const el of targets) io.observe(el)
+    return () => io.disconnect()
+  }, [active])
+
+  return current
 }
 
-function SectionContent({ id }: { id: SectionId }) {
-  if (id === 'projects') return <ProjectsPanel />
-  if (id === 'skills') return <SkillsPanel />
-  if (id === 'experience')
-    return (
-      <>
-        {experience.map((e) => (
-          <article className="card" key={e.id}>
-            <h3>{e.role} · {e.company}</h3>
-            <p>{e.description}</p>
-          </article>
-        ))}
-      </>
-    )
-  if (id === 'about')
-    return (
-      <article className="card">
-        <Img image={profile.about.image} />
-        <p>{profile.about.body}</p>
-      </article>
-    )
-  if (id === 'contact') return <ContactPanel />
-  return null
-}
-
+/**
+ * Everything fixed over the brain stage: the readouts, the density slider, the
+ * section nav, and the request trace's own callouts. The portfolio sections
+ * themselves live in the scroll track, not here.
+ */
 export function PortfolioUI() {
-  const phase = useSceneStore((s) => s.phase)
   const loadPhase = useSceneStore((s) => s.loadPhase)
-  const active = useSceneStore((s) => s.activeSection)
   const tier = useSceneStore((s) => s.qualityTier)
   const nodeCount = useSceneStore((s) => s.nodeCount)
   const scrollZone = useSceneStore((s) => s.scrollZone)
-  const journeySection = useSceneStore((s) => s.journeySection)
-  const journeyProgress = useSceneStore((s) => s.journeyProgress)
-  const limits = NODE_LIMITS[tier]
-  const setHovered = useSceneStore((s) => s.setHovered)
-  const navigateTo = useSceneStore((s) => s.navigateTo)
-  const returnHome = useSceneStore((s) => s.returnHome)
+  const traceStage = useSceneStore((s) => s.traceStage)
   const setNodeCount = useSceneStore((s) => s.setNodeCount)
-  const isMobileNav = tier === 'mobile'
-  const indicatorsRef = useRef<HTMLDivElement>(null)
-  const navRef = useRef<HTMLElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const journeyOverlayRef = useRef<HTMLDivElement>(null)
-  const closingRef = useRef(false)
-  const prevPhaseRef = useRef(phase)
-  const labelRevealRan = useRef(false)
+  const limits = NODE_LIMITS[tier]
   const uiReady = loadPhase === 'ready'
-  const labelsPhase = loadPhase === 'labels' || loadPhase === 'ready'
   const inHero = scrollZone === 'hero'
-  const inJourney = scrollZone === 'journey' || scrollZone === 'end'
-  const coverProgress = useSceneStore((s) => s.coverProgress)
-  const bridgeInProgress = useSceneStore((s) => s.bridgeInProgress)
-  const journeyApproachProgress = useSceneStore((s) => s.journeyApproachProgress)
-  const hudSector = inJourney ? journeySection : active
-  const inClickZone = inHero
-  const labelAlpha = labelOpacityFromScroll({
-    coverProgress,
-    bridgeInProgress,
-    journeyApproachProgress,
-  })
-  const labelsLive = uiReady && inClickZone && labelAlpha > 0.08 && phase === 'idle'
-
-  const runClose = useCallback(() => {
-    if (closingRef.current) return
-    const panel = overlayRef.current?.querySelector('.panel') as HTMLElement | null
-    if (!panel || prefersReduced()) { returnHome(); return }
-    closingRef.current = true
-    const kids = panel.querySelectorAll(':scope > :not(.panel-close)')
-    gsap.killTweensOf([panel, ...kids])
-    gsap.timeline({ onComplete: () => { closingRef.current = false; returnHome() } })
-      .to(kids, { autoAlpha: 0, y: -8, filter: 'blur(8px)', duration: 0.22, stagger: 0.025, ease: 'power2.in' }, 0)
-      .to(panel, { autoAlpha: 0, y: -12, scale: 0.985, duration: 0.32, ease: 'power2.in' }, 0.05)
-  }, [returnHome])
-
-  const onSectorEnter = useCallback((id: SectionId, i: number) => {
-    if (!labelsLive) return
-    setHovered(id)
-    triggerSectorWave(i)
-  }, [setHovered, labelsLive])
-
-  const onSectorLeave = useCallback(() => setHovered(null), [setHovered])
+  const inTrace = scrollZone === 'trace'
+  const isMobile = tier === 'mobile'
+  const currentSection = useCurrentSection(scrollZone === 'sections')
 
   const onNodesChange = useCallback((v: number) => {
     const n = Math.round(v)
@@ -121,193 +62,17 @@ export function PortfolioUI() {
     animateNodeCount(n)
   }, [setNodeCount])
 
-  const onSectorClick = useCallback((id: SectionId) => {
-    if (!labelsLive) return
-    navigateTo(id)
-  }, [labelsLive, navigateTo])
-
-  useEffect(() => {
-    if (!isMobileNav) return
-    sections.forEach((_, i) => { indicatorEls[i] = null })
-  }, [isMobileNav])
-
-  // Hide every label before paint when entering the cascade phase (kills the flash)
-  useLayoutEffect(() => {
-    if (loadPhase !== 'labels') return
-    const root = isMobileNav ? navRef.current : indicatorsRef.current
-    if (!root) return
-    const selector = isMobileNav ? '.sector-nav-btn' : '.indicator'
-    const buttons = [...root.querySelectorAll<HTMLElement>(selector)]
-    gsap.set(buttons, { autoAlpha: 0, x: 0 })
-    gsap.set(root, { autoAlpha: 1, visibility: 'visible', y: 0 })
-    root.setAttribute('data-revealing', 'true')
-  }, [loadPhase, isMobileNav])
-
-  // Initial sector-label cascade (side-in + hover waves) before unlock
-  useEffect(() => {
-    if (loadPhase !== 'labels' || labelRevealRan.current) return
-    labelRevealRan.current = true
-
-    const root = isMobileNav ? navRef.current : indicatorsRef.current
-    if (!root) {
-      useSceneStore.getState().finishLabels()
-      return
-    }
-
-    const selector = isMobileNav ? '.sector-nav-btn' : '.indicator'
-    const buttons = [...root.querySelectorAll<HTMLElement>(selector)]
-    // Re-assert hidden (layout effect already did; keep them dark through the wait)
-    gsap.set(buttons, { autoAlpha: 0, x: 0 })
-
-    let cancelled = false
-    let tl: gsap.core.Timeline | null = null
-    const kick = () => {
-      if (cancelled) return
-      root.removeAttribute('data-revealing')
-      // Keep GSAP opacity at 0 until each beat's fromTo runs
-      gsap.set(buttons, { autoAlpha: 0 })
-      tl = runSectorLabelReveal(buttons, { reduced: prefersReduced() })
-    }
-    // Wait so Projection can place desktop indicators before measuring slide direction
-    const t = window.setTimeout(kick, 80)
-
-    return () => {
-      cancelled = true
-      clearTimeout(t)
-      tl?.kill()
-      root.removeAttribute('data-revealing')
-    }
-  }, [loadPhase, isMobileNav])
-
-  // Sector indicators / mobile nav — scrub with cover; side-slide in after modal close
-  useEffect(() => {
-    const el = isMobileNav ? navRef.current : indicatorsRef.current
-    if (!el) return
-    if (!labelsPhase) {
-      gsap.set(el, { autoAlpha: 0 })
-      return
-    }
-    // Reveal timeline owns the labels phase
-    if (loadPhase === 'labels') return
-
-    const prev = prevPhaseRef.current
-    const wasModal = prev === 'arrived' || prev === 'travel'
-    prevPhaseRef.current = phase
-
-    if (phase !== 'idle') {
-      gsap.to(el, { autoAlpha: 0, y: 0, duration: 0.4, ease: 'power2.in', overwrite: 'auto' })
-      return
-    }
-    const alpha = labelOpacityFromScroll({
-      coverProgress,
-      bridgeInProgress,
-      journeyApproachProgress,
-    })
-
-    if (wasModal && alpha > 0.08) {
-      const kids = [...el.querySelectorAll<HTMLElement>(isMobileNav ? '.sector-nav-btn' : '.indicator')]
-      gsap.set(el, { autoAlpha: 1, visibility: 'visible', y: 0 })
-      kids.forEach((kid, i) => {
-        const fromX = outwardSlideX(kid)
-        gsap.fromTo(
-          kid,
-          { autoAlpha: 0, x: fromX },
-          {
-            autoAlpha: 1,
-            x: 0,
-            duration: 0.55,
-            delay: i * 0.07,
-            ease: 'power3.out',
-            overwrite: 'auto',
-          },
-        )
-      })
-      return
-    }
-
-    gsap.set(el, {
-      autoAlpha: alpha,
-      y: 0,
-      visibility: alpha < 0.03 ? 'hidden' : 'visible',
-    })
-  }, [phase, labelsPhase, loadPhase, isMobileNav, coverProgress, bridgeInProgress, journeyApproachProgress])
-
-  // Journey panels — continuous triangular crossfade from journeyProgress
-  useEffect(() => {
-    const root = journeyOverlayRef.current
-    if (!root) return
-    const n = SECTION_IDS.length
-    const panels = root.querySelectorAll<HTMLElement>('[data-journey-panel]')
-    panels.forEach((panel) => {
-      const id = panel.dataset.journeyPanel as SectionId
-      const idx = SECTION_IDS.indexOf(id)
-      const alpha = inJourney ? journeyPanelOpacity(journeyProgress, idx, n) : 0
-      const p = 1 - alpha
-      const interactive = alpha > 0.45
-      gsap.set(panel, {
-        autoAlpha: alpha,
-        y: prefersReduced() ? 0 : 14 * p,
-        visibility: alpha < 0.04 ? 'hidden' : 'visible',
-        pointerEvents: interactive ? 'auto' : 'none',
-      })
-      panel.toggleAttribute('inert', !interactive)
-      panel.setAttribute('aria-hidden', interactive ? 'false' : 'true')
-    })
-  }, [inJourney, journeyProgress])
-
-  const clickPanelId = !inJourney && phase === 'arrived' && inClickZone ? active : null
-  const showClickPanel = !!clickPanelId
-
-  // Click-mode panel enter only (journey uses scrubbed stack)
-  useEffect(() => {
-    if (!showClickPanel || !clickPanelId) return
-    const overlay = overlayRef.current
-    const panel = overlay?.querySelector('.panel') as HTMLElement | null
-    if (!overlay || !panel) return
-    if (prefersReduced()) { gsap.set(panel, { autoAlpha: 1 }); return }
-    const ctx = gsap.context(() => {
-      const kids = panel.querySelectorAll(':scope > :not(.panel-close)')
-      gsap.timeline()
-        .fromTo(panel, { autoAlpha: 0, y: 18, scale: 0.985 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' })
-        .fromTo(kids,
-          { autoAlpha: 0, y: 14, filter: 'blur(10px)' },
-          { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.55, stagger: 0.06, ease: 'power2.out', clearProps: 'filter' },
-          0.12)
-    }, overlay)
-    return () => ctx.revert()
-  }, [showClickPanel, clickPanelId])
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && useSceneStore.getState().phase === 'arrived') runClose()
-    }
-    addEventListener('keydown', onKey)
-    return () => removeEventListener('keydown', onKey)
-  }, [runClose])
-
-  useEffect(() => {
-    const tw = gsap.to('.indicator .dot, .sector-nav-btn .dot', {
-      opacity: 0.35, repeat: -1, yoyo: true, duration: 1.1, ease: 'sine.inOut', stagger: 0.2,
-    })
-    return () => { tw.kill() }
-  }, [isMobileNav])
-
-  // Dismiss stuck overlay if scroll leaves clickable zones
-  useEffect(() => {
-    if (inClickZone) return
-    const { phase: p, returnHome: rh } = useSceneStore.getState()
-    if (p === 'arrived') rh()
-  }, [inClickZone])
+  const stageLabel = inTrace && traceStage != null ? traceStages[traceStage].title : null
 
   return (
+    <>
     <div
       className="ui"
-      data-phase={phase}
       data-load-phase={loadPhase}
       data-quality-tier={tier}
       data-scroll-zone={scrollZone}
     >
-      {isMobileNav ? (
+      {isMobile ? (
         <div className="hud hud-profile-group" data-testid="hud-profile-group">
           <SiteBrand />
           <div className="hud-profile-meta">
@@ -315,7 +80,7 @@ export function PortfolioUI() {
             {' · '}
             NODES <b>{nodeCount}</b>
             {' · '}
-            SECTOR <b>{hudSector ?? 'CORE'}</b>
+            LAYER <b>{stageLabel ?? 'CORE'}</b>
           </div>
         </div>
       ) : (
@@ -323,13 +88,19 @@ export function PortfolioUI() {
           <div className="hud tl">
             <SiteBrand />
           </div>
-          <div className="hud tr">STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b><br />NODES <b>{nodeCount}</b><br />SECTOR <b>{hudSector ?? 'CORE'}</b></div>
+          <div className="hud tr">
+            STATUS <b>{uiReady ? 'ONLINE' : 'BOOT'}</b><br />
+            NODES <b>{nodeCount}</b><br />
+            LAYER <b>{stageLabel ?? 'CORE'}</b>
+          </div>
         </>
       )}
-      <div className="hud bl">THE ADAPTIVE MIND <b>v1.0</b><br />{profile.tagline}</div>
-      <div className="hud br">SYS.COLOR<span className="swatch" /><br />LINK <b>{inJourney ? 'JOURNEY' : phase.toUpperCase()}</b></div>
 
-      {uiReady && inHero && (
+      <div className="hud bl">
+        THE ADAPTIVE MIND <b>v1.0</b><br />{profile.tagline}
+      </div>
+
+      {uiReady && inHero && !isMobile && (
         <div className="node-control">
           <label htmlFor="node-slider">Neural density</label>
           <input
@@ -346,133 +117,31 @@ export function PortfolioUI() {
         </div>
       )}
 
-      {!isMobileNav && (
-        <div
-          className="indicators"
-          ref={indicatorsRef}
-          data-testid="sector-indicators"
-          data-sectors-ready={uiReady ? 'true' : 'false'}
-          aria-hidden={!labelsLive}
-        >
-          {sections.map((s, i) => (
-            <button
-              key={s.id}
-              data-section={s.id}
-              className="indicator"
-              style={{ '--section-color': s.color } as React.CSSProperties}
-              ref={(el) => { indicatorEls[i] = el }}
-              onMouseEnter={() => onSectorEnter(s.id, i)}
-              onMouseLeave={onSectorLeave}
-              onFocus={() => onSectorEnter(s.id, i)}
-              onBlur={onSectorLeave}
-              onClick={() => onSectorClick(s.id)}
-            >
-              <span className="dot" /><span className="line" />
-              <span className="label-wrap"><span className="label">{s.label}</span></span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {isMobileNav && labelsPhase && (
-        <nav
-          className="sector-nav"
-          ref={navRef}
-          data-testid="sector-nav"
-          data-sectors-ready={uiReady ? 'true' : 'false'}
-          aria-label="Portfolio sections"
-          aria-hidden={!labelsLive}
-        >
-          {sections.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              data-section={s.id}
-              className="sector-nav-btn"
-              style={{ '--section-color': s.color } as React.CSSProperties}
-              aria-current={active === s.id ? 'page' : undefined}
-              tabIndex={labelsLive ? 0 : -1}
-              onFocus={() => onSectorEnter(s.id, i)}
-              onBlur={onSectorLeave}
-              onClick={() => onSectorClick(s.id)}
-            >
-              <span className="dot" aria-hidden />
-              <span className="label">{s.label}</span>
-            </button>
-          ))}
-        </nav>
-      )}
-
-      {inJourney && (
-        <nav className="journey-progress" data-testid="journey-progress" aria-label="Sector journey progress">
-          {SECTION_IDS.map((id, i) => {
-            const op = journeyPanelOpacity(journeyProgress, i, SECTION_IDS.length)
-            return (
-              <span
-                key={id}
-                className={`journey-dot${op > 0.55 ? ' is-active' : ''}`}
-                data-section={id}
-                style={{ opacity: 0.22 + op * 0.78 }}
-                aria-current={op > 0.55 ? 'step' : undefined}
-              />
-            )
-          })}
-        </nav>
-      )}
-
-      {inJourney && (
-        <div
-          className="overlay overlay--journey"
-          ref={journeyOverlayRef}
-          data-testid="journey-overlay"
-        >
-          {SECTION_IDS.map((id, i) => {
-            // Mount at most ~2 neighboring trees during crossfade
-            const live = journeyPanelOpacity(journeyProgress, i, SECTION_IDS.length) > 0.02
-            return (
-              <div
-                key={id}
-                className={`panel panel--journey${id === 'skills' ? ' panel--skills' : ''}${id === 'projects' ? ' panel--projects' : ''}`}
-                data-journey-panel={id}
-                style={{ visibility: 'hidden', opacity: 0 }}
-                inert
-                aria-hidden
-              >
-                {live && (
-                  <>
-                    <h2 data-testid={id === journeySection ? 'overlay-title' : undefined}>
-                      {sectionCopy[id].headline}
-                    </h2>
-                    <p className="intro">{sectionCopy[id].intro}</p>
-                    <SectionContent id={id} />
-                  </>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {showClickPanel && clickPanelId && (
-        <div className="overlay" ref={overlayRef}>
-          <div className={`panel${clickPanelId === 'skills' ? ' panel--skills' : ''}${clickPanelId === 'projects' ? ' panel--projects' : ''}`}>
-            <button
-              type="button"
-              className="panel-close"
-              data-testid="overlay-back"
-              aria-label="Close and return to core"
-              onClick={runClose}
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-            </button>
-            <h2 data-testid="overlay-title">{sectionCopy[clickPanelId].headline}</h2>
-            <p className="intro">{sectionCopy[clickPanelId].intro}</p>
-            <SectionContent id={clickPanelId} />
-          </div>
-        </div>
-      )}
+      <RequestTrace />
     </div>
+
+    {/*
+      Outside `.ui` on purpose. This is the one fixed thing that has to paint
+      over the sections, and `.ui` is a stacking context — lifting the whole
+      layer above them meant a stale scroll zone could leave the trace's
+      callouts sitting on top of a section instead of harmlessly behind it.
+    */}
+    <nav className="section-nav" data-testid="section-nav" aria-label="Portfolio sections">
+      {SECTION_IDS.map((id, i) => (
+        <button
+          key={id}
+          type="button"
+          className={`section-nav__item${currentSection === id ? ' is-current' : ''}`}
+          data-section={id}
+          style={{ '--section-color': sections[i].color } as React.CSSProperties}
+          aria-current={currentSection === id ? 'true' : undefined}
+          onClick={() => scrollToSection(id)}
+        >
+          <span className="section-nav__num">{String(i + 1).padStart(2, '0')}</span>
+          <span className="section-nav__label">{sections[i].label}</span>
+        </button>
+      ))}
+    </nav>
+    </>
   )
 }
