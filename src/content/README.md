@@ -25,12 +25,18 @@ Suggested layout:
 
 ```
 assets/
-  avatar.jpg
-  about.jpg
+  about.jpg      ← About sector portrait (square crop; rendered as a circle)
   contact.jpg
-  experience/
-  client-work/   ← cover section screenshots (auto-loaded)
+  client-work/   ← cover, project, and experience screenshots (auto-loaded)
+  testimonials/
 ```
+
+The About circle applies `object-fit: cover` and `filter: grayscale(1)`, so drop
+in a square colour crop and it renders black and white at the right size. Until
+the file exists the circle shows `profile.about.initials`.
+
+Experience cards take their image from `client-work/` via the entry's `slug`,
+so there is no per-role image path to maintain.
 
 ### Client work (cover marquee)
 
@@ -52,7 +58,7 @@ Optional pretty names live in `clientWorks.ts` (`PROJECT_LABELS`).
 
 **Run `pnpm bake:shots` after adding PNG or JPG shots.** It rewrites them as 1024 px WebP in place. Raw 1080p screenshots decode to about 7 MB of pixels each, and the marquee mounts roughly 160 `<img>` tags, which stalled the main thread on decode and made the sticky 3D scene stutter while scrolling.
 
-Personal projects stay in the Projects overlay — edit the `projects` array in `portfolio.ts` (text-only cards).
+The same files feed the Projects sector cards, the Experience cards, and the scroll walkthrough. See **Projects** below.
 
 ## Sitemap
 
@@ -99,16 +105,31 @@ Keep about **6 primary skills per category** so the detail card fits without scr
 
 ## Projects
 
-`projects` is an array of cards (no preview images). Each entry:
+`projects` is the client work. Each entry:
 
 | Field | Use |
 |-------|-----|
-| `id` | Stable key |
-| `title` | Project name |
-| `description` | Short blurb |
+| `id` | Stable key, and the key into `STORIES` in `projects.ts` |
+| `title` | Project name. Must match the `company` in `experience` |
+| `description` | Short blurb for the sector card |
 | `skills` | String chips (e.g. `['React', 'Next.js']`) |
-| `liveUrl` | Optional live demo — omit / empty to hide |
-| `githubUrl` | Optional repo — omit / empty to hide |
-| `status` | Optional `'live'` \| `'wip'` status pill |
+| `domain` | Optional live client URL. Omit when the work is not public |
+| `slug` | `client-work/` filename prefix, e.g. `revivepharmacy` |
 
-Add or edit objects in `portfolio.ts` — the overlay reads the array as-is.
+No repo links. Client repositories are private or company-owned, so a card links
+the live domain or nothing.
+
+`slug` is what attaches the screenshots. Get it right and the sector card, the
+Experience card, and the scroll walkthrough all pick up images with no other
+edits.
+
+### Project walkthrough (scroll journey)
+
+`projects.ts` holds three copy blocks per project (`intro`, `tech`, `build`),
+keyed by the project's `id`. The walkthrough below the brain journey renders one
+viewport-tall beat per block and crossfades that project's screenshots across
+its three beats, in filename order.
+
+Adding a project is two edits: the entry in `projects` here, and three copy
+blocks in `projects.ts` under the same id. A project with no copy blocks is
+skipped by the walkthrough but still shows in the Projects sector.

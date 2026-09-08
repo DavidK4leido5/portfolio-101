@@ -62,7 +62,7 @@ export function AmbientParticles() {
     u.uMotion.value = reducedMotion ? 0 : 1
 
     const spawn = uniforms.uSpawn.value
-    let fade = loadPhase === 'ready' || loadPhase === 'labels'
+    let fade = loadPhase === 'ready'
       ? 1
       : loadPhase === 'intro' ? Math.min(1, spawn * 1.1) : 0
     fade *= 1 - uniforms.uDim.value * 0.4

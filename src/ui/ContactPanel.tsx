@@ -94,7 +94,7 @@ export function ContactPanel() {
           <span>Message</span>
           <textarea
             name="message"
-            rows={4}
+            rows={7}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={status === 'sending' || status === 'sent'}
@@ -129,15 +129,25 @@ export function ContactPanel() {
         )}
       </form>
 
-      <p className="contact-panel__or">
-        Or reach me at{' '}
-        <a href={`mailto:${contact.email}`}>{contact.email}</a>
-      </p>
+      <a className="contact-panel__email" href={`mailto:${contact.email}`}>
+        <span className="contact-panel__email-label">Or email me directly</span>
+        <span className="contact-panel__email-value">{contact.email}</span>
+      </a>
+
       <div className="tags">
         {contact.links.map((l) => (
           <a key={l.label} href={l.url} target="_blank" rel="noreferrer">{l.label}</a>
         ))}
       </div>
+
+      <dl className="contact-panel__meta">
+        {contact.meta.map((m) => (
+          <div key={m.label}>
+            <dt>{m.label}</dt>
+            <dd>{m.value}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   )
 }

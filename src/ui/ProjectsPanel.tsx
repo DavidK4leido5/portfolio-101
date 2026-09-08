@@ -1,46 +1,53 @@
 import { projects } from '../content/portfolio'
+import { clientWorkGroups } from '../content/clientWorks'
 
-function hasUrl(url?: string) {
-  return Boolean(url?.trim())
+const shotBySlug = new Map(clientWorkGroups.map((g) => [g.key, g.shots[0]?.src]))
+
+function hostOf(url: string) {
+  try {
+    return new URL(url).host.replace(/^www\./, '')
+  } catch {
+    return url
+  }
 }
 
 export function ProjectsPanel() {
   return (
     <div className="projects-panel" data-testid="projects-panel">
-      {projects.map((p) => (
-        <article className="project-card" key={p.id}>
-          <header className="project-card__head">
-            <h3 className="project-card__title">{p.title}</h3>
-            {p.status && (
-              <span className={`project-card__status project-card__status--${p.status}`}>
-                {p.status === 'live' ? 'Live' : 'WIP'}
-              </span>
+      {projects.map((p) => {
+        const shot = shotBySlug.get(p.slug)
+        return (
+          <article className="project-card" key={p.id}>
+            {shot && (
+              <img
+                className="project-card__shot"
+                src={shot}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
             )}
-          </header>
-          <p className="project-card__desc">{p.description}</p>
-          {p.skills.length > 0 && (
-            <ul className="project-card__skills">
-              {p.skills.map((s) => (
-                <li key={s}>{s}</li>
-              ))}
-            </ul>
-          )}
-          {(hasUrl(p.liveUrl) || hasUrl(p.githubUrl)) && (
-            <div className="project-card__links">
-              {hasUrl(p.liveUrl) && (
-                <a href={p.liveUrl!.trim()} target="_blank" rel="noreferrer">
-                  Live →
+            <header className="project-card__head">
+              <h3 className="project-card__title">{p.title}</h3>
+            </header>
+            <p className="project-card__desc">{p.description}</p>
+            {p.skills.length > 0 && (
+              <ul className="project-card__skills">
+                {p.skills.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ul>
+            )}
+            {p.domain && (
+              <div className="project-card__links">
+                <a href={p.domain} target="_blank" rel="noreferrer">
+                  {hostOf(p.domain)} →
                 </a>
-              )}
-              {hasUrl(p.githubUrl) && (
-                <a href={p.githubUrl!.trim()} target="_blank" rel="noreferrer">
-                  GitHub →
-                </a>
-              )}
-            </div>
-          )}
-        </article>
-      ))}
+              </div>
+            )}
+          </article>
+        )
+      })}
     </div>
   )
 }

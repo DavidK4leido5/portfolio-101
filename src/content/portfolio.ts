@@ -10,12 +10,10 @@ export type Project = {
   description: string;
   /** Tech / skill chips shown on the card */
   skills: string[];
-  /** Live demo URL — omit or leave empty to hide the Live link */
-  liveUrl?: string;
-  /** Source repo URL — omit or leave empty to hide the GitHub link */
-  githubUrl?: string;
-  /** Optional status pill: live | wip */
-  status?: "live" | "wip";
+  /** Live client domain — omit when the work is not publicly reachable */
+  domain?: string;
+  /** Matches the `client-work/` filename prefix, e.g. `revivepharmacy` */
+  slug: string;
 };
 
 export type SkillTech = {
@@ -40,8 +38,11 @@ export type Experience = {
   id: string;
   role: string;
   company: string;
+  /** Display range, e.g. "Mar 2025 - Aug 2026" */
+  period: string;
   description: string;
-  image: ImageSource;
+  /** Matches the `client-work/` filename prefix; omit when there are no shots */
+  slug?: string;
 };
 
 export type Testimonial = {
@@ -61,9 +62,20 @@ export type HeroBeat = {
   shape: HeroShapeId;
 };
 
+export type Fact = {
+  label: string;
+  value: string;
+};
+
+export type Stat = {
+  value: string;
+  label: string;
+};
+
 export const profile = {
   name: "I'm David",
-  title: "Creative Fullstack Engineer",
+  fullName: "David Remus Tribugenia",
+  title: "Full Stack Engineer",
   tagline: "Every stack. One synapse.",
   hero: {
     beats: [
@@ -77,109 +89,103 @@ export const profile = {
     textInSec: 0.7,
     textOutSec: 0.55,
   },
-  avatar: {
-    cdnUrl: "",
-    localPath: "/src/content/assets/avatar.jpg",
-    alt: "Profile photo placeholder",
-  } satisfies ImageSource,
   about: {
     headline: "About",
-    body: "Full-stack engineer focused on systems design and integration — shipping React, TypeScript, and Next.js products end to end, from UI and CMS-driven content to APIs, microservices, CI/CD, and cloud. I've built rate-limited backends, Docker pipelines that cut deploy time, Core Web Vitals wins, OpenAI integrations, and CMS-to-frontend wiring across pharmacy systems, marketing platforms, and AI products. I care about clean architecture, reliable interfaces between services, and product experiences that stay fast under load.",
+    role: "Full Stack Engineer",
+    location: "Negros Occidental, Philippines",
+    /** Shown in the avatar circle until a photo is dropped in */
+    initials: "DT",
+    body: [
+      "I build and run web systems end to end. I started in 2021 keeping the voter registration system online for the Commission on Elections, managing MySQL records under data privacy law and leading the people who ran it. That work taught me to assume production breaks at the worst possible time, and to build so it doesn't.",
+      "Since then I've shipped for founders and directors who needed one person to own a system. Node and Postgres services behind a rate-limited Nginx layer at Revive Pharmacy. LLM features and AWS production at Agentsly. Next.js rendering and Core Web Vitals at Codebility, where I also mentored juniors and ran code review. Right now I'm on contract with The Palace Manila.",
+      "What I care about is the unglamorous part. Clear boundaries between services, interfaces that don't surprise the next developer, and pages that stay fast when the traffic actually shows up. I'd rather delete code than add a layer.",
+    ],
+    facts: [
+      { label: "Based", value: "Negros Occidental, PH" },
+      { label: "Experience", value: "5 years (3 shipping product)" },
+      { label: "Hours", value: "AU business hours" },
+      { label: "Focus", value: "React · Node · Postgres" },
+      { label: "Status", value: "Open to work" },
+      { label: "Education", value: "BS Computer Engineering, TUP" },
+    ] satisfies Fact[],
+    numbers: [
+      { value: "99.9%", label: "AWS uptime at Agentsly" },
+      { value: "75%", label: "Faster deploys at Revive Pharmacy" },
+      { value: "80%", label: "More leads at The Palace Manila" },
+      { value: "35%", label: "Core Web Vitals gain at Codebility" },
+    ] satisfies Stat[],
+    /**
+     * Drop a square crop at `src/content/assets/about.jpg`.
+     * The circle applies `object-fit: cover` and `filter: grayscale(1)`,
+     * so a colour photo goes black and white with no extra editing.
+     */
     image: {
       cdnUrl: "",
       localPath: "/src/content/assets/about.jpg",
-      alt: "About section image placeholder",
+      alt: "David Remus Tribugenia",
     } satisfies ImageSource,
   },
 };
 
+/**
+ * Client work shown in the Projects sector and walked through in the
+ * scroll journey below it. Adding one is five fields: `slug` must match the
+ * `client-work/` filename prefix so the screenshots attach themselves.
+ * Story copy for the journey lives in `./projects.ts`.
+ */
 export const projects: Project[] = [
   {
-    id: "anime-vault",
-    title: "Anime Vault",
-    description: "Anime catalog with infinite scroll and dynamic loading.",
-    skills: ["React", "Next.js", "TypeScript", "Tailwind"],
-    liveUrl: "https://anime-vault-lyart.vercel.app/",
-    githubUrl: "https://github.com/DaddyPeeg/anime_vault",
-    status: "live",
+    id: "palace",
+    title: "The Palace Manila",
+    description:
+      "Events venue site on Webflow CMS: rooms, event types, booking enquiries, and lead capture, with an on-page SEO campaign behind it.",
+    skills: ["Webflow CMS", "SEO", "Python", "Content modelling"],
+    domain: "https://the-palace-manila-prototype.webflow.io/",
+    slug: "thepalacemanila",
   },
   {
-    id: "messenger-clone",
-    title: "Messenger Clone",
+    id: "revive",
+    title: "Revive Pharmacy",
     description:
-      "Real-time chat app with conversations, presence, and a modern messaging UI.",
-    skills: ["Next.js", "React", "Pusher", "Prisma", "Tailwind"],
-    liveUrl: "https://messenger-clone-swart.vercel.app/",
-    githubUrl: "https://github.com/DaddyPeeg/messenger-clone",
-    status: "live",
+      "Pharmacy platform split into Node.js microservices on PostgreSQL and Redis, hardened behind Nginx and deployed by Docker CI/CD.",
+    skills: ["Node.js", "PostgreSQL", "Redis", "Nginx", "Docker", "Linux"],
+    domain: "https://revivepharmacy.com.au/",
+    slug: "revivepharmacy",
   },
   {
-    id: "kanban-app",
-    title: "Kanban App",
+    id: "volatility",
+    title: "Volatility",
     description:
-      "SaaS-style Kanban board with drag-and-drop boards and progress tracking.",
-    skills: ["React", "Next.js", "TypeScript", "Tailwind"],
-    liveUrl: "https://task-management-kanban.vercel.app/",
-    githubUrl: "https://github.com/DaddyPeeg/task-management-kanban",
-    status: "live",
+      "Marketing funnel for a trading education business: React landing pages, a Strapi-driven blog, and a live webinar video platform.",
+    skills: ["React", "Strapi", "Video", "SEO"],
+    domain: "https://volatility.com.au/",
+    slug: "volatility",
   },
   {
-    id: "pathfinding",
-    title: "Pathfinding Visualization",
+    id: "agentsly",
+    title: "Agentsly",
     description:
-      "Interactive graph pathfinding visualizer for classic search algorithms.",
-    skills: ["React", "JavaScript", "Algorithms"],
-    liveUrl: "https://daddypeeg.github.io/pathfinding/",
-    githubUrl: "https://github.com/DaddyPeeg/pathfinding",
-    status: "live",
+      "AI product with LLM features on the Vercel AI SDK and OpenAI, GraphQL and REST over PostgreSQL, running on AWS at 99.9% uptime.",
+    skills: ["React", "Node.js", "GraphQL", "PostgreSQL", "Vercel AI SDK", "AWS"],
+    slug: "agentsly",
   },
   {
-    id: "react-admin",
-    title: "React Admin",
+    id: "tapup",
+    title: "TapUp",
     description:
-      "Reusable admin template with charts, tables, and dashboard layouts.",
-    skills: ["React", "TypeScript", "Tailwind"],
-    liveUrl: "https://daddypeeg.github.io/react-admin-temp/",
-    githubUrl: "https://github.com/DaddyPeeg/react-admin-temp",
-    status: "live",
-  },
-  {
-    id: "threads",
-    title: "Threads",
-    description:
-      "Social app where users create threads and discuss topics in communities.",
-    skills: ["Next.js", "React", "MongoDB", "Clerk", "Tailwind"],
-    liveUrl: "https://threads-sample-app.vercel.app/",
-    githubUrl: "https://github.com/DaddyPeeg/threads-app",
-    status: "live",
+      "A card platform where an account is a card. Developer profiles, portfolios, and social features on Next.js and Firebase.",
+    skills: ["Next.js", "Firebase Auth", "Firestore", "Firebase Storage", "TypeScript"],
+    domain: "https://www.tapup.tech/",
+    slug: "tapup",
   },
   {
     id: "codebility",
     title: "Codebility",
     description:
-      "Employee and client management platform for digital delivery teams.",
-    skills: ["Next.js", "React", "TypeScript", "Tailwind"],
-    liveUrl: "https://codebility-fe.vercel.app/",
-    githubUrl: "https://github.com/Zeff01/codebility-fe/tree/main",
-    status: "live",
-  },
-  {
-    id: "image-gallery",
-    title: "Image Gallery",
-    description:
-      "Image gallery with Cloudinary-backed optimization and responsive layout.",
-    skills: ["React", "Cloudinary", "TypeScript"],
-    githubUrl: "https://github.com/DaddyPeeg/image-gallery-church",
-    status: "wip",
-  },
-  {
-    id: "discord-clone",
-    title: "Discord Clone",
-    description:
-      "Discord-inspired app with realtime messaging and video chat foundations.",
-    skills: ["Next.js", "React", "Socket.io", "Prisma"],
-    githubUrl: "https://github.com/DaddyPeeg/discord-clone",
-    status: "wip",
+      "Employee and client management platform for a digital delivery team, tuned for Next.js rendering and Core Web Vitals.",
+    skills: ["Next.js", "TypeScript", "Jest", "Tailwind"],
+    domain: "https://www.codebility.tech/",
+    slug: "codebility",
   },
 ];
 
@@ -270,78 +276,69 @@ export const skills: SkillCategory[] = [
   },
 ];
 
+/** Newest first. `slug` pulls the card image from `client-work/`. */
 export const experience: Experience[] = [
+  {
+    id: "exp-palace",
+    role: "Full Stack Engineer (Contract)",
+    company: "The Palace Manila",
+    period: "Aug 2026 - Present",
+    description:
+      "A Webflow CMS site for venues, events, booking, and lead capture, plus the on-page SEO campaign behind it. Reworking the booking, inquiry, and newsletter paths raised lead volume about 80%.",
+    slug: "thepalacemanila",
+  },
   {
     id: "exp-revive",
     role: "Systems Engineer",
     company: "Revive Pharmacy",
+    period: "Mar 2025 - Aug 2026",
     description:
-      "Secured APIs, optimized databases, and shipped Docker CI/CD that cut deploy time by 75%.",
-    image: {
-      cdnUrl: "",
-      localPath: "/src/content/assets/experience/exp-1.jpg",
-      alt: "Revive Pharmacy",
-    },
-  },
-  {
-    id: "exp-tapup",
-    role: "Fullstack Developer & Project Manager",
-    company: "TapUp",
-    description:
-      "Led delivery end to end — product scope, fullstack implementation, and shipping the TapUp platform with the team.",
-    image: {
-      cdnUrl: "",
-      localPath: "/src/content/assets/experience/exp-1.jpg",
-      alt: "TapUp",
-    },
-  },
-  {
-    id: "exp-palace",
-    role: "Fullstack Developer",
-    company: "The Palace Manila",
-    description:
-      "Built and maintained fullstack features for The Palace Manila’s digital product surfaces.",
-    image: {
-      cdnUrl: "",
-      localPath: "/src/content/assets/experience/exp-1.jpg",
-      alt: "The Palace Manila",
-    },
+      "Node.js microservices on PostgreSQL and Redis so pharmacy services could deploy and fail independently, hardened behind Nginx with rate limiting on a Linux VPS. Docker CI/CD cut deploy time about 75%.",
+    slug: "revivepharmacy",
   },
   {
     id: "exp-volatility",
-    role: "Frontend Developer",
+    role: "Full Stack Engineer",
     company: "Volatility",
+    period: "Oct 2024 - Feb 2025",
     description:
-      "High-converting landing pages, CMS-driven blog, and a webinar video platform.",
-    image: {
-      cdnUrl: "",
-      localPath: "/src/content/assets/experience/exp-1.jpg",
-      alt: "Volatility",
-    },
+      "Responsive React landing pages for the marketing funnel, Strapi CMS wired into the frontend for the blog, and a video platform hosting recurring live webinars. Conversions rose about 22%.",
+    slug: "volatility",
   },
   {
     id: "exp-agentsly",
     role: "Full Stack Engineer",
     company: "Agentsly",
+    period: "May 2024 - Oct 2024",
     description:
-      "OpenAI / Vercel AI SDK integrations, ShadCN UI, and AWS deployments at 99.9% uptime.",
-    image: {
-      cdnUrl: "",
-      localPath: "/src/content/assets/experience/exp-1.jpg",
-      alt: "Agentsly",
-    },
+      "Full-stack LLM features with the Vercel AI SDK and OpenAI, REST and GraphQL over PostgreSQL, and GoHighLevel wired in so the team could follow a lead from capture through follow-up. Production ran on AWS at 99.9% uptime.",
+    slug: "agentsly",
+  },
+  {
+    id: "exp-tapup",
+    role: "Fullstack Developer & Project Manager",
+    company: "TapUp",
+    period: "Nov 2023 - May 2024",
+    description:
+      "A card platform where every account is a card: developer profiles, portfolios, and social features on Next.js and Firebase. I ran scope and delivery as well as building it.",
+    slug: "tapup",
   },
   {
     id: "exp-codebility",
-    role: "Fullstack Developer",
+    role: "Full Stack Engineer / Mentor",
     company: "Codebility",
+    period: "Nov 2023 - May 2024",
     description:
-      "Fullstack work on the Codebility platform — Next.js performance, data layer improvements, and reliable delivery.",
-    image: {
-      cdnUrl: "",
-      localPath: "/src/content/assets/experience/exp-1.jpg",
-      alt: "Codebility",
-    },
+      "Mentored juniors on Next.js, TypeScript, and Jest, ran code review on every pull request, and wrote unit tests for the critical flows. Core Web Vitals improved about 35%.",
+    slug: "codebility",
+  },
+  {
+    id: "exp-comelec",
+    role: "System Administrator",
+    company: "Commission on Elections",
+    period: "Sep 2021 - Jul 2023",
+    description:
+      "Kept the voter registration system online through updates, backups, and live incident response, and led the team running it. MySQL records for large volumes of personnel data, under data privacy law, with strict access control and backup routines.",
   },
 ];
 
@@ -403,8 +400,13 @@ export const testimonials: Testimonial[] = [
 export const contact = {
   headline: "Contact",
   description:
-    "Have a project or role in mind? Send a short note — I usually reply within a day or two.",
+    "Have a project or role in mind? Send a short note and I'll reply within a day or two.",
   email: "developer.work.david@gmail.com",
+  meta: [
+    { label: "Status", value: "Open to work" },
+    { label: "Hours", value: "AU business hours" },
+    { label: "Reply", value: "Within a day or two" },
+  ] satisfies Fact[],
   links: [
     { label: "GitHub", url: "https://github.com/DavidK4leido5" },
     { label: "LinkedIn", url: "https://linkedin.com/in/davidrt1262/" },
@@ -419,25 +421,24 @@ export const contact = {
 export const sectionCopy = {
   projects: {
     headline: "Projects",
-    intro: "Selected builds — live demos and source when available.",
+    intro: "Six client builds. The full walkthrough runs below this journey.",
   },
   experience: {
     headline: "Experience",
-    intro: "Roles across systems, frontend, and full-stack delivery.",
+    intro: "Seven roles, newest first, with the numbers that came out of them.",
   },
   skills: {
     headline: "Skills",
     intro:
-      "Click a radar vertex to inspect a stack. Scores are relative proficiency.",
+      "Click a radar vertex to open a stack. Scores are self-rated and relative.",
   },
   about: {
     headline: "About",
-    intro:
-      "Full-stack engineer — systems design, integration, and shipping end to end.",
+    intro: "Five years keeping systems online. Three shipping product.",
   },
   contact: {
     headline: "Contact",
-    intro: "Drop a message — or email / LinkedIn if you prefer.",
+    intro: "The form, email, or LinkedIn. All of them reach me.",
   },
 } as const;
 

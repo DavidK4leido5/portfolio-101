@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Group, Vector2, Vector3, Color } from 'three'
+import { Group, Vector2, Color } from 'three'
 import { QUALITY } from '../lib/quality'
 import { NODE_LIMITS } from '../lib/nodes'
 import { getAccent, accentHex } from '../lib/accent'
 import { useSceneStore } from '../store/sceneStore'
 import { SECTION_IDS, sections } from '../data/sections'
-import { uniforms, mouse, clusterState, hotspotWorld, indicatorEls, setPointerOnScene } from './shared'
+import { traceStages } from '../content/requestTrace'
+import { uniforms, mouse, clusterState, setPointerOnScene } from './shared'
 import { sceneFraming } from '../lib/framing'
 import { NeuralCluster, makeCloud } from './NeuralCluster'
 import { ConnectionSystem } from './ConnectionSystem'
@@ -15,11 +16,14 @@ import { PostProcessing } from './PostProcessing'
 import { IntroSequence } from './IntroSequence'
 import { AmbientParticles } from './AmbientParticles'
 import { BrainTouchProbe } from './BrainTouch'
-import { HeroShapeCycle } from './HeroShapeCycle'
 import { CameraFraming, SceneDebugBridge } from './SceneDebugBridge'
 
 const tmpMouse = new Vector2()
 let frame = 0
+
+/** Brain hotspot a trace stage rides on. */
+const traceHotspot = (stage: number) =>
+  SECTION_IDS.indexOf(traceStages[stage]?.hotspot ?? SECTION_IDS[0])
 
 function SceneUniforms() {
   useFrame(({ clock }) => {
@@ -28,9 +32,9 @@ function SceneUniforms() {
     getAccent(t, uniforms.uAccent.value as Color)
     uniforms.uMouse.value.lerp(tmpMouse.set(mouse.x, mouse.y), 0.05)
     const s = useSceneStore.getState()
-    uniforms.uHovered.value = s.hoveredSection ? SECTION_IDS.indexOf(s.hoveredSection) : -1
-    const focusId = s.scrollZone === 'journey' ? s.journeySection : s.activeSection
-    uniforms.uActive.value = focusId ? SECTION_IDS.indexOf(focusId) : -1
+    // The trace lights the lobe its stage rides on
+    uniforms.uActive.value =
+      s.scrollZone === 'hero' || s.traceStage == null ? -1 : traceHotspot(s.traceStage)
     if ((frame++ & 31) === 0) document.documentElement.style.setProperty('--accent', accentHex(t))
   })
   return null
@@ -46,69 +50,6 @@ function SceneBoot() {
     useSceneStore.getState().setSceneReady()
   }, [gl, cfg.dpr])
 
-  return null
-}
-
-const projV = new Vector3()
-const MIN_IND_GAP = 118
-
-function separateIndicators(pts: { x: number; y: number }[]) {
-  for (let pass = 0; pass < 6; pass++) {
-    for (let a = 0; a < pts.length; a++) {
-      for (let b = a + 1; b < pts.length; b++) {
-        const dx = pts[b].x - pts[a].x
-        const dy = pts[b].y - pts[a].y
-        const d = Math.hypot(dx, dy)
-        if (d >= MIN_IND_GAP || d < 1) continue
-        const push = (MIN_IND_GAP - d) * 0.55
-        const nx = dx / d
-        const ny = dy / d
-        pts[a].x -= nx * push
-        pts[a].y -= ny * push
-        pts[b].x += nx * push
-        pts[b].y += ny * push
-      }
-    }
-  }
-}
-
-function Projection() {
-  const camera = useThree((s) => s.camera)
-  const size = useThree((s) => s.size)
-  const ready = useSceneStore((s) => s.loadPhase === 'ready' || s.loadPhase === 'labels')
-  const tier = useSceneStore((s) => s.qualityTier)
-  useFrame(() => {
-    const loadPhase = useSceneStore.getState().loadPhase
-    if (!ready || tier === 'mobile' || frame & 1) return
-    const revealing = loadPhase === 'labels'
-    const pts = sections.map((_, i) => {
-      hotspotWorld(i, projV).project(camera)
-      return {
-        i,
-        hide: projV.z > 1,
-        x: (projV.x * 0.5 + 0.5) * size.width,
-        y: (-projV.y * 0.5 + 0.5) * size.height,
-      }
-    })
-    separateIndicators(pts)
-    const pad = 96
-    for (const p of pts) {
-      p.x = Math.max(pad, Math.min(size.width - pad, p.x))
-      p.y = Math.max(pad, Math.min(size.height - pad, p.y))
-    }
-    for (const p of pts) {
-      const el = indicatorEls[p.i]
-      if (!el) continue
-      // During the cascade reveal, GSAP owns opacity — don't flash labels visible
-      if (!revealing) {
-        el.style.opacity = p.hide ? '0' : ''
-      }
-      el.style.pointerEvents = p.hide || revealing ? 'none' : 'auto'
-      el.style.zIndex = String(20 - p.i)
-      el.style.left = `${p.x}px`
-      el.style.top = `${p.y}px`
-    }
-  })
   return null
 }
 
@@ -144,7 +85,7 @@ function BrainScene({ pool }: { pool: number }) {
   useEffect(() => {
     const s = useSceneStore.getState()
     uniforms.uNodeCount.value = s.nodeCount
-    if (s.loadPhase === 'ready' || s.loadPhase === 'labels') {
+    if (s.loadPhase === 'ready') {
       uniforms.uSpawn.value = 1
       uniforms.uSliderSpawn.value = 1
       uniforms.uRevealFrom.value = 0
@@ -160,20 +101,33 @@ function BrainScene({ pool }: { pool: number }) {
   )
 }
 
-export function HomeScene() {
+export function HomeScene({ paused = false }: { paused?: boolean }) {
   const tier = useSceneStore((s) => s.qualityTier)
   const cfg = QUALITY[tier]
   const pool = NODE_LIMITS[tier].pool
   const framing = sceneFraming(tier)
 
   useEffect(() => {
+    // elementFromPoint forces a hit test, so it runs at most once a frame
+    // rather than once per pointer event
+    let pending = false
+    let px = 0
+    let py = 0
+    const test = () => {
+      pending = false
+      const el = document.elementFromPoint(px, py)
+      setPointerOnScene(!el?.closest(
+        '.indicator, [data-testid="node-slider"], .panel, [data-testid="sector-nav"], .journey-progress, .cover-section, .project-journey, .scroll-end',
+      ))
+    }
     const onMove = (e: PointerEvent) => {
       mouse.x = (e.clientX / innerWidth) * 2 - 1
       mouse.y = -((e.clientY / innerHeight) * 2 - 1)
-      const el = document.elementFromPoint(e.clientX, e.clientY)
-      setPointerOnScene(!el?.closest(
-        '.indicator, [data-testid="node-slider"], .panel, .back, [data-testid="sector-nav"], .cover-section, .journey-copy, .scroll-end',
-      ))
+      px = e.clientX
+      py = e.clientY
+      if (pending) return
+      pending = true
+      requestAnimationFrame(test)
     }
     addEventListener('pointermove', onMove)
     return () => removeEventListener('pointermove', onMove)
@@ -182,6 +136,8 @@ export function HomeScene() {
   return (
     <Canvas
       dpr={[1, cfg.dpr]}
+      // 'never' stops the render loop without tearing down the WebGL context
+      frameloop={paused ? 'never' : 'always'}
       camera={{ position: [framing.cam.x, framing.cam.y, framing.cam.z], fov: framing.fov, near: 0.1, far: 80 }}
       gl={{
         antialias: false,
@@ -201,9 +157,7 @@ export function HomeScene() {
       <AmbientParticles />
       <BrainScene key={pool} pool={pool} />
       <IntroSequence />
-      <HeroShapeCycle />
       <CameraRig />
-      <Projection />
       <PostProcessing />
     </Canvas>
   )

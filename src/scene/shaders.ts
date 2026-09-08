@@ -268,12 +268,19 @@ void main(){
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
   if(emphasis<0.02&&uHovered>=0.0&&hasSel>0.5) emphasis=0.48;
-  float shapeFade=1.0-uShapeAlt*0.88;
+  // Lobe emphasis is deliberately NOT tied to uShapeAlt. That coupling existed
+  // for the old ambient reel, where tinting a lobe on a shape that has no
+  // lobes made no sense. The request trace lights the stage's lobe through the
+  // morph on purpose, so uShapeAlt now only gates the connection lines and the
+  // brain activity waves.
+  float shapeFade=1.0;
   float bright=mix(0.92,mix(0.55,1.45,isT),emphasis*hasSel*shapeFade);
   float pulse=0.96+0.04*sin(uTime*2.5+aSeed*6.2831853);
   // Alt shapes lose their connection web — points carry the structure alone,
   // so they get brighter and slightly larger to keep the silhouette crisp
-  vGlow=bright*(1.0+uFocus*0.18*isT)*(1.0+uIntroPulse*0.35)*(1.0+uShapeAlt*0.4);
+  // Off the brain the connection mesh is faded out, so the points carry the
+  // whole silhouette on their own and need more presence to hold it
+  vGlow=bright*(1.0+uFocus*0.18*isT)*(1.0+uIntroPulse*0.35)*(1.0+uShapeAlt*0.95);
   vAlpha=(0.5+0.38*aSeed)*pulse*mix(0.4,1.0,morph);
   vAlpha*=mix(1.0,0.35,uFocus*(1.0-isT)*hasSel);
   vec4 mv=modelViewMatrix*vec4(p,1.0);
@@ -329,7 +336,12 @@ void main(){
   float isT=max(tm,0.0);
   float emphasis=max(uDim,uFocus);
   if(emphasis<0.02&&uHovered>=0.0&&hasSel>0.5) emphasis=0.48;
-  float shapeFade=1.0-uShapeAlt*0.88;
+  // Lobe emphasis is deliberately NOT tied to uShapeAlt. That coupling existed
+  // for the old ambient reel, where tinting a lobe on a shape that has no
+  // lobes made no sense. The request trace lights the stage's lobe through the
+  // morph on purpose, so uShapeAlt now only gates the connection lines and the
+  // brain activity waves.
+  float shapeFade=1.0;
   float bright=mix(0.85,mix(0.4,1.25,isT),emphasis*hasSel*shapeFade);
   float pulse=0.78+0.22*sin(uTime*1.3+aSeed*6.2831853);
   // Stagger connection opacity by seed so lines cascade in/out with uConnect
