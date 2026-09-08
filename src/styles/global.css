@@ -95,25 +95,102 @@ canvas { display: block; }
   display: inline-block;
 }
 
-/* One-shot arrival for anything scrolled past once */
-[data-reveal] {
+/* —— One-shot arrival for anything scrolled past once ——
+ *
+ * The hidden state hangs off `.reveal-armed`, which observeReveal puts on
+ * <html> once its observer is actually attached. Until then every one of these
+ * renders as ordinary content: the copy is in the markup, so a slow chunk, a
+ * thrown module or a browser with no IntersectionObserver must leave a
+ * readable page rather than a blank column. Hiding by default and revealing
+ * later would make the animation load-bearing.
+ *
+ * The arrival is an `animation`, not a `transition`, because several of the
+ * things being revealed own a `transition` of their own for their hover state
+ * — `.project-card` and `.contact-panel__email` both do. `transition` is a
+ * shorthand, so whichever rule won would drop the other's properties, and the
+ * cards would have snapped in with no arrival at all.
+ *
+ * The offsets are held in custom properties so the resting state and the
+ * keyframe cannot drift apart, and so one keyframe covers every variant.
+ */
+.reveal-armed [data-reveal] {
+  --reveal-x: 0px;
+  --reveal-y: 34px;
+  --reveal-scale: 1;
   opacity: 0;
-  transform: translate3d(0, 34px, 0);
-  transition:
-    opacity 0.9s var(--ease-soft) var(--reveal-delay, 0s),
-    transform 1s var(--ease-osmo) var(--reveal-delay, 0s);
+  transform: translate3d(var(--reveal-x), var(--reveal-y), 0) scale(var(--reveal-scale));
 }
 
-[data-reveal].is-in {
+/* Cards carry more weight than a line of copy, so they come further and settle
+   out of a slight recess rather than sliding flat */
+.reveal-armed [data-reveal='card'] {
+  --reveal-y: 48px;
+  --reveal-scale: 0.976;
+}
+
+/* For rows that read across rather than down */
+.reveal-armed [data-reveal='left'] {
+  --reveal-x: -28px;
+  --reveal-y: 0px;
+}
+
+/*
+ * Images wipe open instead of fading. A separate attribute rather than a
+ * `data-reveal` variant on purpose: the screenshots on this page rest at less
+ * than full opacity, and a reveal that animated opacity would have to override
+ * that resting value and then hand it back.
+ */
+.reveal-armed [data-wipe] {
+  clip-path: inset(0 0 100% 0);
+  transform: scale(1.05);
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--reveal-x), var(--reveal-y), 0) scale(var(--reveal-scale));
+  }
+}
+
+@keyframes reveal-wipe {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: scale(1.05);
+  }
+}
+
+.reveal-armed [data-reveal].is-in {
   opacity: 1;
   transform: none;
+  animation: reveal-in 1s var(--ease-osmo) var(--reveal-delay, 0s) backwards;
 }
 
+/*
+ * Kept apart from the rule above rather than sharing it. Landing `opacity: 1`
+ * on a wipe would overwrite the resting opacity its screenshot is set at, and
+ * landing a `clip-path` on a `[data-reveal]` would overwrite the section
+ * titles' own clip — the mask they ride up from under carries `data-reveal`.
+ */
+.reveal-armed [data-wipe].is-in {
+  transform: none;
+  clip-path: inset(0 0 0 0);
+  animation: reveal-wipe 1.1s var(--ease-osmo) var(--reveal-delay, 0s) backwards;
+}
+
+/*
+ * Still needed even though observeReveal refuses to arm under reduced motion:
+ * the query is read once, and someone who turns the setting on mid-visit would
+ * otherwise be left with whatever was hidden at the time.
+ */
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
+  .reveal-armed [data-reveal] {
     opacity: 1;
     transform: none;
-    transition: none;
+  }
+
+  .reveal-armed [data-wipe] {
+    clip-path: none;
+    transform: none;
   }
 }
 
@@ -541,6 +618,53 @@ canvas { display: block; }
   color: rgba(235, 235, 255, 0.42);
 }
 
+/* —— Hero mark entrance ——
+ *
+ * Played once, when the mark mounts — which HeroMark holds back until the
+ * cloud has finished assembling.
+ *
+ * Every keyframe here is `from`-only, so the un-animated state is the finished
+ * one. Nothing is left hidden if animations are off, refused for reduced
+ * motion, or never run at all.
+ *
+ * The properties are also deliberately not `opacity`: the scroll exit owns the
+ * inline opacity on the veil, the hairline group and the sub, and an animation
+ * on the same property would be overwritten the moment the reader scrolled.
+ * `fill-opacity` and `stroke-opacity` multiply with it instead.
+ */
+@keyframes hero-wash {
+  from { fill-opacity: 0; }
+}
+
+@keyframes hero-hairline {
+  from { stroke-opacity: 0; }
+}
+
+@keyframes hero-support {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+}
+
+/* The sheet washes over the brain while the words rise into it, so the letters
+   read as holes opening rather than as type fading up on top */
+.hero-mark__veil {
+  animation: hero-wash 1s var(--ease-soft);
+}
+
+.hero-mark__stroke {
+  animation: hero-hairline 0.8s var(--ease-soft) calc(var(--line, 0) * 0.14s) backwards;
+}
+
+.hero-mark__sub {
+  animation: hero-wash 0.7s var(--ease-soft) 0.62s backwards;
+}
+
+.hero-note {
+  animation: hero-support 0.9s var(--ease-osmo) calc(0.72s + var(--note, 0) * 0.1s) backwards;
+}
+
 .hud {
   position: absolute;
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
@@ -914,6 +1038,8 @@ canvas { display: block; }
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(4, 6, 14, 0.45);
   padding: 16px 18px 14px;
+  /* The screenshot's reveal scales it slightly past its box on the way in */
+  overflow: hidden;
   transition: border-color 0.25s, background 0.25s;
 }
 
@@ -2261,19 +2387,24 @@ canvas { display: block; }
 }
 
 /* At this scale a fade reads as nothing happening, so the line rides up from
-   under its own mask with a slight tilt instead */
+   under its own mask with a slight tilt instead. Hiding it is gated on
+   `.reveal-armed` for the same reason the rest of the reveals are: this is the
+   largest text on the page, and it must not depend on a script to be read. */
 .spine-title__line {
-  transform: translate3d(0, 108%, 0) rotate(2.2deg);
   transform-origin: 0% 100%;
   transition: transform 1.25s var(--ease-osmo);
 }
 
-.spine-title__mask.is-in .spine-title__line {
+.reveal-armed .spine-title__line {
+  transform: translate3d(0, 108%, 0) rotate(2.2deg);
+}
+
+.reveal-armed .spine-title__mask.is-in .spine-title__line {
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spine-title__line {
+  .reveal-armed .spine-title__line {
     transform: none;
     transition: none;
   }

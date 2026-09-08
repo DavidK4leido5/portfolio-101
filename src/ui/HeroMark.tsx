@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import { useSceneStore } from '../store/sceneStore'
 import { profile } from '../content/portfolio'
 
 /** Two of the About stats, set against the mark the way Formix does it. */
 const HERO_NOTES = profile.about.numbers.slice(0, 2)
+
+const prefersReduced = () =>
+  typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /**
  * The hero mark: FULL over STACK, both fitted to the same measure, punched out
@@ -11,8 +15,13 @@ const HERO_NOTES = profile.about.numbers.slice(0, 2)
  *
  * The words are not drawn over the brain — they are a hole in a dark sheet on
  * top of it, so the only place the cloud reads at full strength is inside the
- * letterforms. Scrolling dissolves the sheet, which opens the mask from
- * letter-shaped to fully open and hands the whole brain to the request trace.
+ * letterforms. Scrolling flies the frame into the type until the letters are
+ * past the edges of it, and only then dissolves the sheet, handing the whole
+ * brain to the request trace.
+ *
+ * Nothing here renders until `loadPhase` reaches `ready`, which is the intro
+ * spawn timeline's last frame: the words arrive on a finished cloud, never over
+ * one that is still assembling.
  *
  * It has to be inline SVG rather than a `mask-image` data URI: a mask loaded as
  * a URL renders in an isolated context with no access to the document's fonts,
@@ -59,26 +68,60 @@ const FIT_REF = 200
  * How far the words are pushed toward the viewer over the hero's exit. The
  * knockout scales with them, so the letters open outward and the frame passes
  * through them rather than the block simply fading away.
+ *
+ * It has to be large enough that the letterforms leave the frame entirely. At
+ * 5x they were still recognisably words when the veil took over, so the move
+ * read as a zoom that stopped short and then cut. The camera has to end up
+ * inside the type, past it, with nothing left to recognise.
  */
-const ZOOM_TO = 5.2
+const ZOOM_TO = 26
 /**
- * Point in the exit at which the veil starts to go. Held opaque for the first
- * stretch on purpose: while the sheet is still there the growing letters are
- * doing the revealing, and that reads as one continuous move. Dissolving it
- * from the start turns the whole thing into a crossfade instead.
+ * Exponent on the zoom. Above 1 the growth accelerates, which is what makes it
+ * read as falling into the words rather than as the words being pushed at you.
  */
-const VEIL_HOLD = 0.55
+const ZOOM_EASE = 1.9
+/**
+ * Point in the exit at which the veil starts to go. Held opaque almost to the
+ * end on purpose: while the sheet is still there the growing letters are doing
+ * the revealing, and that reads as one continuous move. Dissolving it early
+ * turns the whole thing into a crossfade instead.
+ */
+const VEIL_HOLD = 0.84
+/**
+ * Point by which it is fully gone. Short of the end of the exit on purpose: at
+ * exactly 1 there is still a sliver of sheet on screen as the trace takes the
+ * frame, and the reader only ever reaches the last percent of the exit if they
+ * scroll to the pixel.
+ */
+const VEIL_GONE = 0.96
+
+/**
+ * Entrance, played once the cloud has finished assembling. The lines rise into
+ * the sheet as it washes over the brain, so the words arrive as holes opening
+ * in it rather than as type fading up on top of it.
+ */
+const ENTER_RISE = 44
+const ENTER_DUR = 1.15
+const ENTER_STAGGER = 0.14
 
 type LineNodes = { mask: SVGTextElement | null; stroke: SVGTextElement | null }
+/** Per-line wrapper groups, one pair per line, carrying the entrance rise. */
+type LineGroups = { mask: SVGGElement | null; stroke: SVGGElement | null }
 
 export function HeroMark() {
   const loadPhase = useSceneStore((s) => s.loadPhase)
   const heroExit = useSceneStore((s) => s.heroExitProgress)
   const tier = useSceneStore((s) => s.qualityTier)
   const nodesRef = useRef<LineNodes[]>(LINES.map(() => ({ mask: null, stroke: null })))
+  const lineGroupsRef = useRef<LineGroups[]>(LINES.map(() => ({ mask: null, stroke: null })))
   const subRef = useRef<SVGTextElement | null>(null)
   const zoomRefs = useRef<(SVGGElement | null)[]>([null, null])
   const originRef = useRef({ x: 0, y: 0 })
+  /** Per-line entrance progress, 0 → 1. Tweened as gsap targets, so it staggers. */
+  const enterRef = useRef(LINES.map(() => ({ v: 0 })))
+  const enterTween = useRef<gsap.core.Tween | null>(null)
+  const exitRef = useRef(0)
+  const enterStarted = useRef(false)
   const [size, setSize] = useState({ w: 0, h: 0 })
 
   useEffect(() => {
@@ -189,17 +232,25 @@ export function HeroMark() {
       subRef.current.setAttribute('textLength', String(measure))
     }
 
-    // The zoom pushes out from the middle of the ink, not the middle of the
-    // viewport, so the words grow around themselves
+    /*
+     * The zoom pushes out from inside the ink, not from the middle of the
+     * viewport, so the words grow around themselves.
+     *
+     * Sat on the last line's cap band rather than on the middle of the whole
+     * block, which fell in the gap between the two words: scaling about a gap
+     * grows the gap, so the last thing on screen before the veil went was a
+     * flat sheet. From inside a line, it is that line's own strokes that sweep
+     * out past the edges of the frame.
+     */
     originRef.current = {
       x: size.w / 2,
-      y: (firstBaseline - plan.caps[0] + lastBaseline) / 2,
+      y: lastBaseline - plan.caps[plan.caps.length - 1] / 2,
     }
   }, [size, tier])
 
   /*
    * `loadPhase` has to be a dependency even though `fit` does not read it: the
-   * SVG is not rendered while the scene is still loading, so the refs are null
+   * SVG is not rendered until the phase reaches `ready`, so the refs are null
    * for the commit where `size` lands. Without it the effect runs once, bails
    * on empty refs, and never runs again once the glyphs actually exist.
    */
@@ -216,22 +267,68 @@ export function HeroMark() {
    * exit progress updates on every scroll tick, and re-rendering the SVG that
    * often would also blow away the sizes and baselines `fit` wrote by hand.
    *
-   * The knockout and the hairline copies get the same transform, so the mask
-   * grows with the letters it is cut from. `getBBox` on a <text> is in its own
-   * user space, so scaling the group around it leaves the fit measurements
-   * alone.
+   * The knockout and the hairline copies get the same transforms, so the mask
+   * moves and grows with the letters it is cut from. `getBBox` on a <text> is
+   * in its own user space, so transforming the groups around it leaves the fit
+   * measurements alone.
+   *
+   * The entrance rise cannot be a CSS animation, because half of what it moves
+   * lives inside a <mask> and mask content is not rendered in its own right —
+   * so it is written here alongside the zoom, on the same nodes.
    */
-  useLayoutEffect(() => {
-    const scale = 1 + (ZOOM_TO - 1) * Math.pow(p, 1.6)
+  const write = useCallback(() => {
+    const scale = 1 + (ZOOM_TO - 1) * Math.pow(exitRef.current, ZOOM_EASE)
     const { x, y } = originRef.current
-    const transform = `translate(${x} ${y}) scale(${scale.toFixed(4)}) translate(${-x} ${-y})`
-    for (const g of zoomRefs.current) g?.setAttribute('transform', transform)
-  }, [p, size])
+    const zoom = `translate(${x} ${y}) scale(${scale.toFixed(4)}) translate(${-x} ${-y})`
+    for (const g of zoomRefs.current) g?.setAttribute('transform', zoom)
 
-  if (loadPhase === 'loading' || !size.w) return null
+    lineGroupsRef.current.forEach((line, i) => {
+      const dy = (1 - enterRef.current[i].v) * ENTER_RISE
+      const rise = `translate(0 ${dy.toFixed(2)})`
+      line.mask?.setAttribute('transform', rise)
+      line.stroke?.setAttribute('transform', rise)
+    })
+  }, [])
 
-  /** Veil holds, then goes — see VEIL_HOLD. */
-  const veil = p <= VEIL_HOLD ? 1 : 1 - (p - VEIL_HOLD) / (1 - VEIL_HOLD)
+  useLayoutEffect(() => {
+    exitRef.current = p
+    write()
+  }, [p, size, write])
+
+  /*
+   * Held back until the cloud has finished assembling — `loadPhase` only
+   * reaches `ready` on the intro timeline's last frame. Showing the words over
+   * a half-built brain gave away that the assembly was still running.
+   */
+  useEffect(() => {
+    if (loadPhase !== 'ready' || !size.w || enterStarted.current) return
+    enterStarted.current = true
+    const cells = enterRef.current
+    if (prefersReduced()) {
+      for (const cell of cells) cell.v = 1
+      write()
+      return
+    }
+    /*
+     * Parked in a ref and torn down on unmount only. Cleaning it up from this
+     * effect instead would kill the tween half-played on the next resize,
+     * since the re-entry guard sends the re-run straight back out.
+     */
+    enterTween.current = gsap.to(cells, {
+      v: 1,
+      duration: ENTER_DUR,
+      ease: 'expo.out',
+      stagger: ENTER_STAGGER,
+      onUpdate: write,
+    })
+  }, [loadPhase, size.w, write])
+
+  useEffect(() => () => { enterTween.current?.kill() }, [])
+
+  if (loadPhase !== 'ready' || !size.w) return null
+
+  /** Veil holds, then goes — see VEIL_HOLD and VEIL_GONE. */
+  const veil = Math.min(1, Math.max(0, 1 - (p - VEIL_HOLD) / (VEIL_GONE - VEIL_HOLD)))
   /** Supporting type is not part of the zoom, so it leaves early. */
   const support = Math.max(0, 1 - p / 0.35)
 
@@ -261,17 +358,20 @@ export function HeroMark() {
             height={size.h}
           >
             <rect x="0" y="0" width={size.w} height={size.h} fill="#fff" />
+            {/* Outer group carries the zoom; the inner one per line carries the
+                entrance rise, so the two compose without fighting */}
             <g ref={(el) => { zoomRefs.current[0] = el }}>
               {LINES.map((text, i) => (
-                <text
-                  key={text}
-                  className="hero-mark__glyph"
-                  ref={(el) => { nodesRef.current[i].mask = el }}
-                  textAnchor="middle"
-                  fill="#000"
-                >
-                  {text}
-                </text>
+                <g key={text} ref={(el) => { lineGroupsRef.current[i].mask = el }}>
+                  <text
+                    className="hero-mark__glyph"
+                    ref={(el) => { nodesRef.current[i].mask = el }}
+                    textAnchor="middle"
+                    fill="#000"
+                  >
+                    {text}
+                  </text>
+                </g>
               ))}
             </g>
           </mask>
@@ -294,14 +394,18 @@ export function HeroMark() {
         */}
         <g ref={(el) => { zoomRefs.current[1] = el }} style={{ opacity: veil }}>
           {LINES.map((text, i) => (
-            <text
-              key={`stroke-${text}`}
-              className="hero-mark__glyph hero-mark__stroke"
-              ref={(el) => { nodesRef.current[i].stroke = el }}
-              textAnchor="middle"
-            >
-              {text}
-            </text>
+            <g key={`stroke-${text}`} ref={(el) => { lineGroupsRef.current[i].stroke = el }}>
+              <text
+                className="hero-mark__glyph hero-mark__stroke"
+                ref={(el) => { nodesRef.current[i].stroke = el }}
+                textAnchor="middle"
+                /* Entrance stagger for the hairline's own fade, matched to the
+                   rise this group is given in `write` */
+                style={{ '--line': i } as React.CSSProperties}
+              >
+                {text}
+              </text>
+            </g>
           ))}
         </g>
 
@@ -320,7 +424,11 @@ export function HeroMark() {
           design, so they stay genuinely small */}
       <div className="hero-notes" style={{ opacity: support }} aria-hidden={p > 0.2}>
         {HERO_NOTES.map((note, i) => (
-          <p className={`hero-note hero-note--${i === 0 ? 'left' : 'right'}`} key={note.label}>
+          <p
+            className={`hero-note hero-note--${i === 0 ? 'left' : 'right'}`}
+            key={note.label}
+            style={{ '--note': i } as React.CSSProperties}
+          >
             <span className="hero-note__value">{note.value}</span>
             <span className="hero-note__label">{note.label}</span>
           </p>

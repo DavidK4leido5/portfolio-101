@@ -13,9 +13,17 @@ export function ExperienceList() {
           <article
             className={`card card--exp${shot ? '' : ' card--exp-bare'}`}
             key={e.id}
+            data-reveal="card"
           >
             {shot && (
-              <img className="card__shot" src={shot} alt="" loading="lazy" decoding="async" />
+              <img
+                className="card__shot"
+                src={shot}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                data-wipe
+              />
             )}
             <div className="card__head">
               <h3>{e.role} · {e.company}</h3>

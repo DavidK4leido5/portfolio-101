@@ -34,7 +34,13 @@ function CategoryDetail({ category }: { category: SkillCategory }) {
   }, [category.id, reduced])
 
   return (
-    <div className="skills-detail" data-testid="skills-detail" id="skills-detail">
+    <div
+      className="skills-detail"
+      data-testid="skills-detail"
+      id="skills-detail"
+      data-reveal
+      style={{ '--reveal-delay': '0.12s' } as React.CSSProperties}
+    >
       <header className="skills-detail__head">
         <span className="skills-detail__badge" aria-hidden>
           <SkillIcon name={category.icon} size={18} />
@@ -85,9 +91,9 @@ export function SkillsPanel() {
       <CategoryDetail category={active} />
 
       {/* Every category at a glance, and a second way into the radar */}
-      <ul className="skills-index" data-testid="skills-index">
+      <ul className="skills-index" data-testid="skills-index" data-reveal-stagger>
         {skills.map((c) => (
-          <li key={c.id}>
+          <li key={c.id} data-reveal="left">
             <button
               type="button"
               className={`skills-index__row${c.id === active.id ? ' is-active' : ''}`}

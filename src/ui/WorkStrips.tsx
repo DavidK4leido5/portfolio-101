@@ -32,13 +32,19 @@ function WorkGroup({ group }: { group: ClientWorkGroup }) {
   )
 }
 
-/** Two counter-scrolling rows of client screenshots, grouped by product. */
+/**
+ * Two counter-scrolling rows of client screenshots, grouped by product.
+ *
+ * The reveal goes on the strip, never on the shots inside it: those already
+ * ride the marquee's own transform, and a second one on the same node fights
+ * it.
+ */
 export function ClientWorkStrip() {
   const { rowA, rowB } = splitClientWorkGroups()
   if (rowA.length + rowB.length === 0) return null
 
   return (
-    <div className="client-work" data-testid="client-work-marquee">
+    <div className="client-work" data-testid="client-work-marquee" data-reveal>
       <Marquee direction="rtl" speedPx={28} fill aria-label="Client work screenshots">
         {rowA.map((g) => (
           <WorkGroup key={g.key} group={g} />
@@ -106,7 +112,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
 export function TestimonialStrip() {
   if (testimonials.length === 0) return null
   return (
-    <div className="testimonial-marquee" data-testid="testimonial-marquee">
+    <div className="testimonial-marquee" data-testid="testimonial-marquee" data-reveal>
       <Marquee direction="ltr" speedPx={22} fill aria-label="Testimonials">
         {testimonials.map((t) => (
           <TestimonialCard key={t.id} t={t} />

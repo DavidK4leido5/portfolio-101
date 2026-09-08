@@ -123,9 +123,34 @@ const desktop = await browser.newPage({
 watch(desktop);
 await desktop.goto(URL, { waitUntil: "domcontentloaded" });
 await desktop.waitForSelector("canvas", { timeout: 15000 });
+
+/*
+ * The words must not be up while the cloud is still assembling — showing them
+ * over a half-built brain gives away that the intro is still running. The
+ * `intro` phase is the spawn timeline, and it is the whole of the assembly, so
+ * the mark has to be absent for all of it and present once the phase is ready.
+ */
+await desktop
+  .waitForSelector('.ui[data-load-phase="intro"]', { timeout: T.ready })
+  .catch(() => {});
+const duringAssembly = await desktop.evaluate(() => ({
+  phase: document.querySelector(".ui")?.getAttribute("data-load-phase"),
+  mark: document.querySelectorAll('[data-testid="hero-mark"]').length,
+}));
+if (duringAssembly.phase !== "intro") {
+  fail(
+    `hero mark: never caught the assembly phase (was ${duringAssembly.phase})`,
+  );
+} else if (duringAssembly.mark !== 0) {
+  fail("hero mark: FULL / STACK is up while the cloud is still assembling");
+} else console.log("ok: mark held back while the cloud assembles");
+
 await desktop.waitForSelector('.ui[data-load-phase="ready"]', {
   timeout: T.ready,
 });
+if (!(await desktop.locator('[data-testid="hero-mark"]').count())) {
+  fail("hero mark: never arrived once the assembly finished");
+} else console.log("ok: mark animates in once the cloud has assembled");
 await desktop.waitForSelector('.ui[data-scroll-zone="hero"]', {
   timeout: T.settle,
 });
@@ -267,8 +292,9 @@ else console.log("ok: density slider interactive on the hero");
  * through the letters, and the veil has to still be there while it does — a
  * veil that dissolves from the start turns the whole move into a crossfade.
  */
+const ZOOM_AT = [0, 0.3, 0.6, 0.8, 1];
 const zoomSamples = [];
-for (const at of [0, 0.3, 0.6, 1]) {
+for (const at of ZOOM_AT) {
   await desktop.evaluate(
     (f) => window.scrollTo(0, window.innerHeight * f * 0.98),
     at,
@@ -292,25 +318,45 @@ for (const at of [0, 0.3, 0.6, 1]) {
     }),
   );
 }
+const zoomAt = (f) => zoomSamples[ZOOM_AT.indexOf(f)];
 const scales = zoomSamples.map((s) => s.scale);
 if (!(scales[0] < 1.05))
   fail(`hero zoom: starts already scaled (${scales[0]})`);
-else if (!(scales[3] > scales[0] * 3)) {
+else if (!(zoomAt(1).scale > scales[0] * 3)) {
   fail(
     `hero zoom: knockout barely grows across the exit (${scales.join(" -> ")})`,
   );
-} else if (!(scales[1] > scales[0] && scales[2] > scales[1])) {
+} else if (!scales.every((s, i) => i === 0 || s > scales[i - 1])) {
   fail(`hero zoom: not monotonic (${scales.join(" -> ")})`);
 } else
   console.log(`ok: knockout zooms through the exit (${scales.join(" -> ")})`);
 
-if (!(zoomSamples[1].veil > 0.95)) {
+if (!(zoomAt(0.3).veil > 0.95)) {
   fail(
-    `hero zoom: veil already dissolving at 30% — that is a crossfade, not a zoom (${zoomSamples[1].veil})`,
+    `hero zoom: veil already dissolving at 30% — that is a crossfade, not a zoom (${zoomAt(0.3).veil})`,
   );
-} else if (!(zoomSamples[3].veil < 0.05)) {
-  fail(`hero zoom: veil never opens (${zoomSamples[3].veil})`);
+} else if (!(zoomAt(1).veil < 0.05)) {
+  fail(`hero zoom: veil never opens (${zoomAt(1).veil})`);
 } else console.log("ok: veil holds through the zoom, then opens");
+
+/*
+ * And the zoom has to finish before the veil goes, not stop short and hand over
+ * to a fade. By four fifths of the exit the letterforms are long past the edges
+ * of the frame — so the sheet is still fully up while the words are already
+ * unrecognisable, and the reveal is the zoom's work rather than a dissolve.
+ */
+const late = zoomAt(0.8);
+if (!(late.scale > 8)) {
+  fail(
+    `hero zoom: only ${late.scale}x at 80% of the exit — the words are still legible when the veil starts to go`,
+  );
+} else if (!(late.veil > 0.95)) {
+  fail(`hero zoom: veil already going at 80% (${late.veil})`);
+} else {
+  console.log(
+    `ok: zoom completes before the veil goes (${late.scale}x with the veil still at ${late.veil})`,
+  );
+}
 
 /*
  * The hero's idle orbit and the trace's scrubbed waypoints are two different

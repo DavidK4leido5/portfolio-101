@@ -17,7 +17,7 @@ export function ProjectsPanel() {
       {projects.map((p) => {
         const shot = shotBySlug.get(p.slug)
         return (
-          <article className="project-card" key={p.id}>
+          <article className="project-card" key={p.id} data-reveal="card">
             {shot && (
               <img
                 className="project-card__shot"
@@ -25,6 +25,7 @@ export function ProjectsPanel() {
                 alt=""
                 loading="lazy"
                 decoding="async"
+                data-wipe
               />
             )}
             <header className="project-card__head">
@@ -32,9 +33,9 @@ export function ProjectsPanel() {
             </header>
             <p className="project-card__desc">{p.description}</p>
             {p.skills.length > 0 && (
-              <ul className="project-card__skills">
+              <ul className="project-card__skills" data-reveal-stagger>
                 {p.skills.map((s) => (
-                  <li key={s}>{s}</li>
+                  <li key={s} data-reveal="left">{s}</li>
                 ))}
               </ul>
             )}
