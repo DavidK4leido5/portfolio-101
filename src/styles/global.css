@@ -3854,3 +3854,104 @@ html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="
 .cursor[data-felt] .cursor__hint-line {
   color: var(--cursor-accent);
 }
+
+/* ==== The cursor under attack ====
+   Chunks bitten out of the ring (a conic mask with gaps, set from Cursor.tsx),
+   a red/cyan split on every bite, a stepped jitter, and the cursor shouting. */
+.cursor__shape {
+  -webkit-mask: var(--bites, none);
+  mask: var(--bites, none);
+}
+
+.cursor[data-attacked] .cursor__shape {
+  border-color: #ff4d6d;
+  background: color-mix(in srgb, #ff4d6d 10%, transparent);
+}
+
+/* Two offset copies of the ring, cut into slices that shift on each bite */
+.cursor__shape::before,
+.cursor__shape::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cursor__shape {
+  position: relative;
+}
+
+.cursor[data-hurt] .cursor__shape::before {
+  border-color: rgba(255, 40, 90, 0.95);
+  opacity: 1;
+  animation: cursor-slice-a 0.3s steps(3) both;
+}
+
+.cursor[data-hurt] .cursor__shape::after {
+  border-color: rgba(40, 230, 255, 0.9);
+  opacity: 1;
+  animation: cursor-slice-b 0.3s steps(3) both;
+}
+
+.cursor[data-hurt] .cursor__shape {
+  animation: cursor-jolt 0.3s steps(4) both;
+}
+
+.cursor[data-hurt] .cursor__dot {
+  box-shadow: 3px 0 0 rgba(255, 40, 90, 0.95), -3px 0 0 rgba(40, 230, 255, 0.9);
+  animation: cursor-jolt 0.3s steps(4) both;
+}
+
+@keyframes cursor-jolt {
+  0% { translate: 3px -2px; }
+  25% { translate: -4px 1px; }
+  50% { translate: 2px 3px; }
+  75% { translate: -2px -3px; }
+  100% { translate: 0 0; }
+}
+
+@keyframes cursor-slice-a {
+  0% { translate: 4px 0; clip-path: inset(0 0 62% 0); }
+  33% { translate: -3px 0; clip-path: inset(40% 0 22% 0); }
+  66% { translate: 5px 0; clip-path: inset(70% 0 0 0); }
+  100% { translate: 0 0; clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes cursor-slice-b {
+  0% { translate: -4px 0; clip-path: inset(55% 0 10% 0); }
+  33% { translate: 3px 0; clip-path: inset(10% 0 60% 0); }
+  66% { translate: -5px 0; clip-path: inset(30% 0 45% 0); }
+  100% { translate: 0 0; clip-path: inset(100% 0 0 0); }
+}
+
+/* While it is being bitten the words show wherever the cursor has run to */
+.cursor[data-attacked] .cursor__hint {
+  opacity: 1;
+  translate: 0 -50%;
+}
+
+.cursor[data-attacked] .cursor__hint-line {
+  font-size: 11px;
+  color: #ff4d6d;
+  text-shadow: 1.5px 0 rgba(40, 230, 255, 0.85), -1.5px 0 rgba(255, 40, 90, 0.85);
+  animation: cursor-shout 0.34s steps(3) infinite;
+}
+
+@keyframes cursor-shout {
+  0% { translate: 0 0; }
+  33% { translate: 1px -1px; }
+  66% { translate: -1px 1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor[data-hurt] .cursor__shape,
+  .cursor[data-hurt] .cursor__dot,
+  .cursor[data-hurt] .cursor__shape::before,
+  .cursor[data-hurt] .cursor__shape::after,
+  .cursor[data-attacked] .cursor__hint-line {
+    animation: none;
+  }
+}

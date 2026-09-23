@@ -54,6 +54,8 @@ uniform float uTouch;
 uniform float uFabricGain;
 uniform vec4 uPulse[4];
 uniform vec4 uRipple[3];
+uniform vec4 uAttack;
+uniform vec3 uAttackTarget;
 uniform vec3 uViewDir;
 uniform float uDim;
 uniform float uTravel;
@@ -213,6 +215,38 @@ vec3 swarmOffset(vec3 pos,float seed){
   return off;
 }
 
+// A raid on the cursor. A few nodes, mostly from near where the pointer was,
+// break off, arc out to it, swarm it for about a second and fall back home.
+// The target is the cursor now, so they chase it if it runs. gAttack is how
+// far out the node is, for its colour and for dropping its connections.
+float gAttack=0.0;
+vec3 attackPos(vec3 p,float seed){
+  gAttack=0.0;
+  if(uAttack.w<0.0) return p;
+  float t=uTime-uAttack.w;
+  if(t<0.0||t>4.0) return p;
+  vec3 fromTouch=p-uAttack.xyz;
+  float near=exp(-dot(fromTouch,fromTouch)*0.25);
+  if(fract(seed*91.7)>0.035+0.09*near) return p;
+  // Each attacker leaves on its own beat, then a 3.4s raid
+  float lt=(t-fract(seed*37.3)*0.5)/3.4;
+  if(lt<=0.0||lt>=1.0) return p;
+  // Out on an accelerating strike, hold on the target, drift back home
+  float k=lt<0.28?pow(lt/0.28,2.2):(lt<0.62?1.0:1.0-smoothstep(0.62,1.0,lt));
+  float s=seed*6.2831853;
+  // At the target they do not sit still: a tight, twitching cloud round it
+  vec3 bite=vec3(sin(uTime*7.0+s)*0.22,cos(uTime*6.3+s*1.7)*0.2,sin(uTime*5.1+s*2.3)*0.18);
+  bite*=0.6+0.4*snoise(vec3(seed*9.0,uTime*2.0,0.0));
+  vec3 target=uAttackTarget+bite;
+  vec3 dir=target-p;
+  float len=length(dir);
+  // Curved flight: each one swings out to its own side on the way
+  vec3 side=len>1e-4?cross(dir/len,uViewDir):vec3(0.0);
+  vec3 bend=side*sin(k*3.14159265)*len*0.28*(fract(seed*5.7)<0.5?-1.0:1.0);
+  gAttack=k;
+  return mix(p,target,k)+bend;
+}
+
 vec3 displace(vec3 pos, float seed, float morph){
   float k=morph*morph;
   float t=uTime*0.05;
@@ -235,6 +269,13 @@ vec3 displace(vec3 pos, float seed, float morph){
   );
   if(uTouch>0.001) p+=fabricTouch(pos,seed,k);
   p+=swarmOffset(pos,seed)*k;
+  // Only a settled node can be sent: mid-spawn ones would fly off half-formed.
+  // The web stays put (NO_ATTACK in the line shader): the attackers tear away
+  // from it, instead of dragging streaks across the screen to the cursor.
+  gAttack=0.0;
+#ifndef NO_ATTACK
+  if(k>0.9) p=attackPos(p,seed);
+#endif
   return p;
 }
 
@@ -360,8 +401,11 @@ void main(){
   vec3 feel=touchLight(anchor)*morph+mix(uAccent,vec3(1.0),0.45)*gSwarm*0.75*morph;
   vColor+=feel;
   vGlow+=dot(feel,vec3(0.4));
-  float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z)*(1.0+uShapeAlt*0.3);
-  gl_PointSize=clamp(px,1.8,6.5);
+  // Attackers run hot
+  vColor=mix(vColor,vec3(1.0,0.26,0.42),gAttack*0.75);
+  vGlow*=1.0+gAttack*1.6;
+  float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z)*(1.0+uShapeAlt*0.3)*(1.0+gAttack*0.45);
+  gl_PointSize=clamp(px,1.8,8.0);
   gl_Position=projectionMatrix*mv;
 }
 `
@@ -386,6 +430,7 @@ void main(){
 `
 
 export const connectionVert = /* glsl */ `
+#define NO_ATTACK
 varying float vAlpha;
 varying vec3 vColor;
 ${NOISE}
