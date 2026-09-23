@@ -35,11 +35,12 @@ const WORD_SPREAD = 0.34
 const WORD_FLOOR = 0.06
 
 /**
- * How much of the beat's own scroll the copy block cancels out. Without this
- * the copy has drifted most of a viewport by the time it finishes fading, so
- * it reads as sliding past rather than holding while you read it.
+ * Entrances settle rather than track the scroll linearly: the last stretch of
+ * each one slows into place. There is deliberately no counter-scroll parallax
+ * on the copy any more; holding it against the page made it lag and then catch
+ * up, which read as the text bouncing.
  */
-const COPY_PARALLAX = 0.45
+const settle = (t: number) => 1 - Math.pow(1 - t, 3)
 
 /** Beats within this many beat-lengths of centre get the `will-change` hint. */
 const NEAR_RANGE = 1.4
@@ -53,7 +54,6 @@ type BeatEl = {
   index: number
   /** -1 when the copy sits in the left lane and slides in from the left edge */
   side: number
-  inner: HTMLElement | null
   /** Animated rows in document order, each with its own offset in the stagger */
   rows: { el: HTMLElement; words: HTMLElement[]; mask: HTMLElement | null }[]
   /** Last `is-near` state, so the class is only touched when it actually flips */
@@ -145,7 +145,6 @@ export function ProjectJourney() {
         el,
         index: Number(el.dataset.beat),
         side: wide ? (el.dataset.side === 'left' ? -1 : 1) : 0,
-        inner: el.querySelector<HTMLElement>('.project-beat__inner'),
         // Document order, so the stagger follows reading order even for rows
         // nested inside the header
         rows: [...el.querySelectorAll<HTMLElement>('[data-row]')].map((row) => ({
@@ -248,27 +247,18 @@ export function ProjectJourney() {
         } else beat.settled = false
 
         /*
-         * Everything below rides in on approach. Driving the offsets off `d` in
-         * both directions meant every row and every word reversed direction the
-         * instant the beat passed centre, so the copy kicked backwards
-         * mid-scroll — which is the judder, not the frame rate. Rows do drift
-         * outward on the way out, but only once they are already fading, so
-         * there is no reversal while they are readable.
+         * Everything below rides in on approach and only fades on the way out.
+         * Driving the offsets off `d` in both directions meant every row and
+         * every word reversed direction the instant the beat passed centre, so
+         * the copy kicked backwards mid-scroll — which is the judder, not the
+         * frame rate.
          */
         const inbound = signed <= 0
-
-        if (beat.inner) {
-          // Clamped rather than skipped: freezing the transform outside a window
-          // leaves a stale offset to jump from when a fast scroll re-enters it
-          const held = Math.max(-1.2, Math.min(1.2, signed))
-          beat.inner.style.transform =
-            `translate3d(0, ${(held * pitch * COPY_PARALLAX).toFixed(1)}px, 0)`
-        }
 
         beat.rows.forEach((row, k) => {
           // Each row trails the one above it, so the block assembles in reading order
           const rd = d + k * 0.05
-          const ro = clamp01((0.55 - rd) / 0.3)
+          const ro = settle(clamp01((0.55 - rd) / 0.3))
 
           if (row.mask) {
             // Masked heading: rides up from under its own clip with a slight tilt
@@ -293,7 +283,7 @@ export function ProjectJourney() {
             row.el.style.opacity = '1'
             const step = WORD_SPREAD / row.words.length
             row.words.forEach((word, i) => {
-              const wo = clamp01((0.55 + WORD_SPREAD - (rd + i * step)) / 0.3)
+              const wo = settle(clamp01((0.55 + WORD_SPREAD - (rd + i * step)) / 0.3))
               word.style.opacity = String(WORD_FLOOR + (1 - WORD_FLOOR) * wo)
               word.style.transform = inbound
                 ? `translate3d(0, ${((1 - wo) * 14).toFixed(1)}px, 0)`
@@ -302,8 +292,9 @@ export function ProjectJourney() {
             return
           }
 
-          // In from the lane's outer edge, and back out toward it
-          const x = beat.side * (1 - ro) * (inbound ? 28 : 12)
+          // In from the lane's outer edge; out is a plain fade, so nothing
+          // reverses direction while it is still readable
+          const x = inbound ? beat.side * (1 - ro) * 28 : 0
           const y = inbound ? (1 - ro) * (22 + k * 6) : 0
           row.el.style.opacity = String(ro)
           row.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`

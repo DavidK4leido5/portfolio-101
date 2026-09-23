@@ -150,7 +150,10 @@ export function RequestTrace() {
             <p className="trace-beat__index">
               {pad(i + 1)}<i>/ {pad(TRACE_COUNT)}</i>
             </p>
+            {/* The layer name leads the heading, so each stage is indexed as
+                "Interface layer: what the person touches", not a bare line */}
             <h2 className="trace-beat__title" data-testid={i === stage ? 'trace-title' : undefined}>
+              <span className="trace-beat__layer">{beat.title} layer</span>{' '}
               {beat.headline}
             </h2>
             <p className="trace-beat__lede">{beat.lede}</p>

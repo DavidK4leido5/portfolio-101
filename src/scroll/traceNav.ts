@@ -24,12 +24,27 @@ export function scrollToBeat(progress: number) {
   scrollTo({ top, behavior: prefersReduced() ? 'auto' : 'smooth' })
 }
 
+/**
+ * Scroll to a document offset. Far jumps cut to a viewport short of the target
+ * and glide the rest: smooth-scrolling the whole twenty-viewport project
+ * timeline to reach the section after it takes seconds and plays every beat of
+ * it on the way past.
+ */
+export function glideTo(top: number) {
+  if (prefersReduced()) {
+    scrollTo({ top, behavior: 'auto' })
+    return
+  }
+  const far = innerHeight * 3
+  if (Math.abs(top - scrollY) > far) {
+    scrollTo({ top: top - Math.sign(top - scrollY) * innerHeight, behavior: 'auto' })
+  }
+  scrollTo({ top, behavior: 'smooth' })
+}
+
 /** Jump to a portfolio section further down the page. */
 export function scrollToSection(id: string) {
   const el = document.getElementById(`section-${id}`)
   if (!el) return
-  scrollTo({
-    top: el.getBoundingClientRect().top + scrollY,
-    behavior: prefersReduced() ? 'auto' : 'smooth',
-  })
+  glideTo(el.getBoundingClientRect().top + scrollY)
 }

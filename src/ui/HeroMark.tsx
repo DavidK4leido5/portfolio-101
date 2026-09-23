@@ -53,14 +53,14 @@ const LAYOUT = {
   mobile: { measure: 0.62, top: 248, bottom: 210 },
 } as const
 /**
- * Gap between one line's baseline and the next line's cap, as a share of the
- * first cap height. Measured off the caps rather than the em size because the
- * two lines are set at different sizes to fill the same measure, so an em-based
- * leading opens a hole under the larger word.
+ * Gap between one line's baseline and the next line's cap top, as a share of
+ * the first line's cap height. Measured off the real ink (see `capOf`), not the
+ * em box: the em box carries the face's whole ascent above the caps, which set
+ * the pair a third of a cap apart and read as two separate words.
  */
-const LINE_GAP = 0.05
-/** Tracking in em. Negative pulls the counters together and shows more cloud. */
-const TRACKING = -0.045
+const LINE_GAP = 0.14
+/** Tracking in em. Slightly tight, the way display caps are set by hand. */
+const TRACKING = -0.03
 /** Size the fit starts from. Metrics scale linearly, so one pass lands it. */
 const FIT_REF = 200
 
@@ -75,6 +75,26 @@ const FIT_REF = 200
  * inside the type, past it, with nothing left to recognise.
  */
 const ZOOM_TO = 26
+/**
+ * The zoom is aimed at the stem of the T in STACK, and grown until that stem
+ * alone covers the frame before the veil starts to go. Once the whole viewport
+ * is inside one solid letter there is no sheet left on screen to fade, so the
+ * handover to the trace is invisible. Aiming anywhere else left slivers of the
+ * veil, and other letters, on screen right up to the cut.
+ */
+const ZOOM_CHAR = { line: 1, index: 1 } as const
+/**
+ * Glyph size past which the knockout stops being drawn as text. Chrome's mask
+ * renderer breaks down on glyphs around 10,000px tall: the hole closes and the
+ * veil comes back over the whole frame. By this size the frame holds nothing
+ * but the T's stem, so a rectangle cut to the stem's measured edges stands in
+ * for the word and scales without limit.
+ */
+const SWAP_PX = 6000
+/** Measurement slack on the stem's edges, as a share of the font size. */
+const STEM_SLACK = 0.012
+/** Floor on the slack in glyph px: the zoomed-layout drift does not shrink with the font. */
+const STEM_SLACK_MIN = 2
 /**
  * Exponent on the zoom. Above 1 the growth accelerates, which is what makes it
  * read as falling into the words rather than as the words being pushed at you.
@@ -104,6 +124,56 @@ const ENTER_RISE = 44
 const ENTER_DUR = 1.15
 const ENTER_STAGGER = 0.14
 
+/** One shared 2D context for reading real glyph metrics. */
+let ctx2d: CanvasRenderingContext2D | null = null
+function measureCtx(family: string, px: number) {
+  ctx2d ??= document.createElement('canvas').getContext('2d')!
+  ctx2d.font = `800 ${px}px ${family}`
+  return ctx2d
+}
+
+const smooth = (t: number) => {
+  const c = Math.min(1, Math.max(0, t))
+  return c * c * (3 - 2 * c)
+}
+
+/**
+ * The T's stem, measured off the rendered glyph rather than assumed: its left
+ * and right edges relative to the pen, and its clear height from the baseline
+ * up to the underside of the crossbar. One row and one column of a canvas.
+ *
+ * Measured at a fixed reference size and scaled down. At a phone's 76px the
+ * stem is 13px wide, and a pixel of rounding times a 30x zoom leaves a strip
+ * of veil standing at the edge of the frame.
+ */
+const STEM_REF = 400
+function stemOf(family: string, px: number, cap: number, ch: string) {
+  const k = px / STEM_REF
+  const refCap = cap / k
+  const pad = STEM_REF * 0.2
+  const c = document.createElement('canvas')
+  c.width = STEM_REF * 1.4
+  c.height = STEM_REF * 1.2
+  const g = c.getContext('2d', { willReadFrequently: true })!
+  g.font = `800 ${STEM_REF}px ${family}`
+  g.fillText(ch, pad, STEM_REF)
+  const row = g.getImageData(0, Math.round(STEM_REF - refCap * 0.25), c.width, 1).data
+  let left = -1
+  let right = -1
+  for (let x = 0; x < c.width; x++) {
+    if (row[x * 4 + 3] > 127) {
+      if (left < 0) left = x
+      right = x + 1
+    }
+  }
+  if (left < 0) return { left: 0, right: px * 0.18, clear: cap * 0.8 }
+  // Just outside the stem, the column is only ink where the crossbar is
+  const col = g.getImageData(Math.max(0, left - 4), 0, 1, c.height).data
+  let bottom = STEM_REF - refCap
+  for (let y = 0; y < STEM_REF; y++) if (col[y * 4 + 3] > 127) bottom = y + 1
+  return { left: (left - pad) * k, right: (right - pad) * k, clear: (STEM_REF - bottom) * k }
+}
+
 type LineNodes = { mask: SVGTextElement | null; stroke: SVGTextElement | null }
 /** Per-line wrapper groups, one pair per line, carrying the entrance rise. */
 type LineGroups = { mask: SVGGElement | null; stroke: SVGGElement | null }
@@ -117,6 +187,13 @@ export function HeroMark() {
   const subRef = useRef<SVGTextElement | null>(null)
   const zoomRefs = useRef<(SVGGElement | null)[]>([null, null])
   const originRef = useRef({ x: 0, y: 0 })
+  /** Scale the zoom ends at, solved in `fit` so the T's stem covers the frame. */
+  const zoomToRef = useRef<number>(ZOOM_TO)
+  /** Where the stem's middle ends up (the viewport centre), and when. */
+  const aimRef = useRef({ x: 0, y: 0, panBy: 1, swapAt: Infinity })
+  const stemRef = useRef<SVGRectElement | null>(null)
+  const maskWordsRef = useRef<SVGGElement | null>(null)
+  const hairlineRef = useRef<SVGGElement | null>(null)
   /** Per-line entrance progress, 0 → 1. Tweened as gsap targets, so it staggers. */
   const enterRef = useRef(LINES.map(() => ({ v: 0 })))
   const enterTween = useRef<gsap.core.Tween | null>(null)
@@ -188,29 +265,38 @@ export function HeroMark() {
       lines.forEach((line, i) => setSizeOn(line, solved[i] * scale))
     applyScale(1)
 
-    /** Real ink extents with the baseline at y=0, so -bbox.y is the cap height. */
-    const inkAll = () =>
-      lines.map((line) => {
-        line.stroke!.setAttribute('y', '0')
-        return line.stroke!.getBBox()
-      })
+    /*
+     * Real cap height from the glyphs themselves. `getBBox` on SVG text returns
+     * the em box, whose top is the face's ascent, well above the caps.
+     */
+    const capOf = (line: LineNodes) => {
+      const node = line.stroke!
+      const px = parseFloat(node.style.fontSize)
+      const m = measureCtx(getComputedStyle(node).fontFamily, px).measureText(node.textContent ?? '')
+      return m.actualBoundingBoxAscent || px * 0.727
+    }
 
-    /** Baseline offsets from the first baseline, and the block's ink height. */
-    const layout = (boxes: DOMRect[]) => {
-      const caps = boxes.map((b) => -b.y)
+    /** Space from the last baseline down to the ENGINEER label's baseline. */
+    const subGap = (cap: number) => Math.max(30, cap * 0.24)
+
+    /**
+     * Baseline offsets from the first baseline, and the block's height. The
+     * label counts as part of the block, or a tight pair fills the whole band
+     * and pushes the label down into the call to action.
+     */
+    const layout = () => {
+      const caps = lines.map(capOf)
       const gap = caps[0] * LINE_GAP
       const offsets = [0]
       for (let i = 1; i < caps.length; i++) offsets.push(offsets[i - 1] + caps[i] + gap)
-      const last = boxes[boxes.length - 1]
-      const descent = Math.max(0, last.y + last.height)
-      return { caps, offsets, height: caps[0] + offsets[offsets.length - 1] + descent }
+      return { caps, offsets, height: caps[0] + offsets[offsets.length - 1] + subGap(caps[0]) }
     }
 
-    let plan = layout(inkAll())
+    let plan = layout()
     // A short first word fits so wide that the pair can overrun the band
     if (plan.height > band) {
       applyScale(band / plan.height)
-      plan = layout(inkAll())
+      plan = layout()
     }
 
     const firstBaseline = frame.top + (band - plan.height) / 2 + plan.caps[0]
@@ -227,9 +313,10 @@ export function HeroMark() {
     const lastBaseline = firstBaseline + plan.offsets[plan.offsets.length - 1]
 
     if (subRef.current) {
-      subRef.current.setAttribute('y', String(lastBaseline + Math.max(26, plan.caps[0] * 0.2)))
-      subRef.current.setAttribute('x', x)
-      subRef.current.setAttribute('textLength', String(measure))
+      subRef.current.setAttribute('y', String(lastBaseline + subGap(plan.caps[0])))
+      // Letter-spacing trails the last glyph too; shift by half so it centres
+      const tracking = parseFloat(getComputedStyle(subRef.current).letterSpacing) || 0
+      subRef.current.setAttribute('x', String(size.w / 2 + tracking / 2))
     }
 
     /*
@@ -242,10 +329,48 @@ export function HeroMark() {
      * flat sheet. From inside a line, it is that line's own strokes that sweep
      * out past the edges of the frame.
      */
-    originRef.current = {
-      x: size.w / 2,
-      y: lastBaseline - plan.caps[plan.caps.length - 1] / 2,
-    }
+    const aim = lines[ZOOM_CHAR.line].stroke!
+    const aimCap = plan.caps[ZOOM_CHAR.line]
+    const aimPx = parseFloat(aim.style.fontSize)
+    const aimBaseline = firstBaseline + plan.offsets[ZOOM_CHAR.line]
+    const family = getComputedStyle(aim).fontFamily
+    const ch = (aim.textContent ?? '')[ZOOM_CHAR.index]
+    let pen = size.w / 2
+    try {
+      pen = aim.getStartPositionOfChar(ZOOM_CHAR.index).x
+    } catch { /* no layout yet; the fallback still lands inside STACK */ }
+    const stem = stemOf(family, aimPx, aimCap, ch)
+    const halfW = (stem.right - stem.left) / 2
+    const clearTop = aimBaseline - stem.clear
+    const ox = pen + (stem.left + stem.right) / 2
+    const oy = (clearTop + aimBaseline) / 2
+    originRef.current = { x: ox, y: oy }
+
+    // The stand-in for the word once it is too big to draw as text
+    stemRef.current?.setAttribute('x', String(pen + stem.left))
+    stemRef.current?.setAttribute('y', String(aimBaseline - aimCap))
+    stemRef.current?.setAttribute('width', String(stem.right - stem.left))
+    stemRef.current?.setAttribute('height', String(aimCap))
+
+    /*
+     * Scale at which the stem alone covers the frame, once it has been panned
+     * to the centre. The zoom is solved to reach it just as the veil starts to
+     * go, so by then there is no sheet left on screen to fade.
+     */
+    /*
+     * Zoomed in, SVG stops rounding glyph advances, and the T slides up to
+     * about 1.6px of glyph space from where it sat at rest. Harmless at rest,
+     * but times a 35x zoom it leaves a strip of veil at the frame's edge on a
+     * phone, so the stem is treated as that much narrower than measured.
+     */
+    const slack = Math.max(STEM_SLACK_MIN, aimPx * STEM_SLACK)
+    const cover = 1.1 * Math.max(
+      size.w / 2 / Math.max(1, halfW - slack),
+      size.h / 2 / Math.max(1, (aimBaseline - clearTop) / 2 - slack),
+    )
+    const swapAt = Math.max(1, SWAP_PX / aimPx)
+    aimRef.current = { x: size.w / 2, y: size.h / 2, panBy: Math.min(cover, swapAt), swapAt }
+    zoomToRef.current = Math.max(ZOOM_TO, 1 + (cover - 1) / Math.pow(VEIL_HOLD, ZOOM_EASE))
   }, [size, tier])
 
   /*
@@ -277,10 +402,26 @@ export function HeroMark() {
    * so it is written here alongside the zoom, on the same nodes.
    */
   const write = useCallback(() => {
-    const scale = 1 + (ZOOM_TO - 1) * Math.pow(exitRef.current, ZOOM_EASE)
+    const scale = 1 + (zoomToRef.current - 1) * Math.pow(exitRef.current, ZOOM_EASE)
     const { x, y } = originRef.current
-    const zoom = `translate(${x} ${y}) scale(${scale.toFixed(4)}) translate(${-x} ${-y})`
+    const aim = aimRef.current
+    /*
+     * The stem is carried to the middle of the frame as it grows, like a
+     * camera flying into it, and arrives by the time it has to cover the frame.
+     * Covering from off-centre needs half again the scale, and past the mask's
+     * limit.
+     */
+    const k = smooth((scale - 1) / Math.max(1e-3, aim.panBy - 1))
+    const tx = x + (aim.x - x) * k
+    const ty = y + (aim.y - y) * k
+    const zoom = `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(4)}) translate(${-x} ${-y})`
     for (const g of zoomRefs.current) g?.setAttribute('transform', zoom)
+
+    const swapped = scale >= aim.swapAt
+    maskWordsRef.current?.setAttribute('visibility', swapped ? 'hidden' : 'visible')
+    stemRef.current?.setAttribute('visibility', swapped ? 'visible' : 'hidden')
+    // Past the swap the hairline copy would hit the same limit; it is long gone by then
+    hairlineRef.current?.setAttribute('visibility', swapped ? 'hidden' : 'visible')
 
     lineGroupsRef.current.forEach((line, i) => {
       const dy = (1 - enterRef.current[i].v) * ENTER_RISE
@@ -331,6 +472,11 @@ export function HeroMark() {
   const veil = Math.min(1, Math.max(0, 1 - (p - VEIL_HOLD) / (VEIL_GONE - VEIL_HOLD)))
   /** Supporting type is not part of the zoom, so it leaves early. */
   const support = Math.max(0, 1 - p / 0.35)
+  /**
+   * The hairlines go before the veil does. By then the frame is inside the T,
+   * and the outlines of the other letters sweeping past are just noise.
+   */
+  const hairline = veil * Math.min(1, Math.max(0, 1 - (p - 0.5) / 0.2))
 
   return (
     <div
@@ -339,7 +485,7 @@ export function HeroMark() {
       data-load-phase={loadPhase}
       aria-hidden={p > 0.9}
     >
-      <p className="sr-only">{`${LINES.join('')} ${SUB}`}</p>
+      <p className="sr-only">Full-stack engineer</p>
       <svg
         className="hero-mark__svg"
         width={size.w}
@@ -361,6 +507,8 @@ export function HeroMark() {
             {/* Outer group carries the zoom; the inner one per line carries the
                 entrance rise, so the two compose without fighting */}
             <g ref={(el) => { zoomRefs.current[0] = el }}>
+              <rect ref={stemRef} fill="#000" visibility="hidden" />
+              <g ref={maskWordsRef}>
               {LINES.map((text, i) => (
                 <g key={text} ref={(el) => { lineGroupsRef.current[i].mask = el }}>
                   <text
@@ -373,6 +521,7 @@ export function HeroMark() {
                   </text>
                 </g>
               ))}
+              </g>
             </g>
           </mask>
         </defs>
@@ -392,7 +541,10 @@ export function HeroMark() {
           A word filled with an image loses its edges against the image, and
           once the edges go it stops reading as a word. Hairline it.
         */}
-        <g ref={(el) => { zoomRefs.current[1] = el }} style={{ opacity: veil }}>
+        <g
+          ref={(el) => { zoomRefs.current[1] = el; hairlineRef.current = el }}
+          style={{ opacity: hairline }}
+        >
           {LINES.map((text, i) => (
             <g key={`stroke-${text}`} ref={(el) => { lineGroupsRef.current[i].stroke = el }}>
               <text
@@ -413,7 +565,6 @@ export function HeroMark() {
           ref={subRef}
           className="hero-mark__sub"
           textAnchor="middle"
-          lengthAdjust="spacing"
           style={{ opacity: support }}
         >
           {SUB}
