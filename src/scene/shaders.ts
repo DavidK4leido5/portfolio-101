@@ -52,6 +52,9 @@ uniform vec2 uMouse;
 uniform vec3 uTouchPos;
 uniform float uTouch;
 uniform float uFabricGain;
+uniform vec4 uPulse[4];
+uniform vec4 uRipple[3];
+uniform vec3 uViewDir;
 uniform float uDim;
 uniform float uTravel;
 uniform float uHovered;
@@ -166,6 +169,50 @@ vec3 fabricTouch(vec3 pos,float seed,float morphK){
   return (n*((indent+bunch)*gate+fold)+stretch)*uFabricGain;
 }
 
+// The swarm startled by a click. A signal spreads out from the touch like a
+// message through a hive: near nodes react first, far ones a beat later, each
+// with its own lag. Each node flees, curls around the touch and rides its own
+// flowing noise, so the cloud scatters in streams rather than as a ring, then
+// regroups on an overdamped curve. gSwarm is how agitated the node is, for the
+// light the vertex shaders add.
+float gSwarm=0.0;
+vec3 swarmOffset(vec3 pos,float seed){
+  vec3 off=vec3(0.0);
+  float agit=0.0;
+  for(int i=0;i<3;i++){
+    vec4 r=uRipple[i];
+    if(r.w<0.0) continue;
+    float t=uTime-r.w;
+    if(t<0.0||t>3.6) continue;
+    vec3 d=pos-r.xyz;
+    vec3 across=d-dot(d,uViewDir)*uViewDir;
+    float dist=length(across);
+    // Reach: the nodes under the touch scatter hard, the rest of the hive shivers
+    float reach=exp(-dist*dist*0.3);
+    if(reach<0.002) continue;
+    // The signal's arrival: distance over its speed, plus a per-node hesitation
+    float lt=t-dist/3.2-fract(seed*13.7)*0.28;
+    if(lt<=0.0) continue;
+    // Startle then settle: rises fast, peaks near 0.45s, eases home by ~3s
+    float env=lt*exp(1.0-lt*2.2)*2.2;
+    vec3 away=dist>1e-4?across/dist:vec3(0.0,1.0,0.0);
+    // Curl around the touch, each node picking its own way round
+    vec3 swirl=cross(away,uViewDir)*(fract(seed*5.13)<0.5?-1.0:1.0);
+    // Its own current, drifting in time, so no two nodes take the same path
+    float nt=uTime*0.9;
+    vec3 flow=vec3(
+      snoise(pos*0.85+vec3(seed*3.1,nt,0.0)),
+      snoise(pos*0.85+vec3(0.0,seed*2.7,nt+17.0)),
+      snoise(pos*0.85+vec3(nt+41.0,0.0,seed*1.9))
+    );
+    float give=0.7+0.6*fract(seed*7.31);
+    off+=(away*0.5+swirl*0.3+flow*0.38)*env*reach*give;
+    agit+=env*reach;
+  }
+  gSwarm=min(agit,1.4);
+  return off;
+}
+
 vec3 displace(vec3 pos, float seed, float morph){
   float k=morph*morph;
   float t=uTime*0.05;
@@ -187,6 +234,7 @@ vec3 displace(vec3 pos, float seed, float morph){
     sin(uTime*(1.4+seed*1.1)+seed*2.3)
   );
   if(uTouch>0.001) p+=fabricTouch(pos,seed,k);
+  p+=swarmOffset(pos,seed)*k;
   return p;
 }
 
@@ -198,6 +246,21 @@ float waveFront(vec3 pos,vec3 origin,float ph,float sharp){
   float w=exp(-sharp*abs(d-ph*7.0))*(1.0-ph)*(1.0-ph);
   w*=0.7+0.5*sin(dot(pos,vec3(2.3,1.9,2.7))+uTime*1.6);
   return max(w,0.0);
+}
+
+// Shockwaves of light the pointer sends out as it moves through the cloud.
+// Same wavefront as the ambient activity, from wherever the pointer was, and
+// measured from each node's current position so it runs on every shape.
+vec3 touchLight(vec3 pos){
+  vec3 c=vec3(0.0);
+  for(int i=0;i<4;i++){
+    vec4 w=uPulse[i];
+    if(w.w<0.0) continue;
+    float ph=(uTime-w.w)/2.6;
+    if(ph<0.0||ph>1.0) continue;
+    c+=mix(uAccent,vec3(1.0),0.5)*waveFront(pos,w.xyz,ph,3.0)*1.9;
+  }
+  return c;
 }
 
 // Ambient brain activity: same shockwave as hover but firing from random
@@ -292,6 +355,11 @@ void main(){
   vec3 act=brainActivity(position)*morph*uConnect*(1.0-uFocus*0.75)*(1.0-uShapeAlt*0.92);
   vColor+=act*1.35;
   vGlow+=dot(act,vec3(0.5));
+  // Touch feedback is not gated by uShapeAlt or uConnect: it has to answer the
+  // pointer on the network and the stack as much as on the brain
+  vec3 feel=touchLight(anchor)*morph+mix(uAccent,vec3(1.0),0.45)*gSwarm*0.75*morph;
+  vColor+=feel;
+  vGlow+=dot(feel,vec3(0.4));
   float px=uSize*(0.82+aSeed*0.38)*(28.0/-mv.z)*(1.0+uShapeAlt*0.3);
   gl_PointSize=clamp(px,1.8,6.5);
   gl_Position=projectionMatrix*mv;
@@ -365,6 +433,7 @@ void main(){
   float grey=(1.0-isT)*hasSel*uFocus*shapeFade;
   vColor=mix(vColor,vec3(0.36,0.38,0.46),grey*0.55);
   vColor+=brainActivity(position)*0.7*morph*connectReveal*(1.0-uFocus*0.75)*(1.0-uShapeAlt*0.92);
+  vColor+=(touchLight(anchor)*0.8+mix(uAccent,vec3(1.0),0.45)*gSwarm*0.5)*morph;
   gl_Position=projectionMatrix*mv;
 }
 `

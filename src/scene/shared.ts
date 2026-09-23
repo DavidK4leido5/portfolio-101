@@ -1,4 +1,4 @@
-import { Color, Vector2, Vector3, type Group } from 'three'
+import { Color, Vector2, Vector3, Vector4, type Group } from 'three'
 import { sections } from '../data/sections'
 import { brainSurface } from '../data/brainCloud'
 
@@ -29,6 +29,13 @@ export const indicatorEls: (HTMLButtonElement | null)[] = sections.map(() => nul
 /** Master scale for fabric touch — tune here; coeffs in shaders.ts target ~3–6px at desktop framing. */
 export const FABRIC_GAIN = 0.68
 
+/**
+ * Touch feedback slots. Must match the array lengths in shaders.ts. Each slot
+ * is xyz = origin in cluster space, w = uTime it started (-1 = free).
+ */
+export const PULSE_SLOTS = 4
+export const RIPPLE_SLOTS = 3
+
 export const uniforms = {
   uTime: { value: 0 },
   uAccent: { value: new Color('#8b5cf6') },
@@ -36,6 +43,12 @@ export const uniforms = {
   uTouchPos: { value: new Vector3(0, 0.12, 0) },
   uTouch: { value: 0 },
   uFabricGain: { value: FABRIC_GAIN },
+  // Light shockwaves the pointer sends through the cloud while it moves
+  uPulse: { value: Array.from({ length: PULSE_SLOTS }, () => new Vector4(0, 0, 0, -1)) },
+  // Swarm reactions to a click on the cloud
+  uRipple: { value: Array.from({ length: RIPPLE_SLOTS }, () => new Vector4(0, 0, 0, -1)) },
+  // Camera forward in cluster space, so the swarm reacts across the screen
+  uViewDir: { value: new Vector3(0, 0, -1) },
   uDim: { value: 0 },
   uTravel: { value: 0 },
   uHovered: { value: -1 },

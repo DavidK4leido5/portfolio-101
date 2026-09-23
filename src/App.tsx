@@ -7,6 +7,9 @@ import { HeroMark } from './ui/HeroMark'
 import { ScrollDriver } from './scroll/ScrollDriver'
 import { useSceneVisibility } from './scene/useSceneVisibility'
 import { detectTier } from './lib/quality'
+import { Cursor } from './ui/Cursor'
+import { ScrollProgress } from './ui/ScrollProgress'
+import { SwarmHint } from './ui/SwarmHint'
 
 export default function App() {
   const sceneReady = useSceneStore((s) => s.sceneReady)
@@ -72,6 +75,9 @@ export default function App() {
       <HeroMark />
       <LoadingScreen />
       <PortfolioUI />
+      <SwarmHint />
+      <ScrollProgress />
+      <Cursor />
     </div>
   )
 }
