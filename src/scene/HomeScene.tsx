@@ -117,7 +117,7 @@ export function HomeScene({ paused = false }: { paused?: boolean }) {
       pending = false
       const el = document.elementFromPoint(px, py)
       setPointerOnScene(!el?.closest(
-        '.indicator, [data-testid="node-slider"], .panel, [data-testid="sector-nav"], .journey-progress, .cover-section, .project-journey, .scroll-end',
+        '.node-control, .hero-cta, .site-brand, .trace-beat, .trace-rail, .section-nav, .spine, .site-foot',
       ))
     }
     const onMove = (e: PointerEvent) => {

@@ -3730,3 +3730,127 @@ html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="
 .app-root:not([data-load-phase="ready"]) .scroll-progress {
   opacity: 0;
 }
+
+/* ==== Swarm hint ====
+   A dare beside the brain, small and tracked like the hero notes. Above the
+   hero mark (6) and the HUD (10), under the sections (20). */
+.swarm-hint {
+  position: fixed;
+  left: clamp(20px, 4vw, 66px);
+  bottom: 96px;
+  z-index: 11;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: center;
+  margin: 0;
+  pointer-events: none;
+  font-family: ui-monospace, Consolas, monospace;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  transition:
+    opacity 0.7s var(--ease-soft),
+    transform 0.9s var(--ease-osmo);
+}
+
+.swarm-hint[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+  transition-delay: 1.2s;   /* after the mark has risen into place */
+}
+
+.swarm-hint[data-state="felt"] {
+  transition-delay: 0s;
+}
+
+.swarm-hint__dot {
+  grid-row: 1;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: swarm-breathe 2.4s ease-in-out infinite;
+}
+
+.swarm-hint__line {
+  grid-column: 2;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: rgba(245, 245, 255, 0.88);
+}
+
+.swarm-hint__sub {
+  grid-column: 2;
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  color: rgba(235, 235, 255, 0.45);
+}
+
+/* Once touched it quickens, like something that noticed */
+.swarm-hint[data-state="felt"] .swarm-hint__dot {
+  animation-duration: 0.7s;
+}
+
+@keyframes swarm-breathe {
+  0%, 100% { opacity: 0.45; scale: 0.8; }
+  50% { opacity: 1; scale: 1.15; }
+}
+
+/* Phones: centred in the gap between the mark and the call to action */
+@media (max-width: 768px) {
+  .swarm-hint {
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 200px);
+    translate: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swarm-hint__dot { animation: none; }
+}
+
+/* The dare the cursor carries over the particle cloud. Beside the ring, not
+   on it, so it never covers what is being touched */
+.cursor__hint {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 14px);
+  display: grid;
+  gap: 5px;
+  font-family: ui-monospace, Consolas, monospace;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  translate: -6px -50%;
+  transition:
+    opacity 0.35s var(--ease-soft),
+    translate 0.5s var(--ease-osmo);
+}
+
+.cursor[data-swarm][data-state="idle"] .cursor__hint {
+  opacity: 1;
+  translate: 0 -50%;
+}
+
+.cursor__hint-line {
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  color: rgba(245, 245, 255, 0.78);
+}
+
+.cursor__hint-sub {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: rgba(235, 235, 255, 0.42);
+}
+
+.cursor__hint-sub:empty {
+  display: none;
+}
+
+.cursor[data-felt] .cursor__hint-line {
+  color: var(--cursor-accent);
+}

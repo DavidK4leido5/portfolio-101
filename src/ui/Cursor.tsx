@@ -1,4 +1,11 @@
 import { useEffect, useRef } from 'react'
+import { SWARM_ENTER, SWARM_LEAVE, SWARM_TOUCH } from '../lib/swarmEvents'
+
+/** What the cursor says while it is over the particle cloud. */
+const DARE = ["Don't touch.", 'The swarm is alive.'] as const
+const FELT = 'It felt that.'
+/** How long the answer to a touch stays before the dare comes back. */
+const FELT_MS = 2800
 
 /** Anything the ring should open up for. */
 const INTERACTIVE = 'a, button, [role="button"], label, summary, input[type="range"], [data-cursor]'
@@ -62,6 +69,8 @@ export function Cursor() {
     const dot = root.querySelector<HTMLElement>('.cursor__dot')!
     const ring = root.querySelector<HTMLElement>('.cursor__ring')!
     const label = root.querySelector<HTMLElement>('.cursor__label')!
+    const hintLine = root.querySelector<HTMLElement>('.cursor__hint-line')!
+    const hintSub = root.querySelector<HTMLElement>('.cursor__hint-sub')!
     document.documentElement.classList.add('has-cursor')
 
     let x = -100
@@ -128,6 +137,28 @@ export function Cursor() {
     const onBlur = () => { root.dataset.visible = 'false' }
 
     /*
+     * Over the particle cloud the cursor carries a line of its own. The cloud
+     * says when the pointer arrives and leaves, and answers a touch; the text
+     * swaps for a moment, then the dare comes back.
+     */
+    let feltTo: ReturnType<typeof setTimeout>
+    const dare = () => {
+      hintLine.textContent = DARE[0]
+      hintSub.textContent = DARE[1]
+      root.removeAttribute('data-felt')
+    }
+    const onSwarmEnter = () => root.toggleAttribute('data-swarm', true)
+    const onSwarmLeave = () => root.toggleAttribute('data-swarm', false)
+    const onSwarmTouch = () => {
+      clearTimeout(feltTo)
+      hintLine.textContent = FELT
+      hintSub.textContent = ''
+      root.toggleAttribute('data-felt', true)
+      feltTo = setTimeout(dare, FELT_MS)
+    }
+    dare()
+
+    /*
      * The page scrolls under a still pointer (the timeline changes accent as it
      * does), so re-read what is under it once scrolling settles. One hit test,
      * not one per frame.
@@ -149,6 +180,9 @@ export function Cursor() {
     document.addEventListener('pointerout', onLeave, { passive: true })
     addEventListener('scroll', onScroll, { passive: true })
     addEventListener('blur', onBlur)
+    addEventListener(SWARM_ENTER, onSwarmEnter)
+    addEventListener(SWARM_LEAVE, onSwarmLeave)
+    addEventListener(SWARM_TOUCH, onSwarmTouch)
 
     return () => {
       cancelAnimationFrame(raf)
@@ -161,6 +195,10 @@ export function Cursor() {
       document.removeEventListener('pointerout', onLeave)
       removeEventListener('scroll', onScroll)
       removeEventListener('blur', onBlur)
+      removeEventListener(SWARM_ENTER, onSwarmEnter)
+      removeEventListener(SWARM_LEAVE, onSwarmLeave)
+      removeEventListener(SWARM_TOUCH, onSwarmTouch)
+      clearTimeout(feltTo)
     }
   }, [])
 
@@ -169,6 +207,10 @@ export function Cursor() {
       <div className="cursor__ring">
         <span className="cursor__shape" />
         <span className="cursor__label" />
+        <span className="cursor__hint">
+          <span className="cursor__hint-line" />
+          <span className="cursor__hint-sub" />
+        </span>
       </div>
       <div className="cursor__dot" />
     </div>
