@@ -422,7 +422,7 @@ export const sectionCopy = {
   projects: {
     headline: "Projects",
     intro:
-      "Six client builds, from a Manila events venue on Webflow to an LLM product on AWS. Pick one to jump to its chapter.",
+      "Six client builds, from a Manila events venue on Webflow to an LLM product on AWS. Each has its own chapter under Experience.",
   },
   experience: {
     headline: "Experience",

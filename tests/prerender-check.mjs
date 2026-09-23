@@ -22,6 +22,10 @@ for (const id of ['about', 'projects', 'experience', 'skills', 'contact']) {
   check(root.includes(`id="section-${id}-title"`), `section h2 for ${id}`)
 }
 
+for (const layer of ['Interface', 'API', 'Service', 'Data', 'Infrastructure']) {
+  check(new RegExp(`<h2>${layer} layer:`).test(root), `hero stage "${layer}" is a heading`)
+}
+
 const projects = ['The Palace Manila', 'Revive Pharmacy', 'Volatility', 'Agentsly', 'TapUp', 'Codebility']
 for (const p of projects) check(root.includes(`id="project-`) && text.includes(p), `project "${p}" is in the markup`)
 

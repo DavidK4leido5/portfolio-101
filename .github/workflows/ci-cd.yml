@@ -179,6 +179,10 @@ jobs:
         # VITE_BASE_PATH; either absolute value breaks one of the two.
         run: pnpm build
 
+      # The copy has to be in the served HTML for crawlers that never run JS
+      - name: Check prerendered HTML
+        run: node tests/prerender-check.mjs
+
       - name: Upload production build
         uses: actions/upload-pages-artifact@v4
         with:

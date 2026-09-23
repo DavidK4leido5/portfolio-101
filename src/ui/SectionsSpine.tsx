@@ -11,6 +11,7 @@ import { ContactPanel } from './ContactPanel'
 import { ClientWorkStrip, TestimonialStrip } from './WorkStrips'
 import { ProjectJourney } from './ProjectJourney'
 import { projectStories } from '../content/projects'
+import { useSoftFill } from './softFill'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -76,15 +77,16 @@ function SectionBody({ id }: { id: SectionId }) {
 
 /** Full-bleed extras that belong to a section but break out of its column. */
 function SectionExtras({ id }: { id: SectionId }): ReactNode {
-  if (id === 'projects') {
+  if (id === 'projects') return <ClientWorkStrip />
+  // The walkthrough closes Experience: each client build told as the job it was
+  if (id === 'experience') {
     return (
       <>
-        <ClientWorkStrip />
+        <TestimonialStrip />
         <ProjectJourney />
       </>
     )
   }
-  if (id === 'experience') return <TestimonialStrip />
   return null
 }
 
@@ -98,6 +100,8 @@ function SectionExtras({ id }: { id: SectionId }): ReactNode {
  */
 export function SectionsSpine() {
   const rootRef = useRef<HTMLElement>(null)
+  // Softened client-side; until then (and in the prerendered page) the title is solid
+  const projectsSoft = useSoftFill(projectsFill, sections[SECTION_IDS.indexOf('projects')].color)
 
   useEffect(() => {
     const root = rootRef.current
@@ -150,13 +154,13 @@ export function SectionsSpine() {
                 */}
                 <span className="spine-title__mask" data-reveal>
                   <span
-                    className={`spine-title__line${id === 'projects' && projectsFill ? ' is-filled' : ''}`}
+                    className={`spine-title__line${id === 'projects' && projectsSoft ? ' is-filled' : ''}`}
                     data-fit
                     // Inline so the url() resolves against the document, not
                     // the stylesheet in assets/
                     style={
-                      id === 'projects' && projectsFill
-                        ? { backgroundImage: `url("${projectsFill}")` }
+                      id === 'projects' && projectsSoft
+                        ? { backgroundImage: `url("${projectsSoft}")` }
                         : undefined
                     }
                   >
