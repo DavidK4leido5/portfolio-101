@@ -3565,3 +3565,132 @@ canvas { display: block; }
     animation: none;
   }
 }
+
+/* ==== Cursor ====
+   A dot on the pointer and a ring that trails it. Only mounted for a fine
+   pointer (see Cursor.tsx), which is also the only time the native cursor is
+   hidden: `has-cursor` is added by the same effect. */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+/* Where you type, the caret has to be the real one */
+html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"]) {
+  cursor: text !important;
+}
+
+/* `display: contents`, not a fixed layer: a wrapper with its own z-index or
+   opacity isolates the dot, and its difference blend would only see the
+   wrapper's empty box instead of the page */
+.cursor {
+  --cursor-accent: var(--accent);
+  display: contents;
+}
+
+.cursor__dot,
+.cursor__ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cursor[data-visible="false"] .cursor__dot,
+.cursor[data-visible="false"] .cursor__ring {
+  visibility: hidden;
+}
+
+/* Difference blend keeps the dot visible on the cream type and the dark ground */
+.cursor__dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #fff;
+  mix-blend-mode: difference;
+  transition: scale 0.35s var(--ease-osmo), opacity 0.25s;
+}
+
+.cursor__ring {
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  display: grid;
+  place-items: center;
+}
+
+/* The ring's own scale lives on a child, so it never fights the per-frame
+   translate written to its parent */
+.cursor__shape {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--cursor-accent) 70%, #fff);
+  background: color-mix(in srgb, var(--cursor-accent) 0%, transparent);
+  transition:
+    scale 0.45s var(--ease-osmo),
+    background-color 0.35s var(--ease-soft),
+    border-color 0.35s var(--ease-soft),
+    opacity 0.25s;
+}
+
+.cursor__label {
+  grid-area: 1 / 1;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.25s, scale 0.45s var(--ease-osmo);
+}
+
+/* Over anything clickable: the ring opens and fills faintly, the dot tucks in */
+.cursor[data-state="hover"] .cursor__shape {
+  scale: 1.55;
+  background: color-mix(in srgb, var(--cursor-accent) 16%, transparent);
+  border-color: var(--cursor-accent);
+}
+
+.cursor[data-state="hover"] .cursor__dot {
+  scale: 0;
+}
+
+/* A link that goes somewhere specific says where, and the ring makes room */
+.cursor[data-label] .cursor__shape {
+  scale: 2.3;
+  background: color-mix(in srgb, var(--cursor-accent) 26%, rgba(5, 5, 10, 0.55));
+}
+
+.cursor[data-label] .cursor__label {
+  opacity: 1;
+  scale: 1;
+}
+
+.cursor[data-down] .cursor__shape {
+  scale: 0.8;
+}
+
+.cursor[data-down][data-state="hover"] .cursor__shape {
+  scale: 1.3;
+}
+
+.cursor[data-state="text"] .cursor__shape,
+.cursor[data-state="text"] .cursor__dot {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor__shape,
+  .cursor__dot,
+  .cursor__label {
+    transition: opacity 0.2s;
+  }
+}
