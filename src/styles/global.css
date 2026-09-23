@@ -3694,3 +3694,39 @@ html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="
     transition: opacity 0.2s;
   }
 }
+
+/* ==== Scroll progress ====
+   A hairline across the top in the page's accent. Driven by the scroll
+   timeline where supported (compositor only, no script); ScrollProgress.tsx
+   writes the same transform where it is not. */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9000;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, transparent), var(--accent));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: opacity 0.6s var(--ease-soft);
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    animation: scroll-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes scroll-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Nothing to measure yet while the intro holds the page */
+.app-root:not([data-load-phase="ready"]) .scroll-progress {
+  opacity: 0;
+}
