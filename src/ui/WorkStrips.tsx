@@ -66,6 +66,8 @@ function TestimonialAvatar({ name, image }: { name: string; image: ImageSource }
           className="testimonial-avatar__img"
           src={src}
           alt=""
+          width={48}
+          height={48}
           loading="lazy"
           decoding="async"
           onError={() => setShowImg(false)}

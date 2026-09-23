@@ -9,8 +9,12 @@
 const REF_PX = 200
 /** How far one shrink step backs the size off. */
 const STEP = 0.004
-/** Steps allowed before giving up — 4 covers a staircase tread comfortably. */
-const MAX_STEPS = 4
+/**
+ * Steps allowed before giving up. Four covered a display word; a long line at
+ * phone size needed more. At 23px each glyph advance is rounded, and across a
+ * 30-character email address that adds 5px that no 0.4% step could take back.
+ */
+const MAX_STEPS = 12
 
 export function fitToWidth(el: HTMLElement, targetPx: number, trackingEm: number) {
   if (targetPx <= 0) return
@@ -39,10 +43,24 @@ export function fitToWidth(el: HTMLElement, targetPx: number, trackingEm: number
    * container makes every block beside it look wrongly inset. Undershooting by
    * a fraction of a percent is invisible. So step down until it fits and stop.
    */
+  let shrank = false
   for (let step = 0; step < MAX_STEPS; step++) {
-    if (el.getBoundingClientRect().width <= targetPx) break
-    size *= 1 - STEP
+    const width = el.getBoundingClientRect().width
+    if (width <= targetPx) break
+    // Back off by the overshoot, and never by less than one step
+    size *= Math.min(1 - STEP, targetPx / width)
     setSize(size)
+    shrank = true
+  }
+  // The back-off can land a whole tread low; climb back while it still fits
+  for (let step = 0; shrank && step < MAX_STEPS; step++) {
+    const up = size / (1 - STEP)
+    setSize(up)
+    if (el.getBoundingClientRect().width > targetPx) {
+      setSize(size)
+      break
+    }
+    size = up
   }
 }
 

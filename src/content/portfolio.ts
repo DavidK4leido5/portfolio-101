@@ -475,5 +475,8 @@ export function resolveImage({ cdnUrl, localPath }: ImageSource): string {
     if (hit) return hit[1];
   }
 
-  return path;
+  // Not in the bundle. Returning the raw path shipped a request that 404s in
+  // production and a broken image in the prerendered page; empty makes the
+  // callers fall back to initials, which is what they are built to do.
+  return "";
 }
