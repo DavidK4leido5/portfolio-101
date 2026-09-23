@@ -1645,19 +1645,36 @@ canvas { display: block; }
   position: absolute;
   inset: 0;
   overflow: hidden;
-  will-change: transform;
+  will-change: transform, translate;
 }
 
 .journey-line__clip-inner {
   position: absolute;
   inset: 0;
-  will-change: transform;
+  will-change: transform, translate;
+}
+
+/* The comet's track: first beat to last. Sized from the engine's measure */
+.journey-line__track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--tl-y0, 0px);
+  height: var(--tl-span, 0px);
+}
+
+/* Held at the viewport centre by the browser across the whole track */
+.journey-line__pin {
+  position: sticky;
+  top: 50vh;
+  top: 50dvh;
+  height: 0;
 }
 
 .journey-line__comet {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
   width: 14px;
   height: 14px;
   margin: -7px 0 0 -7px;
@@ -3953,5 +3970,61 @@ html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="
   .cursor[data-hurt] .cursor__shape::after,
   .cursor[data-attacked] .cursor__hint-line {
     animation: none;
+  }
+}
+
+/* ==== Timeline on the scroll itself ====
+   Where the browser has scroll timelines, the lit half of the line and the
+   comet's swing are animations bound to the scroll position, so they run on
+   the compositor in lockstep with it. ProjectJourney.tsx leaves them alone
+   in that case and only drives them itself as a fallback. */
+@supports (animation-timeline: view()) {
+  .project-journey {
+    view-timeline-name: --journey;
+  }
+
+  /* Across the journey's cover range the viewport centre runs from half a
+     viewport above the line to half a viewport past its end. The wrapper
+     rides up by (centre - height) and the inner copy back down by as much,
+     so the lit part always ends at the centre */
+  .journey-line__clip {
+    animation: journey-lit linear both;
+    animation-timeline: --journey;
+  }
+
+  .journey-line__clip-inner {
+    animation: journey-lit-inner linear both;
+    animation-timeline: --journey;
+  }
+
+  .journey-line__track {
+    view-timeline-name: --journey-track;
+  }
+
+  /* 0 when the track's top reaches the centre, 1 when its bottom does */
+  .journey-line__comet {
+    animation: journey-comet-swing linear both;
+    animation-timeline: --journey-track;
+    animation-range: cover 50vh cover calc(100% - 50vh);
+    animation-range: cover 50dvh cover calc(100% - 50dvh);
+  }
+}
+
+@keyframes journey-lit {
+  from { translate: 0 calc(-100% - 50dvh); }
+  to { translate: 0 50dvh; }
+}
+
+@keyframes journey-lit-inner {
+  from { translate: 0 calc(100% + 50dvh); }
+  to { translate: 0 -50dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-line__clip,
+  .journey-line__clip-inner,
+  .journey-line__comet {
+    animation: none;
+    translate: none;
   }
 }
