@@ -22,6 +22,16 @@ const BEAT_ORDER: ProjectBeatId[] = ['intro', 'tech', 'build']
 
 type StoryCopy = Record<ProjectBeatId, string>
 
+/** One colour per project for the timeline line, comet, node and numeral. */
+const ACCENTS: Record<string, string> = {
+  palace: '#e8b86b',
+  revive: '#35e0c8',
+  volatility: '#ff5c7a',
+  agentsly: '#8b7bff',
+  tapup: '#4da6ff',
+  codebility: '#7ee08a',
+}
+
 const STORIES: Record<string, StoryCopy> = {
   palace: {
     intro:
@@ -79,6 +89,7 @@ export type ProjectStory = {
   role: string
   period: string
   domain?: string
+  accent: string
   stack: string[]
   beats: ProjectBeat[]
   /** Every shot for the project, in order — the stage crossfades through these */
@@ -98,6 +109,7 @@ function toStory(project: Project): ProjectStory | null {
     role: role?.role ?? '',
     period: role?.period ?? '',
     domain: project.domain,
+    accent: ACCENTS[project.id] ?? '#8b5cf6',
     stack: project.skills,
     shots: shotsBySlug.get(project.slug) ?? [],
     beats: BEAT_ORDER.map((id) => ({ id, label: BEAT_LABELS[id], body: copy[id] })),

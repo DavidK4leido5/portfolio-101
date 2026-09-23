@@ -63,6 +63,13 @@ export function ContactPanel() {
 
   return (
     <div className="contact-panel" data-testid="contact-panel">
+      {/* The fastest way to reach me, so it is the biggest thing here. The
+          value is fitted to the column by observeFit in SectionsSpine */}
+      <a className="contact-panel__email" href={`mailto:${contact.email}`} data-reveal>
+        <span className="contact-panel__email-label">Email me directly</span>
+        <span className="contact-panel__email-value" data-fit>{contact.email}</span>
+      </a>
+
       <p className="contact-panel__lead" data-reveal>{contact.description}</p>
 
       <form className="contact-form" onSubmit={onSubmit} noValidate data-reveal-stagger>
@@ -129,10 +136,6 @@ export function ContactPanel() {
         )}
       </form>
 
-      <a className="contact-panel__email" href={`mailto:${contact.email}`} data-reveal="card">
-        <span className="contact-panel__email-label">Or email me directly</span>
-        <span className="contact-panel__email-value">{contact.email}</span>
-      </a>
 
       <div className="tags" data-reveal-stagger>
         {contact.links.map((l) => (

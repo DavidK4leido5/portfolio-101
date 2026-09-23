@@ -89,9 +89,3 @@ export const clientWorkGroups: ClientWorkGroup[] = (() => {
   }
   return [...byProject.values()]
 })()
-
-/** Split projects across two marquee rows; odd-count leftovers go to row A. */
-export function splitClientWorkGroups(): { rowA: ClientWorkGroup[]; rowB: ClientWorkGroup[] } {
-  const mid = Math.ceil(clientWorkGroups.length / 2)
-  return { rowA: clientWorkGroups.slice(0, mid), rowB: clientWorkGroups.slice(mid) }
-}

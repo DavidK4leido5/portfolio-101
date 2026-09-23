@@ -1,0 +1,4378 @@
+{
+  "desktop": {
+    "loadMs": 5157,
+    "readyMs": 18317,
+    "errors": [
+      "warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.",
+      "warning: [.WebGL-0x437c001c7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "warning: [.WebGL-0x437c001c7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "warning: [.WebGL-0x437c001c7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "warning: [.WebGL-0x437c001c7800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    ],
+    "failed": [],
+    "title": "The Adaptive Mind | Davids Portfolio",
+    "metaDesc": "David Remus Tribugenia — full-stack engineer. Interactive portfolio: React, TypeScript, Three.js systems, APIs, and product delivery. Explore projects, experience, and skills.",
+    "lang": "en",
+    "h1Count": 1,
+    "headings": [
+      "H2 About",
+      "H3 David Remus Tribugenia",
+      "H2 Projects",
+      "H3 The Palace Manila",
+      "H3 Revive Pharmacy",
+      "H3 Volatility",
+      "H3 Agentsly",
+      "H3 TapUp",
+      "H3 Codebility",
+      "H3 The Palace Manila",
+      "H3 Revive Pharmacy",
+      "H3 Volatility",
+      "H3 Agentsly",
+      "H3 TapUp",
+      "H3 Codebility",
+      "H2 Experience",
+      "H3 Full Stack Engineer (Contract) · The Palace Manila",
+      "H3 Systems Engineer · Revive Pharmacy",
+      "H3 Full Stack Engineer · Volatility",
+      "H3 Full Stack Engineer · Agentsly",
+      "H3 Fullstack Developer & Project Manager · TapUp",
+      "H3 Full Stack Engineer / Mentor · Codebility",
+      "H3 System Administrator · Commission on Elections",
+      "H2 Skills",
+      "H3 Frontend Development",
+      "H2 Contact",
+      "H1 The Adaptive Mind",
+      "H2 What the person touches.",
+      "H2 The contract in the middle.",
+      "H2 Where the work happens.",
+      "H2 The part you cannot redo.",
+      "H2 The floor it stands on."
+    ],
+    "landmarks": [
+      "MAIN",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "FOOTER",
+      "NAV[Elsewhere]",
+      "NAV[Request stages]",
+      "NAV[Portfolio sections]"
+    ],
+    "overflow": [
+      "g.[object SVGAnimatedString] right=9722",
+      "g.[object SVGAnimatedString] right=9557",
+      "text.[object SVGAnimatedString] right=9557",
+      "g.[object SVGAnimatedString] right=9722",
+      "text.[object SVGAnimatedString] right=9722",
+      "SPAN.trace-ghost right=1344",
+      "B. right=1242",
+      "SPAN.trace-ghost__ch right=-75",
+      "SPAN.trace-ghost__ch right=103",
+      "SPAN.trace-ghost right=1544",
+      "B. right=1544",
+      "SPAN.trace-ghost__ch right=1490",
+      "SPAN.trace-ghost__ch right=1544",
+      "SPAN.trace-ghost right=1516",
+      "B. right=1573"
+    ],
+    "docScrollWidth": 1430,
+    "vw": 1440,
+    "small": [
+      "A. \"the-palace-manila-prototype.we\" 272x12",
+      "A. \"revivepharmacy.com.au →\" 156x12",
+      "A. \"volatility.com.au →\" 129x12",
+      "A. \"tapup.tech →\" 82x12",
+      "A. \"codebility.tech →\" 116x12",
+      "A.project-beat__link \"the-palace-manila-prototype.we\" 280x16",
+      "A.project-beat__link \"revivepharmacy.com.au →\" 161x16",
+      "A.project-beat__link \"volatility.com.au →\" 133x16",
+      "A.project-beat__link \"tapup.tech →\" 84x16",
+      "A.project-beat__link \"codebility.tech →\" 119x16",
+      "BUTTON.skills-index__row is-active \"Frontend Development89\" 1178x31",
+      "BUTTON.skills-index__row \"Backend Development88\" 1178x31",
+      "BUTTON.skills-index__row \"Database Management81\" 1178x31",
+      "BUTTON.skills-index__row \"DevOps/Deployment68\" 1178x31",
+      "BUTTON.skills-index__row \"Version Control & Collaboratio\" 1178x31",
+      "BUTTON.skills-index__row \"Problem Solving & Algorithms71\" 1178x31",
+      "INPUT. \"\" 660x39",
+      "INPUT. \"\" 660x39",
+      "BUTTON.contact-form__submit \"Send message\" 138x33",
+      "A.is-in \"GitHub\" 58x18",
+      "A.is-in \"LinkedIn\" 71x18",
+      "A. \"GitHub ↗\" 61x13",
+      "A. \"LinkedIn ↗\" 76x13",
+      "A.site-brand \"The Adaptive MindDavids Portfo\" 208x40",
+      "BUTTON.trace-rail__tick \"Interface\" 26x26",
+      "BUTTON.trace-rail__tick \"API\" 26x26",
+      "BUTTON.trace-rail__tick \"Service\" 26x26",
+      "BUTTON.trace-rail__tick \"Data\" 26x26",
+      "BUTTON.trace-rail__tick is-active \"Infrastructure\" 26x26",
+      "BUTTON.section-nav__item \"01About\" 109x25",
+      "BUTTON.section-nav__item \"02Projects\" 109x25",
+      "BUTTON.section-nav__item \"03Experience\" 109x25",
+      "BUTTON.section-nav__item \"04Skills\" 109x25",
+      "BUTTON.section-nav__item is-current \"05Contact\" 109x25"
+    ],
+    "imgs": [
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "541x304"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "541x304"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "541x304"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "541x304"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "541x304"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "541x304"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "378x252"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "378x252"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "378x252"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "378x252"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "614x353"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "614x353"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "614x353"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "614x353"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "614x353"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "614x353"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "614x353"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "614x353"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "448x180"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "448x180"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "448x180"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "448x180"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "448x180"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "448x180"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "daniel-Cfz-mpMA.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "daniel-Cfz-mpMA.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "daniel-Cfz-mpMA.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "daniel-Cfz-mpMA.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "daniel-Cfz-mpMA.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "logo.png",
+        "alt": "",
+        "loading": "auto",
+        "decoding": "async",
+        "hasDims": true,
+        "natural": "250x250",
+        "rendered": "40x40"
+      }
+    ],
+    "unnamed": [],
+    "links": [
+      {
+        "href": "https://the-palace-manila-prototype.webflow.io/",
+        "text": "the-palace-manila-prototype.webflow.io →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://revivepharmacy.com.au/",
+        "text": "revivepharmacy.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://volatility.com.au/",
+        "text": "volatility.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.tapup.tech/",
+        "text": "tapup.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.codebility.tech/",
+        "text": "codebility.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://the-palace-manila-prototype.webflow.io/",
+        "text": "the-palace-manila-prototype.webflow.io →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://revivepharmacy.com.au/",
+        "text": "revivepharmacy.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://volatility.com.au/",
+        "text": "volatility.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.tapup.tech/",
+        "text": "tapup.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.codebility.tech/",
+        "text": "codebility.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "mailto:developer.work.david@gmail.com",
+        "text": "Or email me directlydeveloper.work.david",
+        "target": "",
+        "rel": ""
+      },
+      {
+        "href": "https://github.com/DavidK4leido5",
+        "text": "GitHub",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://linkedin.com/in/davidrt1262/",
+        "text": "LinkedIn",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "mailto:developer.work.david@gmail.com",
+        "text": "developer.work.david@gmail.com ↗",
+        "target": "",
+        "rel": ""
+      },
+      {
+        "href": "https://github.com/DavidK4leido5",
+        "text": "GitHub ↗",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://linkedin.com/in/davidrt1262/",
+        "text": "LinkedIn ↗",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "./",
+        "text": "The Adaptive MindDavids Portfolio",
+        "target": "",
+        "rel": ""
+      }
+    ],
+    "domNodes": 2283,
+    "vitals": {
+      "lcp": 72552,
+      "lcpEl": "IMG.",
+      "cls": 0.0008570924944674855,
+      "longTasks": 80,
+      "longTaskMs": 56205
+    },
+    "fcp": 5600,
+    "domContentLoaded": 5150.699999999953,
+    "resTop": [
+      {
+        "name": "assets/index-BdjNeI66.js",
+        "type": "script",
+        "kb": 1140,
+        "decodedKb": 3340,
+        "ms": 246
+      },
+      {
+        "name": "assets/thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "type": "img",
+        "kb": 71,
+        "decodedKb": 71,
+        "ms": 17
+      },
+      {
+        "name": "assets/thepalacemanila%20(8)-C0Z_LOup.webp",
+        "type": "img",
+        "kb": 69,
+        "decodedKb": 69,
+        "ms": 36
+      },
+      {
+        "name": "localhost:4173/logo.png",
+        "type": "img",
+        "kb": 59,
+        "decodedKb": 59,
+        "ms": 4
+      },
+      {
+        "name": "assets/thepalacemanila%20(7)-BSGOiAeW.webp",
+        "type": "img",
+        "kb": 53,
+        "decodedKb": 53,
+        "ms": 24
+      },
+      {
+        "name": "assets/thepalacemanila%20(4)-CqYDK1CD.webp",
+        "type": "img",
+        "kb": 51,
+        "decodedKb": 50,
+        "ms": 16
+      },
+      {
+        "name": "assets/thepalacemanila%20(2)-CsERKHSJ.webp",
+        "type": "img",
+        "kb": 44,
+        "decodedKb": 44,
+        "ms": 14
+      },
+      {
+        "name": "assets/index-LIluf4Rc.css",
+        "type": "link",
+        "kb": 10,
+        "decodedKb": 43,
+        "ms": 8
+      },
+      {
+        "name": "assets/revivepharmacy%20(1)-N_i511J6.webp",
+        "type": "img",
+        "kb": 42,
+        "decodedKb": 42,
+        "ms": 5
+      },
+      {
+        "name": "assets/thepalacemanila%20(3)-Xsnyii-4.webp",
+        "type": "img",
+        "kb": 43,
+        "decodedKb": 42,
+        "ms": 16
+      },
+      {
+        "name": "assets/revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "type": "img",
+        "kb": 41,
+        "decodedKb": 41,
+        "ms": 40
+      },
+      {
+        "name": "assets/agentsly%20(3)-D1sqylzb.avif",
+        "type": "img",
+        "kb": 37,
+        "decodedKb": 37,
+        "ms": 21
+      },
+      {
+        "name": "assets/volatility%20(2)-CnVUQrt8.webp",
+        "type": "img",
+        "kb": 36,
+        "decodedKb": 36,
+        "ms": 35
+      },
+      {
+        "name": "assets/codebility%20(2)-BuHPfIgr.webp",
+        "type": "img",
+        "kb": 35,
+        "decodedKb": 35,
+        "ms": 21
+      },
+      {
+        "name": "assets/revivepharmacy%20(2)-DIJKzqBN.webp",
+        "type": "img",
+        "kb": 34,
+        "decodedKb": 34,
+        "ms": 35
+      }
+    ],
+    "resCount": 41,
+    "heap": 17
+  },
+  "mobile": {
+    "loadMs": 335,
+    "readyMs": 8478,
+    "errors": [
+      "warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead."
+    ],
+    "failed": [],
+    "title": "The Adaptive Mind | Davids Portfolio",
+    "metaDesc": "David Remus Tribugenia — full-stack engineer. Interactive portfolio: React, TypeScript, Three.js systems, APIs, and product delivery. Explore projects, experience, and skills.",
+    "lang": "en",
+    "h1Count": 1,
+    "headings": [
+      "H2 About",
+      "H3 David Remus Tribugenia",
+      "H2 Projects",
+      "H3 The Palace Manila",
+      "H3 Revive Pharmacy",
+      "H3 Volatility",
+      "H3 Agentsly",
+      "H3 TapUp",
+      "H3 Codebility",
+      "H3 The Palace Manila",
+      "H3 Revive Pharmacy",
+      "H3 Volatility",
+      "H3 Agentsly",
+      "H3 TapUp",
+      "H3 Codebility",
+      "H2 Experience",
+      "H3 Full Stack Engineer (Contract) · The Palace Manila",
+      "H3 Systems Engineer · Revive Pharmacy",
+      "H3 Full Stack Engineer · Volatility",
+      "H3 Full Stack Engineer · Agentsly",
+      "H3 Fullstack Developer & Project Manager · TapUp",
+      "H3 Full Stack Engineer / Mentor · Codebility",
+      "H3 System Administrator · Commission on Elections",
+      "H2 Skills",
+      "H3 Frontend Development",
+      "H2 Contact",
+      "H1 The Adaptive Mind",
+      "H2 What the person touches.",
+      "H2 The contract in the middle.",
+      "H2 Where the work happens.",
+      "H2 The part you cannot redo.",
+      "H2 The floor it stands on."
+    ],
+    "landmarks": [
+      "MAIN",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "FOOTER",
+      "HEADER",
+      "HEADER",
+      "HEADER",
+      "FOOTER",
+      "NAV[Elsewhere]",
+      "NAV[Request stages]",
+      "NAV[Portfolio sections]"
+    ],
+    "overflow": [
+      "g.[object SVGAnimatedString] right=3427",
+      "g.[object SVGAnimatedString] right=3422",
+      "text.[object SVGAnimatedString] right=3422",
+      "g.[object SVGAnimatedString] right=3427",
+      "text.[object SVGAnimatedString] right=3427",
+      "SPAN.trace-ghost right=367",
+      "B. right=408",
+      "SPAN.trace-ghost__ch right=-6",
+      "SPAN.trace-ghost__ch right=50",
+      "SPAN.trace-ghost__ch right=408",
+      "SPAN.trace-ghost right=421",
+      "SPAN.trace-ghost right=413",
+      "B. right=406",
+      "SPAN.trace-ghost__ch right=406"
+    ],
+    "docScrollWidth": 390,
+    "vw": 390,
+    "small": [
+      "A. \"the-palace-manila-prototype.we\" 272x12",
+      "A. \"revivepharmacy.com.au →\" 156x12",
+      "A. \"volatility.com.au →\" 129x12",
+      "A. \"tapup.tech →\" 82x12",
+      "A. \"codebility.tech →\" 116x12",
+      "A.project-beat__link \"the-palace-manila-prototype.we\" 280x16",
+      "A.project-beat__link \"revivepharmacy.com.au →\" 161x16",
+      "A.project-beat__link \"volatility.com.au →\" 133x16",
+      "A.project-beat__link \"tapup.tech →\" 84x16",
+      "A.project-beat__link \"codebility.tech →\" 119x16",
+      "BUTTON.skills-radar__hit is-active \"Frontend Development\" 37x37",
+      "BUTTON.skills-radar__hit \"Backend Development\" 37x37",
+      "BUTTON.skills-radar__hit \"Database Management\" 37x37",
+      "BUTTON.skills-radar__hit \"DevOps/Deployment\" 37x37",
+      "BUTTON.skills-radar__hit \"Version Control & Collaboratio\" 37x37",
+      "BUTTON.skills-radar__hit \"Problem Solving & Algorithms\" 37x37",
+      "BUTTON.skills-index__row is-active \"Frontend Development89\" 350x31",
+      "BUTTON.skills-index__row \"Backend Development88\" 350x31",
+      "BUTTON.skills-index__row \"Database Management81\" 350x31",
+      "BUTTON.skills-index__row \"DevOps/Deployment68\" 350x31",
+      "BUTTON.skills-index__row \"Version Control & Collaboratio\" 350x31",
+      "BUTTON.skills-index__row \"Problem Solving & Algorithms71\" 350x31",
+      "INPUT. \"\" 350x39",
+      "INPUT. \"\" 350x39",
+      "BUTTON.contact-form__submit \"Send message\" 138x33",
+      "A.is-in \"GitHub\" 58x18",
+      "A.is-in \"LinkedIn\" 71x18",
+      "A. \"GitHub ↗\" 61x13",
+      "A. \"LinkedIn ↗\" 76x13",
+      "A.site-brand \"The Adaptive MindDavids Portfo\" 174x34",
+      "BUTTON.trace-rail__tick \"Interface\" 26x26",
+      "BUTTON.trace-rail__tick \"API\" 26x26",
+      "BUTTON.trace-rail__tick \"Service\" 26x26",
+      "BUTTON.trace-rail__tick \"Data\" 26x26",
+      "BUTTON.trace-rail__tick is-active \"Infrastructure\" 26x26",
+      "BUTTON.section-nav__item \"01About\" 78x40",
+      "BUTTON.section-nav__item \"02Projects\" 78x40",
+      "BUTTON.section-nav__item \"03Experience\" 78x40",
+      "BUTTON.section-nav__item \"04Skills\" 78x40",
+      "BUTTON.section-nav__item is-current \"05Contact\" 78x40"
+    ],
+    "imgs": [
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "312x176"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "312x176"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "312x176"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "312x176"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "312x176"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "312x176"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(2)-DnwDzgYQ.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "agentsly%20(3)-D1sqylzb.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "162x108"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(2)-DIJKzqBN.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(3)-BxMJes3N.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(4)-BiMIvA9u.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(5)-DnoNF6jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x531",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(7)-OuLuFYcd.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x528",
+        "rendered": "162x108"
+      },
+      {
+        "src": "revivepharmacy%20(8)-B7yJ5yhK.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x527",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(2)-CsERKHSJ.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(3)-Xsnyii-4.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x512",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(4)-CqYDK1CD.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x509",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(5)-Cnfbislk.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x508",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(7)-BSGOiAeW.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "thepalacemanila%20(8)-C0Z_LOup.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(2)-CnVUQrt8.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(3)-Bv1alO7z.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x506",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(4)-CixnQhkO.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "162x108"
+      },
+      {
+        "src": "volatility%20(5)-DdfXchtU.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "162x108"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "348x289"
+      },
+      {
+        "src": "tapup%20(2)-Cm-kNcXr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "348x289"
+      },
+      {
+        "src": "tapup%20(3)-DK-gv9Ip.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "348x289"
+      },
+      {
+        "src": "tapup%20(4)-BMj1jd2M.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x503",
+        "rendered": "348x289"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "348x289"
+      },
+      {
+        "src": "codebility%20(2)-BuHPfIgr.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "348x289"
+      },
+      {
+        "src": "codebility%20(3)-DDRfDjqs.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x498",
+        "rendered": "348x289"
+      },
+      {
+        "src": "codebility%20(4)-BUaACnIw.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "348x289"
+      },
+      {
+        "src": "thepalacemanila%20(1)-Hcuz6_kj.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "348x180"
+      },
+      {
+        "src": "revivepharmacy%20(1)-N_i511J6.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "348x180"
+      },
+      {
+        "src": "volatility%20(1)-Bjl6EHyV.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x507",
+        "rendered": "348x180"
+      },
+      {
+        "src": "agentsly%20(1)-CDyejYAX.avif",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x691",
+        "rendered": "348x180"
+      },
+      {
+        "src": "tapup%20(1)-EdNq61Jm.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x505",
+        "rendered": "348x180"
+      },
+      {
+        "src": "codebility%20(1)-muCU8sPC.webp",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "1024x504",
+        "rendered": "348x180"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "0x0",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "0x0",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "0x0",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "0x0",
+        "rendered": "46x46"
+      },
+      {
+        "src": "fady-NreFoBjR.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "shawn-COY4I19S.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "zeff-BWknKv87.jpg",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "200x200",
+        "rendered": "46x46"
+      },
+      {
+        "src": "",
+        "alt": "",
+        "loading": "lazy",
+        "decoding": "async",
+        "hasDims": false,
+        "natural": "0x0",
+        "rendered": "46x46"
+      },
+      {
+        "src": "logo.png",
+        "alt": "",
+        "loading": "auto",
+        "decoding": "async",
+        "hasDims": true,
+        "natural": "250x250",
+        "rendered": "34x34"
+      }
+    ],
+    "unnamed": [],
+    "links": [
+      {
+        "href": "https://the-palace-manila-prototype.webflow.io/",
+        "text": "the-palace-manila-prototype.webflow.io →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://revivepharmacy.com.au/",
+        "text": "revivepharmacy.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://volatility.com.au/",
+        "text": "volatility.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.tapup.tech/",
+        "text": "tapup.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.codebility.tech/",
+        "text": "codebility.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://the-palace-manila-prototype.webflow.io/",
+        "text": "the-palace-manila-prototype.webflow.io →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://revivepharmacy.com.au/",
+        "text": "revivepharmacy.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://volatility.com.au/",
+        "text": "volatility.com.au →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.tapup.tech/",
+        "text": "tapup.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://www.codebility.tech/",
+        "text": "codebility.tech →",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "mailto:developer.work.david@gmail.com",
+        "text": "Or email me directlydeveloper.work.david",
+        "target": "",
+        "rel": ""
+      },
+      {
+        "href": "https://github.com/DavidK4leido5",
+        "text": "GitHub",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://linkedin.com/in/davidrt1262/",
+        "text": "LinkedIn",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "mailto:developer.work.david@gmail.com",
+        "text": "developer.work.david@gmail.com ↗",
+        "target": "",
+        "rel": ""
+      },
+      {
+        "href": "https://github.com/DavidK4leido5",
+        "text": "GitHub ↗",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "https://linkedin.com/in/davidrt1262/",
+        "text": "LinkedIn ↗",
+        "target": "_blank",
+        "rel": "noreferrer"
+      },
+      {
+        "href": "./",
+        "text": "The Adaptive MindDavids Portfolio",
+        "target": "",
+        "rel": ""
+      }
+    ],
+    "domNodes": 2281,
+    "vitals": {
+      "lcp": 28624,
+      "lcpEl": "IMG.",
+      "cls": 0.00015868024899226465,
+      "longTasks": 3,
+      "longTaskMs": 638
+    },
+    "fcp": 620,
+    "domContentLoaded": 332.5,
+    "resTop": [
+      {
+        "name": "assets/index-BdjNeI66.js",
+        "type": "script",
+        "kb": 1140,
+        "decodedKb": 3340,
+        "ms": 218
+      },
+      {
+        "name": "assets/thepalacemanila%20(6)-Dv1Nq09j.webp",
+        "type": "img",
+        "kb": 71,
+        "decodedKb": 71,
+        "ms": 40
+      },
+      {
+        "name": "assets/thepalacemanila%20(8)-C0Z_LOup.webp",
+        "type": "img",
+        "kb": 69,
+        "decodedKb": 69,
+        "ms": 41
+      },
+      {
+        "name": "localhost:4173/logo.png",
+        "type": "img",
+        "kb": 59,
+        "decodedKb": 59,
+        "ms": 4
+      },
+      {
+        "name": "assets/thepalacemanila%20(7)-BSGOiAeW.webp",
+        "type": "img",
+        "kb": 53,
+        "decodedKb": 53,
+        "ms": 38
+      },
+      {
+        "name": "assets/thepalacemanila%20(4)-CqYDK1CD.webp",
+        "type": "img",
+        "kb": 51,
+        "decodedKb": 50,
+        "ms": 30
+      },
+      {
+        "name": "assets/thepalacemanila%20(2)-CsERKHSJ.webp",
+        "type": "img",
+        "kb": 44,
+        "decodedKb": 44,
+        "ms": 29
+      },
+      {
+        "name": "assets/index-LIluf4Rc.css",
+        "type": "link",
+        "kb": 10,
+        "decodedKb": 43,
+        "ms": 8
+      },
+      {
+        "name": "assets/thepalacemanila%20(3)-Xsnyii-4.webp",
+        "type": "img",
+        "kb": 43,
+        "decodedKb": 42,
+        "ms": 30
+      },
+      {
+        "name": "assets/revivepharmacy%20(1)-N_i511J6.webp",
+        "type": "img",
+        "kb": 42,
+        "decodedKb": 42,
+        "ms": 39
+      },
+      {
+        "name": "assets/revivepharmacy%20(6)-DjQ7aPZ8.webp",
+        "type": "img",
+        "kb": 41,
+        "decodedKb": 41,
+        "ms": 51
+      },
+      {
+        "name": "assets/agentsly%20(3)-D1sqylzb.avif",
+        "type": "img",
+        "kb": 37,
+        "decodedKb": 37,
+        "ms": 18
+      },
+      {
+        "name": "assets/volatility%20(2)-CnVUQrt8.webp",
+        "type": "img",
+        "kb": 36,
+        "decodedKb": 36,
+        "ms": 4
+      },
+      {
+        "name": "assets/codebility%20(2)-BuHPfIgr.webp",
+        "type": "img",
+        "kb": 35,
+        "decodedKb": 35,
+        "ms": 21
+      },
+      {
+        "name": "assets/revivepharmacy%20(2)-DIJKzqBN.webp",
+        "type": "img",
+        "kb": 34,
+        "decodedKb": 34,
+        "ms": 40
+      }
+    ],
+    "resCount": 40,
+    "heap": 16
+  },
+  "noJs": {
+    "bodyText": ""
+  }
+}

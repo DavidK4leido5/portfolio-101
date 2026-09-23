@@ -1,13 +1,13 @@
 const LOGO_SRC = `${import.meta.env.BASE_URL}logo.png`
 
-/** Persistent brand mark — favicon twin + document h1 for SEO. */
+/** Persistent brand mark. The name line is the document h1. */
 export function SiteBrand() {
   return (
     <a
       className="site-brand"
       href={import.meta.env.BASE_URL}
       data-testid="site-brand"
-      aria-label="The Adaptive Mind — Davids Portfolio"
+      aria-label="The Adaptive Mind, David Remus Tribugenia portfolio home"
     >
       <img
         className="site-brand__logo"
@@ -18,8 +18,8 @@ export function SiteBrand() {
         decoding="async"
       />
       <span className="site-brand__copy">
-        <h1 className="site-brand__title">The Adaptive Mind</h1>
-        <span className="site-brand__sub">Davids Portfolio</span>
+        <span className="site-brand__title">The Adaptive Mind</span>
+        <h1 className="site-brand__sub">David Remus Tribugenia</h1>
       </span>
     </a>
   )
