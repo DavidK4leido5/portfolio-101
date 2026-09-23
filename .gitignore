@@ -6,3 +6,4 @@ dist
 job-hunt/drafts/
 job-hunt/sent-log.json
 .ssr
+tests/audit
