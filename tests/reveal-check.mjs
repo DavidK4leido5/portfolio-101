@@ -408,6 +408,46 @@ else {
   else if (chrome.withBar !== chrome.cards) {
     fail(`${chrome.cards - chrome.withBar} card(s) missing browser chrome`)
   } else console.log(`ok: browser chrome on all ${chrome.cards} cards (e.g. "${chrome.url}")`)
+
+  // —— The timeline: the comet rides the viewport centre and the lit line ends on it ——
+  const lineAt = async (y) => {
+    await goTo(y)
+    return page.evaluate(() => {
+      const c = document.querySelector('.journey-line__comet')?.getBoundingClientRect()
+      const clip = document.querySelector('.journey-line__clip')?.getBoundingClientRect()
+      const root = document.querySelector('.project-journey')
+      return c && clip && root
+        ? {
+            cometY: c.top + c.height / 2,
+            litEnd: clip.bottom,
+            mid: innerHeight / 2,
+            accent: getComputedStyle(root).getPropertyValue('--project-accent').trim(),
+          }
+        : null
+    })
+  }
+  const line = []
+  for (const y of [beatCentres[1], (beatCentres[1] + beatCentres[2]) / 2, beatCentres[4]]) {
+    line.push(await lineAt(Math.round(y)))
+  }
+  if (line.some((s) => !s)) fail('journey line or comet missing')
+  else {
+    const drift = Math.max(...line.map((s) => Math.abs(s.cometY - s.mid)))
+    const gap = Math.max(...line.map((s) => Math.abs(s.litEnd - s.cometY)))
+    if (drift > 2) fail(`comet strays ${drift.toFixed(1)}px from the viewport centre`)
+    else if (gap > 4) fail(`lit line ends ${gap.toFixed(1)}px away from the comet`)
+    else console.log(`ok: comet holds the centre (±${drift.toFixed(1)}px), lit line ends on it (±${gap.toFixed(1)}px)`)
+    if (line[0].accent === line[2].accent) fail(`accent did not change at the handover (${line[0].accent})`)
+    else console.log(`ok: accent hands over ${line[0].accent} -> ${line[2].accent}`)
+  }
+
+  const sides = await page.evaluate(() =>
+    [0, 3, 6].map((i) => document.querySelector(`[data-beat="${i}"]`)?.dataset.side))
+  if (sides.join() !== 'left,right,left') fail(`projects do not alternate lanes (${sides.join()})`)
+  else console.log('ok: projects alternate lanes (left, right, left)')
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+  if (overflow > 0) fail(`journey adds ${overflow}px of horizontal scroll`)
 }
 
 await browser.close()

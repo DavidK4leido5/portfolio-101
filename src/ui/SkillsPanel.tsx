@@ -83,6 +83,10 @@ export function SkillsPanel() {
 
   return (
     <div className="skills-panel">
+      {/* Keyed, so a new category remounts it and replays the CSS roll-in */}
+      <span className="skills-panel__ghost" aria-hidden key={active.id}>
+        {active.label.split(' ')[0]}
+      </span>
       <SkillsRadar
         categories={skills}
         activeId={active.id}

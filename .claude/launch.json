@@ -6,6 +6,18 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev", "--port", "5177"],
       "port": 5177
+    },
+    {
+      "name": "portfolio-dist",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "vite", "preview", "--port", "4173"],
+      "port": 4173
+    },
+    {
+      "name": "portfolio-base",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "vite", "preview", "--outDir", "C:/Users/PROGRA~1/AppData/Local/Temp/claude/C--Users-Programming-Desktop-Projects-Compile-side-projects-portfolio-new/581a8503-9302-4428-8d2b-d7553085b459/scratchpad/base/dist", "--port", "4174"],
+      "port": 4174
     }
   ]
 }

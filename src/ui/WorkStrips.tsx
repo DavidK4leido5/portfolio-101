@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { splitClientWorkGroups, type ClientWorkGroup } from '../content/clientWorks'
+import { clientWorkGroups } from '../content/clientWorks'
 import {
-  experience,
   resolveImage,
   testimonials,
   type ImageSource,
@@ -9,54 +8,39 @@ import {
 } from '../content/portfolio'
 import { Marquee } from './Marquee'
 
-/** Company → role, so each strip group reads as an engagement, not a screenshot dump. */
-const roleByCompany = new Map(experience.map((e) => [e.company, e.role]))
-
-function WorkGroup({ group }: { group: ClientWorkGroup }) {
-  const role = roleByCompany.get(group.label)
-
-  return (
-    <div className="work-group">
-      <div className="work-group__head">
-        <span className="work-group__name">{group.label}</span>
-        {role && <span className="work-group__role">{role}</span>}
-      </div>
-      <div className="work-group__shots">
-        {group.shots.map((w) => (
-          <figure className="client-work__shot" key={w.id}>
-            <img src={w.src} alt="" loading="lazy" decoding="async" draggable={false} />
-          </figure>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 /**
- * Two counter-scrolling rows of client screenshots, grouped by product.
+ * A big-type break between the project index and the timeline: the client
+ * names in giant alternating outline and solid type, each followed by one
+ * small screenshot, running as one CSS marquee.
  *
- * The reveal goes on the strip, never on the shots inside it: those already
- * ride the marquee's own transform, and a second one on the same node fights
- * it.
+ * Decorative: every name and shot here is already on the page as real
+ * content, and the marquee repeats its children to fill the row.
  */
 export function ClientWorkStrip() {
-  const { rowA, rowB } = splitClientWorkGroups()
-  if (rowA.length + rowB.length === 0) return null
+  if (clientWorkGroups.length === 0) return null
 
   return (
     <div className="client-work" data-testid="client-work-marquee" data-reveal>
-      <Marquee direction="rtl" speedPx={28} fill aria-label="Client work screenshots">
-        {rowA.map((g) => (
-          <WorkGroup key={g.key} group={g} />
+      <Marquee direction="rtl" speedPx={60} fill decorative>
+        {clientWorkGroups.map((g, i) => (
+          <div className="type-marquee__item" key={g.key}>
+            <span className={`type-marquee__word${i % 2 ? ' is-solid' : ''}`}>{g.label}</span>
+            {g.shots[0] && (
+              <figure className="client-work__shot">
+                <img
+                  src={g.shots[0].src}
+                  alt=""
+                  width={1024}
+                  height={504}
+                  loading="lazy"
+                  decoding="async"
+                  draggable={false}
+                />
+              </figure>
+            )}
+          </div>
         ))}
       </Marquee>
-      {rowB.length > 0 && (
-        <Marquee direction="ltr" speedPx={24} className="client-work__row--offset" fill decorative>
-          {rowB.map((g) => (
-            <WorkGroup key={g.key} group={g} />
-          ))}
-        </Marquee>
-      )}
     </div>
   )
 }

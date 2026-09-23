@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "build:smoke": "tsc --noEmit && VITE_SMOKE=true vite build",
+    "build": "tsc --noEmit && vite build && pnpm prerender",
+    "build:smoke": "tsc --noEmit && VITE_SMOKE=true vite build && pnpm prerender",
+    "prerender": "vite build --ssr src/prerender.tsx --outDir .ssr && node scripts/prerender.mjs",
     "preview": "vite preview",
     "test": "node tests/smoke.mjs",
     "test:scene": "node tests/scene-visibility-check.mjs",

@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { profile, resolveImage } from '../content/portfolio'
 
+/** First sentence, then the rest of the paragraph. */
+function splitLead(para: string): [string, string] {
+  const m = para.match(/^(.+?[.!?])\s+(.*)$/s)
+  return m ? [m[1], m[2]] : ['', para]
+}
+
 export function AboutPanel() {
   const { about } = profile
   const photo = resolveImage(about.image)
@@ -31,9 +37,18 @@ export function AboutPanel() {
       </header>
 
       <div className="about-panel__body" data-reveal-stagger>
-        {about.body.map((para) => (
-          <p key={para.slice(0, 24)} data-reveal>{para}</p>
-        ))}
+        {about.body.map((para, i) => {
+          // The opening sentence is set at display scale as the section's
+          // statement; it stays part of its paragraph, so it is said once
+          const [lead, rest] = i === 0 ? splitLead(para) : ['', para]
+          return (
+            <p key={para.slice(0, 24)} data-reveal>
+              {lead && <strong className="about-panel__statement">{lead}</strong>}
+              {lead && ' '}
+              {rest}
+            </p>
+          )
+        })}
       </div>
 
       <dl className="about-facts" data-testid="about-facts" data-reveal-stagger>

@@ -421,11 +421,13 @@ export const contact = {
 export const sectionCopy = {
   projects: {
     headline: "Projects",
-    intro: "Six client builds. The full walkthrough runs below this journey.",
+    intro:
+      "Six client builds, from a Manila events venue on Webflow to an LLM product on AWS. Pick one to jump to its chapter.",
   },
   experience: {
     headline: "Experience",
-    intro: "Seven roles, newest first, with the numbers that came out of them.",
+    intro:
+      "Seven full-stack and systems roles since 2021, newest first, with the numbers that came out of them.",
   },
   skills: {
     headline: "Skills",
@@ -434,7 +436,8 @@ export const sectionCopy = {
   },
   about: {
     headline: "About",
-    intro: "Five years keeping systems online. Three shipping product.",
+    intro:
+      "Full-stack engineer in the Philippines. Five years keeping systems online, three shipping React and Node product.",
   },
   contact: {
     headline: "Contact",

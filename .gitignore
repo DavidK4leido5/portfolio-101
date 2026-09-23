@@ -5,3 +5,4 @@ dist
 .pnpm-debug.log
 job-hunt/drafts/
 job-hunt/sent-log.json
+.ssr
