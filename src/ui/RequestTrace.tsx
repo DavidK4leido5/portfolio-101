@@ -5,6 +5,7 @@ import { traceStages, traceOpening, TRACE_COUNT } from '../content/requestTrace'
 import { SECTION_IDS, sections } from '../data/sections'
 import { triggerSectorWave } from '../scene/nodeAnimator'
 import { scrollToBeat } from '../scroll/traceNav'
+import { announceReveal } from '../lib/uiEvents'
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -61,8 +62,10 @@ export function RequestTrace() {
       // An invisible link is a tab trap
       el.toggleAttribute('inert', alpha < 0.5)
       el.setAttribute('aria-hidden', alpha < 0.5 ? 'true' : 'false')
-      if (alpha > 0.5) el.classList.add('is-in')
-      else if (alpha < 0.05) el.classList.remove('is-in')
+      if (alpha > 0.5 && !el.classList.contains('is-in')) {
+        el.classList.add('is-in')
+        announceReveal('stage')
+      } else if (alpha < 0.05) el.classList.remove('is-in')
     })
 
     // The ghost arrives from the edge it is placed against, so each stage's

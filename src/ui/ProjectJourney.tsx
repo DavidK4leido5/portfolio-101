@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { projectStories } from '../content/projects'
 import { toWords } from './textReveal'
+import { announceReveal } from '../lib/uiEvents'
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -239,6 +240,7 @@ export function ProjectJourney() {
       if (storyIndex !== activeRef.current) {
         activeRef.current = storyIndex
         setActive(storyIndex)
+        announceReveal('stage')
       }
 
       /*

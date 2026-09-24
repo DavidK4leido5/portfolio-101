@@ -98,7 +98,7 @@ export function PortfolioUI() {
       )}
 
       <div className="hud bl">
-        THE ADAPTIVE MIND <b>v1.0</b><br />{profile.tagline}
+        THE ADAPTIVE MIND <b>v3.1</b><br />{profile.tagline}
       </div>
 
       {/*

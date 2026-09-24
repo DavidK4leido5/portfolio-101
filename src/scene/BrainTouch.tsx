@@ -15,6 +15,7 @@ import {
   SWARM_BITE,
   SWARM_ENTER,
   SWARM_LEAVE,
+  SWARM_PULSE,
   SWARM_RETREAT,
   SWARM_TOUCH,
 } from '../lib/swarmEvents'
@@ -144,6 +145,7 @@ export function BrainTouchProbe() {
       f.lastPulse = now
       f.travel = 0
       f.gap = PULSE_GAP + Math.random() * PULSE_JITTER
+      dispatchEvent(new Event(SWARM_PULSE))
     }
 
     if (hit) {
