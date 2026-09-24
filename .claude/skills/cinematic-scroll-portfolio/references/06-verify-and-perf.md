@@ -154,3 +154,45 @@ must be equal or better.
   unmount it after ~2s covered. Never run a canvas behind opaque sections.
 - Marquees are CSS keyframes on one track element.
 - Scroll handlers are passive, rAF-throttled, and idle when their element is off screen.
+
+## Headless browser caveats (read before trusting a screenshot)
+
+- **Screenshots lag the page.** Headless Chromium rendering a WebGL scene can manage
+  only a few frames a second, so a screenshot often shows the frame before the state
+  you just caused. Verify state by reading the DOM (`dataset`, `textContent`,
+  computed styles) and use screenshots only for the look.
+- **To capture a transient look, pin it.** Hold the state from inside the page (for
+  example rewrite a uniform every animation frame, or keep toggling an attribute),
+  wait a few seconds, then screenshot.
+- **Timing is stretched.** An intro that takes 5.4s can take 10s headless. Anything
+  keyed to wall-clock guesses looks wrong there and may be wrong on slow phones too.
+  Key big moments to the actual visual state instead.
+- **Canvas pixel analysis: keep the aspect ratio.** When decoding a screenshot into a
+  canvas to count pixels, draw it at its native size. Squashing it into a fixed
+  rectangle, or reading a cropped preview, hides strips at the edges.
+- **Start gates stop tests.** Skip them under `navigator.webdriver`. To test the gate
+  itself, override it in an init script:
+  `Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false })`.
+- **A/B against the previous commit** for performance: `git worktree add --detach
+  <dir> HEAD`, install and build there, serve both builds with `vite preview` on two
+  ports, and run the same frame-time probe on each. On Windows, deleting that worktree
+  can fail with "Filename too long" inside `node_modules`; remove it with PowerShell
+  `Remove-Item -LiteralPath '\?\C:\...' -Recurse -Force`, then `git worktree prune`.
+- **Respect the person's dev server.** If they stop it, test against the production
+  preview instead of restarting theirs.
+
+## Timeline sync check
+
+```js
+for (const b of [0, 0.5, 1.3, 4, 8.7, 17]) {
+  await scrollToBeat(b)
+  const r = await page.evaluate(() => {
+    const c = document.querySelector('.tl-line__comet').getBoundingClientRect()
+    const lit = document.querySelector('.tl-line__clip').getBoundingClientRect()
+    const cy = c.top + c.height / 2
+    return { centre: cy - innerHeight / 2, gap: lit.bottom - cy }
+  })
+  // centre within 2px, gap within 1px, in both the scroll-timeline path and the
+  // forced JS fallback (stub CSS.supports and add animation:none)
+}
+```

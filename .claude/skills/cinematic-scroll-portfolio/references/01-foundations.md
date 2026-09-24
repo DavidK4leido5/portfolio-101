@@ -101,7 +101,9 @@ because rendered width snaps to the pixel grid and a correction loop oscillates.
 ```ts
 const REF_PX = 200
 const STEP = 0.004
-const MAX_STEPS = 4
+// Twelve, not four: at phone sizes the browser rounds every glyph advance, and a
+// long line (an email address, 30 characters) can land 5px over at the solved size
+const MAX_STEPS = 12
 
 export function fitToWidth(el: HTMLElement, targetPx: number, trackingEm: number) {
   if (targetPx <= 0) return
@@ -114,11 +116,22 @@ export function fitToWidth(el: HTMLElement, targetPx: number, trackingEm: number
   if (measured < 1) return
   let size = (REF_PX * targetPx) / measured
   setSize(size)
-  // Overflow is the failure that shows; undershooting 0.4% is invisible
+  // Overflow is the failure that shows; undershooting a fraction is invisible.
+  // Back off by the actual overshoot, never by less than one step.
+  let shrank = false
   for (let step = 0; step < MAX_STEPS; step++) {
-    if (el.getBoundingClientRect().width <= targetPx) break
-    size *= 1 - STEP
+    const width = el.getBoundingClientRect().width
+    if (width <= targetPx) break
+    size *= Math.min(1 - STEP, targetPx / width)
     setSize(size)
+    shrank = true
+  }
+  // The back-off can land a whole rounding step low; climb back while it still fits
+  for (let step = 0; shrank && step < MAX_STEPS; step++) {
+    const up = size / (1 - STEP)
+    setSize(up)
+    if (el.getBoundingClientRect().width > targetPx) { setSize(size); break }
+    size = up
   }
 }
 
@@ -164,6 +177,9 @@ Markup and CSS for a fitted line:
 ```
 
 Rules:
+- Some sizes cannot be hit exactly: at 20.4px vs 20.5px a long line's width can jump
+  5% because of glyph rounding. The loop above never overflows and gets as close as
+  the renderer allows. Accept a line that sits a few percent short on one phone width.
 - The fitted element must be one unbroken text run with `white-space: nowrap`.
   An inline child span (a coloured trailing dot) is fine.
 - Run the fit after the reveal system arms (see below). If a hidden state adds a

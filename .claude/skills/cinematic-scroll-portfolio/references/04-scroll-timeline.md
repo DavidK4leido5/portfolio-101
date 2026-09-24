@@ -18,9 +18,16 @@ lane, puts the line in the left gutter, and pins the deck in a 44dvh band at the
 
 - One rAF-throttled scroll listener. It returns immediately while an
   IntersectionObserver says the timeline is off screen.
-- Per frame it writes only: `transform` on the comet and on two line wrappers,
-  `opacity` and `transform` on rows and words of beats within 1.4 beats of the
-  center, and `transform`/`opacity` on the current project's cards.
+- Per frame it writes only `opacity` and `transform` on rows and words of beats
+  within 1.4 beats of the center, and `transform`/`opacity` on the current
+  project's cards.
+- **The comet and the lit line are never written per frame** where the browser has
+  scroll timelines. The comet's height is a sticky pin, and the lit line and the
+  comet's swing are CSS animations bound to the scroll (see "Comet and lit line"
+  below). A scroll handler always runs a frame behind a natively scrolling page, so
+  anything that must stay locked to the scroll (a comet on the viewport centre, the
+  tip of a line) visibly staggers if JS moves it. This is worst on phones, where
+  scrolling runs on another thread and scroll events arrive less often.
 - Layout is read in `measure()` only, on resize and on body `ResizeObserver`.
 - The line scrolls with the page natively (it spans the full timeline height), so
   moving it costs nothing. Only its lit half is written per frame.
@@ -57,7 +64,11 @@ split into spans for the per-word resolve, **without** a duplicate `sr-only` cop
     </div></div>
     <!-- one per story -->
     <span class="tl-line__node" data-node="0" style="color:#e8b86b"><span class="tl-line__label">Aug 2026</span></span>
-    <span class="tl-line__comet"></span>
+    <!-- Track from the first beat to the last; the pin is sticky at the viewport
+         centre, so the browser holds the comet there, not a handler -->
+    <div class="tl-line__track">
+      <div class="tl-line__pin"><span class="tl-line__comet"></span></div>
+    </div>
   </div>
 
   <div class="tl-grid">
@@ -123,9 +134,11 @@ Card image `src` is set by the engine only for the active story and its neighbou
 .tl-line path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .tl-line__base path { stroke: rgba(255,255,255,.12); stroke-width: 1; stroke-dasharray: 2 7; }
 .tl-line path.tl-line__glow { stroke-width: 12; opacity: .16; }   /* glow without a filter */
-.tl-line__clip, .tl-line__clip-inner { position: absolute; inset: 0; will-change: transform; }
+.tl-line__clip, .tl-line__clip-inner { position: absolute; inset: 0; will-change: transform, translate; }
 .tl-line__clip { overflow: hidden; }
-.tl-line__comet { position: absolute; top: 0; left: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+.tl-line__track { position: absolute; left: 0; right: 0; top: var(--tl-y0, 0px); height: var(--tl-span, 0px); }
+.tl-line__pin { position: sticky; top: 50vh; top: 50dvh; height: 0; }
+.tl-line__comet { position: absolute; top: 0; left: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px;
   border-radius: 50%; background: #fff; will-change: transform;
   box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 28%, transparent),
               0 0 28px 8px color-mix(in srgb, currentColor 55%, transparent); }
@@ -249,6 +262,8 @@ export function createTimeline(root: HTMLElement, stories: { accent: string; tit
   const caption = root.querySelector<HTMLElement>('.tl-caption__name')!
   const cards = [...root.querySelectorAll<HTMLElement>('[data-shot]')]
   const total = stories.length * BEATS
+  // Where scroll timelines exist, CSS drives the lit line and the swing (below)
+  const cssDriven = typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()')
   const lit = nodes.map(() => false)
 
   let vh = innerHeight, first = 0, pitch = vh, top = 0, lw = 0, lh = 0, swing = 0
@@ -286,6 +301,10 @@ export function createTimeline(root: HTMLElement, stories: { accent: string; tit
     for (const s of svgs) s.setAttribute('viewBox', `0 0 ${lw} ${lh}`)
     for (const p of paths) p.setAttribute('d', d)
     nodes.forEach((n, i) => { n.style.transform = `translate3d(0, ${(y0 + i * BEATS * pitch).toFixed(1)}px, 0)` })
+    // The comet's track and swing, for the sticky pin and the CSS swing keyframes
+    root.style.setProperty('--tl-y0', `${y0.toFixed(1)}px`)
+    root.style.setProperty('--tl-span', `${(y1 - y0).toFixed(1)}px`)
+    root.style.setProperty('--tl-swing', `${swing.toFixed(1)}px`)
   }
 
   function handover(si: number) {
@@ -306,12 +325,16 @@ export function createTimeline(root: HTMLElement, stories: { accent: string; tit
     const si = Math.min(stories.length - 1, Math.floor(Math.round(pos) / BEATS))
     if (si !== active) handover(si)
 
-    // Lit line: wrapper up, inner back down, so the lit copy ends exactly at the tip.
-    // A dash offset drifts off the comet on a curve; a clip-path repaints every frame.
+    // Fallback only (no scroll timelines, e.g. Firefox). Lit line: wrapper up, inner
+    // back down, so the lit copy ends exactly at the tip. A dash offset drifts off the
+    // comet on a curve; a clip-path repaints every frame. The comet's height is the
+    // sticky pin in every browser; here JS only adds its sideways swing.
     const tip = first - top + (reduced ? total - 1 : pos) * pitch
-    clip.style.transform = `translate3d(0, ${(tip - lh).toFixed(1)}px, 0)`
-    clipInner.style.transform = `translate3d(0, ${(lh - tip).toFixed(1)}px, 0)`
-    comet.style.transform = `translate3d(${xAt(tip).toFixed(1)}px, ${tip.toFixed(1)}px, 0)`
+    if (!cssDriven) {
+      clip.style.transform = `translate3d(0, ${(tip - lh).toFixed(1)}px, 0)`
+      clipInner.style.transform = `translate3d(0, ${(lh - tip).toFixed(1)}px, 0)`
+      if (swing) comet.style.transform = `translate3d(${(xAt(tip) - lw / 2).toFixed(1)}px, 0, 0)`
+    }
     nodes.forEach((n, i) => {
       const on = reduced || pos >= i * BEATS - 0.02
       if (on !== lit[i]) { lit[i] = on; n.classList.toggle('is-lit', on) }
@@ -406,6 +429,60 @@ export function createTimeline(root: HTMLElement, stories: { accent: string; tit
 }
 ```
 
+## Comet and lit line on the scroll itself
+
+Add this CSS. It binds the lit line to the timeline's own scroll range and the
+comet's swing to the track's, so both run on the compositor in lockstep with the
+scroll. Derivation for the lit line: across the root's `cover` range, the viewport
+centre in the line's own coordinates runs from `-50vh` to `H + 50vh`, where H is
+the line's height (`100%` in `translate` terms), and the wrapper sits at
+`centre - H`.
+
+```css
+@supports (animation-timeline: view()) {
+  .tl { view-timeline-name: --tl; }
+  .tl-line__clip { animation: tl-lit linear both; animation-timeline: --tl; }
+  .tl-line__clip-inner { animation: tl-lit-inner linear both; animation-timeline: --tl; }
+  .tl-line__track { view-timeline-name: --tl-track; }
+  /* 0 when the track's top reaches the centre, 1 when its bottom does */
+  .tl-line__comet {
+    animation: tl-swing linear both;
+    animation-timeline: --tl-track;
+    animation-range: cover 50vh cover calc(100% - 50vh);
+    animation-range: cover 50dvh cover calc(100% - 50dvh);
+  }
+}
+@keyframes tl-lit { from { translate: 0 calc(-100% - 50dvh); } to { translate: 0 50dvh; } }
+@keyframes tl-lit-inner { from { translate: 0 calc(100% + 50dvh); } to { translate: 0 -50dvh; } }
+@media (prefers-reduced-motion: reduce) {
+  .tl-line__clip, .tl-line__clip-inner, .tl-line__comet { animation: none; translate: none; }
+}
+```
+
+The swing keyframes follow the path's own sine, one extreme per beat, sampled every
+quarter period. Easing out into each extreme and in to each crossing is close
+enough to a sine that the comet stays on the line. Generate them once from the beat
+count and render them in a `<style>` tag next to the timeline:
+
+```ts
+function swingKeyframes(beats: number): string {
+  const quarters = Math.max(1, (beats - 1) * 2)
+  const out: string[] = []
+  for (let i = 0; i <= quarters; i++) {
+    const phase = i % 4
+    const x = phase === 1 ? 1 : phase === 3 ? -1 : 0
+    const ease = x === 0 ? 'cubic-bezier(0.61, 1, 0.88, 1)' : 'cubic-bezier(0.12, 0, 0.39, 0)'
+    out.push(`${((i / quarters) * 100).toFixed(4)}% { translate: calc(var(--tl-swing, 0px) * ${x}) 0; animation-timing-function: ${ease}; }`)
+  }
+  return `@keyframes tl-swing { ${out.join(' ')} }`
+}
+```
+
+Check it: at eight scroll positions the comet's centre must sit within 2px of the
+viewport centre, the lit edge within 1px of the comet, and the swing must match the
+JS `xAt` values. Test the fallback by stubbing `CSS.supports` to return false for
+`animation-timeline` and adding `animation: none` to the three elements.
+
 If you use React: render the markup from data, memoise the copy column (hundreds of
 word spans), call `createTimeline` in one `useEffect` with no dependency on the active
 index, and let the engine own every class and style it writes. Never re-render the
@@ -422,3 +499,5 @@ copy on a handover.
 | Words never resolve after load | Offsets cached before titles fitted / images loaded | Body `ResizeObserver` re-measure |
 | Sticky stage does not stick | An ancestor has `overflow: hidden` | Use `overflow: clip` |
 | Janky on phones | `filter: blur()` per frame on big bitmaps | Disable blur below desktop |
+| Comet staggers or jitters while scrolling, worst on phones | JS moves it on the next frame while the page scrolls natively | Sticky pin for its height, scroll timelines for the lit line and swing, JS only as a fallback |
+| Far nav jumps take seconds and replay every beat | Smooth-scrolling the whole 20-viewport journey | `glideTo`: jump to one viewport short, then smooth-scroll (03-section-patterns.md) |

@@ -175,3 +175,28 @@ const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/
 check(ld.some((d) => d['@type'] === 'ItemList'), 'ItemList JSON-LD present')
 if (fails.length) process.exit(1)
 ```
+
+## Lessons from shipping it
+
+- **Prerender the hero's own copy, not just a name.** If the hero is a WebGL scene
+  with scroll-driven copy (story stages), render those stages into the static hero as
+  real `h2`s with their ledes. Put the keyword first ("Interface layer: what the
+  person touches") and show it visibly as a small label above the line in the live
+  page, so the static and live pages say the same thing.
+- **One text run per heading.** React puts `<!-- -->` between adjacent JSX text
+  nodes: `<h2>{title} layer: {headline}</h2>` renders as three runs. Harmless to
+  crawlers but it breaks exact-match checks. Use one template string:
+  `<h2>{`${title} layer: ${headline}`}</h2>`.
+- **A missing optional image must resolve to nothing.** An image helper that falls
+  back to the raw source path when the file is not in the bundle ships a request that
+  404s in production and a broken image in the prerendered page. Return `''` and let
+  the component show its placeholder (initials, a solid block).
+- **Every `<img>` gets `width`, `height` and real `alt`**, including avatars and
+  marquee copies. The audit check is "zero images without dimensions in the
+  prerendered HTML".
+- **The h1 names the person or product.** If the brand mark holds the h1, move the
+  h1 to the name line and keep the brand text as a plain span. Only one h1 exists at a
+  time: the prerendered hero's h1 is replaced when the app mounts.
+- **Gate buttons and loaders are client-only.** The prerendered page must read
+  correctly with JS off: the hero heading, every section heading, every chapter's
+  copy. Hidden-until-revealed states hang off `html.reveal-armed`, which only JS adds.
