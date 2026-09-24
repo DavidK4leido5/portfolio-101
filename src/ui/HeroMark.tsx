@@ -48,9 +48,10 @@ const SUB = 'ENGINEER'
 const LAYOUT = {
   desktop: { measure: 0.76, top: 96, bottom: 224 },
   tablet: { measure: 0.72, top: 96, bottom: 216 },
-  // Mobile's band is deliberately lopsided: the brain sits low in a portrait
-  // frame, and the block has to sit on it rather than above it
-  mobile: { measure: 0.62, top: 248, bottom: 210 },
+  // On a phone the brain is too small to fill the words at any legible size,
+  // so they are set for reading instead: wide, and with the pair centred on
+  // the viewport (the band carries the ENGINEER line 30px below it)
+  mobile: { measure: 0.84, top: 150, bottom: 120 },
 } as const
 /**
  * Gap between one line's baseline and the next line's cap top, as a share of
@@ -300,10 +301,12 @@ export function HeroMark() {
     }
 
     const firstBaseline = frame.top + (band - plan.height) / 2 + plan.caps[0]
-    const x = String(size.w / 2)
 
     lines.forEach((line, i) => {
       const y = String(firstBaseline + plan.offsets[i])
+      // The advance carries the tracking after the last glyph too, so the ink
+      // sits half of it off centre; tight tracking pushed the words right
+      const x = String(size.w / 2 + (TRACKING * parseFloat(line.stroke!.style.fontSize)) / 2)
       for (const node of [line.mask, line.stroke]) {
         node!.setAttribute('y', y)
         node!.setAttribute('x', x)
