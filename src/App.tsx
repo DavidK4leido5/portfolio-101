@@ -10,6 +10,8 @@ import { detectTier } from './lib/quality'
 import { Cursor } from './ui/Cursor'
 import { ScrollProgress } from './ui/ScrollProgress'
 import { SwarmHint } from './ui/SwarmHint'
+import { Soundscape } from './audio/Soundscape'
+import { SoundToggle } from './audio/SoundToggle'
 
 export default function App() {
   const sceneReady = useSceneStore((s) => s.sceneReady)
@@ -41,8 +43,13 @@ export default function App() {
     return () => { clearTimeout(to); removeEventListener('resize', onResize) }
   }, [])
 
+  /*
+   * The intro starts from the loading screen's button, which is also the
+   * gesture the browser needs before it allows sound. Automated browsers
+   * have no one to press it, so under test the intro starts on its own.
+   */
   useEffect(() => {
-    if (!sceneReady || loadPhase !== 'loading') return
+    if (!sceneReady || loadPhase !== 'loading' || !navigator.webdriver) return
     const t = setTimeout(() => useSceneStore.getState().startIntro(), 1500)
     return () => clearTimeout(t)
   }, [sceneReady, loadPhase])
@@ -77,6 +84,8 @@ export default function App() {
       <PortfolioUI />
       <SwarmHint />
       <ScrollProgress />
+      <Soundscape />
+      <SoundToggle />
       <Cursor />
     </div>
   )

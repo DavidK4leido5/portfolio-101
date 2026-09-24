@@ -47,6 +47,10 @@ export const uniforms = {
   uPulse: { value: Array.from({ length: PULSE_SLOTS }, () => new Vector4(0, 0, 0, -1)) },
   // Swarm reactions to a click on the cloud
   uRipple: { value: Array.from({ length: RIPPLE_SLOTS }, () => new Vector4(0, 0, 0, -1)) },
+  // A raid on the cursor: xyz = where the pointer was when it began, w = uTime
+  // it began (-1 = none); the target is the cursor now, chased each frame
+  uAttack: { value: new Vector4(0, 0, 0, -1) },
+  uAttackTarget: { value: new Vector3() },
   // Camera forward in cluster space, so the swarm reacts across the screen
   uViewDir: { value: new Vector3(0, 0, -1) },
   uDim: { value: 0 },

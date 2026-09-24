@@ -15,6 +15,8 @@
  */
 
 /** Everything the one-shot reveal drives. `data-wipe` is the image variant. */
+import { announceReveal } from '../lib/uiEvents'
+
 export const REVEAL_SELECTOR = '[data-reveal],[data-wipe]'
 
 /**
@@ -103,6 +105,8 @@ export function observeReveal(root: ParentNode, selector = '[data-reveal]'): () 
       for (const entry of entries) {
         if (!entry.isIntersecting) continue
         entry.target.classList.add('is-in')
+        // Section titles are a moment; everything else is a detail arriving
+        announceReveal(entry.target.matches('.spine-title__mask') ? 'title' : 'item')
         for (const wipe of entry.target.querySelectorAll(WIPE)) {
           wipe.classList.add('is-in')
         }

@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { projectStories } from '../content/projects'
 import { toWords } from './textReveal'
+import { announceReveal } from '../lib/uiEvents'
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -48,6 +49,36 @@ const NEAR_RANGE = 1.4
 /** Swing of the journey line, as a share of its column, capped in px. */
 const LINE_SWING = 0.3
 const LINE_SWING_MAX = 56
+
+/**
+ * Whether the browser can drive the lit line and the comet's swing from the
+ * scroll position itself. Where it can, those run on the compositor in step
+ * with the scroll and the scroll handler never touches them; a handler a
+ * frame behind a natively scrolling line is what made the comet stagger.
+ */
+const scrollDriven = () =>
+  typeof CSS !== 'undefined' && CSS.supports('animation-timeline: view()')
+
+/**
+ * Keyframes for the comet's swing: the path's own sine, one extreme per beat,
+ * sampled at every quarter period. Easing out into each extreme and back in
+ * to each crossing is close enough to a sine that the comet stays on the line.
+ */
+function swingKeyframes(beats: number): string {
+  const quarters = Math.max(1, (beats - 1) * 2)
+  const out: string[] = []
+  for (let i = 0; i <= quarters; i++) {
+    const phase = i % 4
+    const x = phase === 1 ? 1 : phase === 3 ? -1 : 0
+    // Leaving a crossing it decelerates into the extreme; leaving an extreme
+    // it accelerates back through the middle
+    const ease = x === 0 ? 'cubic-bezier(0.61, 1, 0.88, 1)' : 'cubic-bezier(0.12, 0, 0.39, 0)'
+    out.push(
+      `${((i / quarters) * 100).toFixed(4)}% { translate: calc(var(--tl-swing, 0px) * ${x}) 0; animation-timing-function: ${ease}; }`,
+    )
+  }
+  return `@keyframes journey-comet-swing { ${out.join(' ')} }`
+}
 
 type BeatEl = {
   el: HTMLElement
@@ -104,6 +135,7 @@ export function ProjectJourney() {
     const clip = line.querySelector<HTMLElement>('.journey-line__clip')
     const clipInner = line.querySelector<HTMLElement>('.journey-line__clip-inner')
     const comet = line.querySelector<HTMLElement>('.journey-line__comet')
+    const cssDriven = scrollDriven()
     const nodes = [...line.querySelectorAll<HTMLElement>('[data-node]')]
     const lit = nodes.map(() => false)
 
@@ -183,6 +215,11 @@ export function ProjectJourney() {
       nodes.forEach((node, i) => {
         node.style.transform = `translate3d(0, ${(y0 + i * BEATS_PER_PROJECT * pitch).toFixed(1)}px, 0)`
       })
+      // The comet's track spans the first beat to the last; its sticky pin
+      // holds it at the viewport centre across exactly that stretch
+      root.style.setProperty('--tl-y0', `${y0.toFixed(1)}px`)
+      root.style.setProperty('--tl-span', `${(y1 - y0).toFixed(1)}px`)
+      root.style.setProperty('--tl-swing', `${swing.toFixed(1)}px`)
     }
 
     const apply = () => {
@@ -203,6 +240,7 @@ export function ProjectJourney() {
       if (storyIndex !== activeRef.current) {
         activeRef.current = storyIndex
         setActive(storyIndex)
+        announceReveal('stage')
       }
 
       /*
@@ -212,12 +250,19 @@ export function ProjectJourney() {
        * offset would drift off the comet (arc length is not linear in y on a
        * curve) and a clip-path would repaint the column every frame.
        */
+      /*
+       * Fallback only. Where scroll timelines exist the CSS drives the lit
+       * line and the swing, and the comet's height is a sticky pin, so none
+       * of the three waits on this handler.
+       */
       const tip = firstCentre - rootTop + (reduced ? total - 1 : pos) * pitch
-      if (clip && clipInner) {
+      if (!cssDriven && clip && clipInner) {
         clip.style.transform = `translate3d(0, ${(tip - lineH).toFixed(1)}px, 0)`
         clipInner.style.transform = `translate3d(0, ${(lineH - tip).toFixed(1)}px, 0)`
       }
-      if (comet) comet.style.transform = `translate3d(${xAt(tip).toFixed(1)}px, ${tip.toFixed(1)}px, 0)`
+      if (!cssDriven && comet && swing) {
+        comet.style.transform = `translate3d(${(xAt(tip) - lineW / 2).toFixed(1)}px, 0, 0)`
+      }
       nodes.forEach((node, i) => {
         const on = reduced || pos >= i * BEATS_PER_PROJECT - 0.02
         if (on !== lit[i]) {
@@ -597,6 +642,7 @@ export function ProjectJourney() {
         The line spans the whole journey and scrolls with the page, so moving
         it costs nothing; only the lit copy and the comet are written per frame.
       */}
+      <style>{swingKeyframes(total)}</style>
       <div className="journey-line" ref={lineRef} aria-hidden>
         <svg className="journey-line__base">
           <path />
@@ -619,7 +665,14 @@ export function ProjectJourney() {
             <span className="journey-line__node-label">{s.period.split(' - ')[0]}</span>
           </span>
         ))}
-        <span className="journey-line__comet" />
+        {/* Track from the first beat to the last; the pin inside it is
+            sticky at the viewport centre, so the browser holds the comet on
+            the scroll itself rather than a handler chasing it */}
+        <div className="journey-line__track">
+          <div className="journey-line__pin">
+            <span className="journey-line__comet" />
+          </div>
+        </div>
       </div>
 
       <div className="project-journey__grid">

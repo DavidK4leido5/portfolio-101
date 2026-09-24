@@ -1645,19 +1645,36 @@ canvas { display: block; }
   position: absolute;
   inset: 0;
   overflow: hidden;
-  will-change: transform;
+  will-change: transform, translate;
 }
 
 .journey-line__clip-inner {
   position: absolute;
   inset: 0;
-  will-change: transform;
+  will-change: transform, translate;
+}
+
+/* The comet's track: first beat to last. Sized from the engine's measure */
+.journey-line__track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--tl-y0, 0px);
+  height: var(--tl-span, 0px);
+}
+
+/* Held at the viewport centre by the browser across the whole track */
+.journey-line__pin {
+  position: sticky;
+  top: 50vh;
+  top: 50dvh;
+  height: 0;
 }
 
 .journey-line__comet {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
   width: 14px;
   height: 14px;
   margin: -7px 0 0 -7px;
@@ -3853,4 +3870,341 @@ html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="
 
 .cursor[data-felt] .cursor__hint-line {
   color: var(--cursor-accent);
+}
+
+/* ==== The cursor under attack ====
+   Chunks bitten out of the ring (a conic mask with gaps, set from Cursor.tsx),
+   a red/cyan split on every bite, a stepped jitter, and the cursor shouting. */
+.cursor__shape {
+  -webkit-mask: var(--bites, none);
+  mask: var(--bites, none);
+}
+
+.cursor[data-attacked] .cursor__shape {
+  border-color: #ff4d6d;
+  background: color-mix(in srgb, #ff4d6d 10%, transparent);
+}
+
+/* Two offset copies of the ring, cut into slices that shift on each bite */
+.cursor__shape::before,
+.cursor__shape::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cursor__shape {
+  position: relative;
+}
+
+.cursor[data-hurt] .cursor__shape::before {
+  border-color: rgba(255, 40, 90, 0.95);
+  opacity: 1;
+  animation: cursor-slice-a 0.3s steps(3) both;
+}
+
+.cursor[data-hurt] .cursor__shape::after {
+  border-color: rgba(40, 230, 255, 0.9);
+  opacity: 1;
+  animation: cursor-slice-b 0.3s steps(3) both;
+}
+
+.cursor[data-hurt] .cursor__shape {
+  animation: cursor-jolt 0.3s steps(4) both;
+}
+
+.cursor[data-hurt] .cursor__dot {
+  box-shadow: 3px 0 0 rgba(255, 40, 90, 0.95), -3px 0 0 rgba(40, 230, 255, 0.9);
+  animation: cursor-jolt 0.3s steps(4) both;
+}
+
+@keyframes cursor-jolt {
+  0% { translate: 3px -2px; }
+  25% { translate: -4px 1px; }
+  50% { translate: 2px 3px; }
+  75% { translate: -2px -3px; }
+  100% { translate: 0 0; }
+}
+
+@keyframes cursor-slice-a {
+  0% { translate: 4px 0; clip-path: inset(0 0 62% 0); }
+  33% { translate: -3px 0; clip-path: inset(40% 0 22% 0); }
+  66% { translate: 5px 0; clip-path: inset(70% 0 0 0); }
+  100% { translate: 0 0; clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes cursor-slice-b {
+  0% { translate: -4px 0; clip-path: inset(55% 0 10% 0); }
+  33% { translate: 3px 0; clip-path: inset(10% 0 60% 0); }
+  66% { translate: -5px 0; clip-path: inset(30% 0 45% 0); }
+  100% { translate: 0 0; clip-path: inset(100% 0 0 0); }
+}
+
+/* While it is being bitten the words show wherever the cursor has run to */
+.cursor[data-attacked] .cursor__hint {
+  opacity: 1;
+  translate: 0 -50%;
+}
+
+.cursor[data-attacked] .cursor__hint-line {
+  font-size: 11px;
+  color: #ff4d6d;
+  text-shadow: 1.5px 0 rgba(40, 230, 255, 0.85), -1.5px 0 rgba(255, 40, 90, 0.85);
+  animation: cursor-shout 0.34s steps(3) infinite;
+}
+
+@keyframes cursor-shout {
+  0% { translate: 0 0; }
+  33% { translate: 1px -1px; }
+  66% { translate: -1px 1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor[data-hurt] .cursor__shape,
+  .cursor[data-hurt] .cursor__dot,
+  .cursor[data-hurt] .cursor__shape::before,
+  .cursor[data-hurt] .cursor__shape::after,
+  .cursor[data-attacked] .cursor__hint-line {
+    animation: none;
+  }
+}
+
+/* ==== Timeline on the scroll itself ====
+   Where the browser has scroll timelines, the lit half of the line and the
+   comet's swing are animations bound to the scroll position, so they run on
+   the compositor in lockstep with it. ProjectJourney.tsx leaves them alone
+   in that case and only drives them itself as a fallback. */
+@supports (animation-timeline: view()) {
+  .project-journey {
+    view-timeline-name: --journey;
+  }
+
+  /* Across the journey's cover range the viewport centre runs from half a
+     viewport above the line to half a viewport past its end. The wrapper
+     rides up by (centre - height) and the inner copy back down by as much,
+     so the lit part always ends at the centre */
+  .journey-line__clip {
+    animation: journey-lit linear both;
+    animation-timeline: --journey;
+  }
+
+  .journey-line__clip-inner {
+    animation: journey-lit-inner linear both;
+    animation-timeline: --journey;
+  }
+
+  .journey-line__track {
+    view-timeline-name: --journey-track;
+  }
+
+  /* 0 when the track's top reaches the centre, 1 when its bottom does */
+  .journey-line__comet {
+    animation: journey-comet-swing linear both;
+    animation-timeline: --journey-track;
+    animation-range: cover 50vh cover calc(100% - 50vh);
+    animation-range: cover 50dvh cover calc(100% - 50dvh);
+  }
+}
+
+@keyframes journey-lit {
+  from { translate: 0 calc(-100% - 50dvh); }
+  to { translate: 0 50dvh; }
+}
+
+@keyframes journey-lit-inner {
+  from { translate: 0 calc(100% + 50dvh); }
+  to { translate: 0 -50dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-line__clip,
+  .journey-line__clip-inner,
+  .journey-line__comet {
+    animation: none;
+    translate: none;
+  }
+}
+
+/* ==== Sound toggle ====
+   Always on screen, above the loader too, so sound can be turned on before
+   the intro lands. Bars move while sound is playing. */
+.sound-toggle {
+  position: fixed;
+  right: clamp(16px, 2vw, 26px);
+  bottom: 22px;
+  z-index: 120;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 8px 10px;
+  font: 9.5px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.55);
+  background: rgba(5, 5, 10, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  backdrop-filter: none;
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  outline: none;
+}
+
+.sound-toggle__bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.sound-toggle__bars i {
+  width: 2px;
+  height: 100%;
+  background: currentColor;
+  transform-origin: 50% 100%;
+  scale: 1 0.25;
+  transition: scale 0.4s var(--ease-soft);
+}
+
+.sound-toggle[data-state="on"] {
+  color: rgba(245, 245, 255, 0.85);
+}
+
+.sound-toggle[data-state="on"] .sound-toggle__bars i {
+  background: var(--accent);
+  animation: sound-bar 1.1s ease-in-out infinite;
+}
+
+.sound-toggle[data-state="on"] .sound-toggle__bars i:nth-child(2) { animation-delay: -0.35s; }
+.sound-toggle[data-state="on"] .sound-toggle__bars i:nth-child(3) { animation-delay: -0.7s; }
+.sound-toggle[data-state="on"] .sound-toggle__bars i:nth-child(4) { animation-delay: -0.15s; }
+
+@keyframes sound-bar {
+  0%, 100% { scale: 1 0.3; }
+  50% { scale: 1 1; }
+}
+
+/* On, but held by the browser until a first gesture: a slow pulse invites it */
+.sound-toggle[data-state="waiting"] {
+  animation: sound-invite 2.4s ease-in-out infinite;
+}
+
+@keyframes sound-invite {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.1); }
+  50% { border-color: color-mix(in srgb, var(--accent) 65%, transparent); }
+}
+
+.sound-toggle[data-state="muted"] .sound-toggle__bars i {
+  scale: 1 0.18;
+}
+
+/* Phones: top right, clear of the brand and the section nav bar */
+@media (max-width: 768px) {
+  .sound-toggle {
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    bottom: auto;
+    right: 14px;
+    padding: 7px 10px 7px 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-toggle[data-state="on"] .sound-toggle__bars i,
+  .sound-toggle[data-state="waiting"] {
+    animation: none;
+  }
+}
+
+/* ==== Loader gate ====
+   The way in once the surface is mapped. The press doubles as the gesture
+   browsers need before they allow sound, so the intro plays with it. */
+.loader-gate {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 34px;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition:
+    opacity 0.7s var(--ease-soft),
+    transform 0.9s var(--ease-osmo);
+}
+
+.loader-gate[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.loader-wake {
+  padding: 14px 26px;
+  font: 11px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #fff;
+  background: color-mix(in srgb, var(--accent) 16%, rgba(5, 5, 10, 0.6));
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 0 32px color-mix(in srgb, var(--accent) 30%, transparent);
+  cursor: pointer;
+  animation: loader-wake 2.6s ease-in-out infinite;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.loader-wake:hover,
+.loader-wake:focus-visible {
+  background: color-mix(in srgb, var(--accent) 32%, rgba(5, 5, 10, 0.6));
+  box-shadow: 0 0 48px color-mix(in srgb, var(--accent) 50%, transparent);
+  outline: none;
+}
+
+@keyframes loader-wake {
+  0%, 100% { box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 22%, transparent); }
+  50% { box-shadow: 0 0 44px color-mix(in srgb, var(--accent) 48%, transparent); }
+}
+
+.loader-note {
+  font: 9px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.42);
+}
+
+.loader-silent {
+  padding: 6px 10px;
+  font: 9px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(235, 235, 255, 0.35);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.loader-silent:hover,
+.loader-silent:focus-visible {
+  color: rgba(245, 245, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-wake { animation: none; }
+}
+
+/* The gate carries the sound choice while loading; the toggle waits */
+.app-root[data-load-phase="loading"] .sound-toggle {
+  opacity: 0;
+  pointer-events: none;
 }

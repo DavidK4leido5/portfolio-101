@@ -1,11 +1,25 @@
 import { useEffect, useRef } from 'react'
-import { SWARM_ENTER, SWARM_LEAVE, SWARM_TOUCH } from '../lib/swarmEvents'
+import {
+  SWARM_ATTACK,
+  SWARM_BITE,
+  SWARM_ENTER,
+  SWARM_LEAVE,
+  SWARM_RETREAT,
+  SWARM_TOUCH,
+} from '../lib/swarmEvents'
 
 /** What the cursor says while it is over the particle cloud. */
 const DARE = ["Don't touch.", 'The swarm is alive.'] as const
 const FELT = 'It felt that.'
 /** How long the answer to a touch stays before the dare comes back. */
 const FELT_MS = 2800
+
+/** What the cursor shouts while the swarm is biting it. */
+const HURT = ['Ouch!', 'Hey!', 'Ahhh!', 'Run.', 'It bites!', 'Stop that.', 'Not the cursor!']
+/** Most chunks the ring can lose before it stops losing more. */
+const MAX_BITES = 7
+/** Gap between chunks growing back once the swarm falls back, ms. */
+const HEAL_MS = 260
 
 /** Anything the ring should open up for. */
 const INTERACTIVE = 'a, button, [role="button"], label, summary, input[type="range"], [data-cursor]'
@@ -69,6 +83,7 @@ export function Cursor() {
     const dot = root.querySelector<HTMLElement>('.cursor__dot')!
     const ring = root.querySelector<HTMLElement>('.cursor__ring')!
     const label = root.querySelector<HTMLElement>('.cursor__label')!
+    const shape = root.querySelector<HTMLElement>('.cursor__shape')!
     const hintLine = root.querySelector<HTMLElement>('.cursor__hint-line')!
     const hintSub = root.querySelector<HTMLElement>('.cursor__hint-sub')!
     document.documentElement.classList.add('has-cursor')
@@ -147,9 +162,82 @@ export function Cursor() {
       hintSub.textContent = DARE[1]
       root.removeAttribute('data-felt')
     }
+    /*
+     * Being eaten. Each bite takes a chunk out of the ring (a gap in a conic
+     * mask), flashes a red/cyan split and a jitter, and the cursor says so.
+     * The chunks grow back one at a time after the swarm falls back. Every
+     * state also times itself out, in case the scene stops mid-raid.
+     */
+    const bites: { at: number; size: number }[] = []
+    let hurtTo: ReturnType<typeof setTimeout>
+    let attackTo: ReturnType<typeof setTimeout>
+    let healTo: ReturnType<typeof setTimeout>
+    let lastWord = ''
+    const paintBites = () => {
+      if (!bites.length) {
+        shape.style.removeProperty('--bites')
+        return
+      }
+      const gaps = [...bites].sort((a, b) => a.at - b.at)
+      let at = 0
+      const stops: string[] = []
+      for (const g of gaps) {
+        const from = Math.max(at, g.at)
+        stops.push(`#000 ${at}deg ${from}deg`, `transparent ${from}deg ${from + g.size}deg`)
+        at = from + g.size
+      }
+      stops.push(`#000 ${at}deg 360deg`)
+      shape.style.setProperty('--bites', `conic-gradient(${stops.join(', ')})`)
+    }
+    const shout = () => {
+      let word = lastWord
+      while (word === lastWord) word = HURT[Math.floor(Math.random() * HURT.length)]
+      lastWord = word
+      hintLine.textContent = word
+      hintSub.textContent = ''
+    }
+    const heal = () => {
+      clearTimeout(healTo)
+      if (!bites.length) return
+      bites.shift()
+      paintBites()
+      healTo = setTimeout(heal, HEAL_MS)
+    }
+    const endAttack = () => {
+      root.removeAttribute('data-attacked')
+      root.removeAttribute('data-hurt')
+      dare()
+      heal()
+    }
+    const onAttack = () => {
+      clearTimeout(healTo)
+      root.toggleAttribute('data-attacked', true)
+      shout()
+      clearTimeout(attackTo)
+      attackTo = setTimeout(endAttack, 3500)
+    }
+    const onBite = () => {
+      if (!root.hasAttribute('data-attacked')) onAttack()
+      if (bites.length < MAX_BITES) {
+        bites.push({ at: Math.random() * 340, size: 14 + Math.random() * 26 })
+        paintBites()
+      }
+      // Restart the flash: drop the attribute and set it again next frame
+      root.removeAttribute('data-hurt')
+      requestAnimationFrame(() => root.toggleAttribute('data-hurt', true))
+      clearTimeout(hurtTo)
+      hurtTo = setTimeout(() => root.removeAttribute('data-hurt'), 320)
+      if (Math.random() < 0.45) shout()
+    }
+    const onRetreat = () => {
+      clearTimeout(attackTo)
+      attackTo = setTimeout(endAttack, 450)
+    }
+
     const onSwarmEnter = () => root.toggleAttribute('data-swarm', true)
     const onSwarmLeave = () => root.toggleAttribute('data-swarm', false)
     const onSwarmTouch = () => {
+      if (root.hasAttribute('data-attacked')) return
       clearTimeout(feltTo)
       hintLine.textContent = FELT
       hintSub.textContent = ''
@@ -183,6 +271,9 @@ export function Cursor() {
     addEventListener(SWARM_ENTER, onSwarmEnter)
     addEventListener(SWARM_LEAVE, onSwarmLeave)
     addEventListener(SWARM_TOUCH, onSwarmTouch)
+    addEventListener(SWARM_ATTACK, onAttack)
+    addEventListener(SWARM_BITE, onBite)
+    addEventListener(SWARM_RETREAT, onRetreat)
 
     return () => {
       cancelAnimationFrame(raf)
@@ -198,7 +289,13 @@ export function Cursor() {
       removeEventListener(SWARM_ENTER, onSwarmEnter)
       removeEventListener(SWARM_LEAVE, onSwarmLeave)
       removeEventListener(SWARM_TOUCH, onSwarmTouch)
+      removeEventListener(SWARM_ATTACK, onAttack)
+      removeEventListener(SWARM_BITE, onBite)
+      removeEventListener(SWARM_RETREAT, onRetreat)
       clearTimeout(feltTo)
+      clearTimeout(hurtTo)
+      clearTimeout(attackTo)
+      clearTimeout(healTo)
     }
   }, [])
 
