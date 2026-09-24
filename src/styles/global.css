@@ -548,6 +548,17 @@ canvas { display: block; }
   vector-effect: non-scaling-stroke;
 }
 
+/* On a phone the brain covers only the middle of the words, and a 0.6px
+   hairline round empty letters does not read. A real 1px line and a faint
+   fill make the words legible wherever the cloud is not behind them. */
+@media (max-width: 768px) {
+  .hero-mark__stroke {
+    stroke-width: 1.1px;
+    stroke: rgba(244, 237, 228, 0.62);
+    fill: rgba(236, 233, 242, 0.07);
+  }
+}
+
 /* A tracked label under the mark, not a line stretched across the measure */
 .hero-mark__sub {
   font-family: ui-monospace, Consolas, monospace;
@@ -621,7 +632,7 @@ canvas { display: block; }
 }
 
 @keyframes hero-hairline {
-  from { stroke-opacity: 0; }
+  from { stroke-opacity: 0; fill-opacity: 0; }
 }
 
 @keyframes hero-support {
@@ -3816,11 +3827,13 @@ html.has-cursor :is(input:not([type="range"]):not([type="checkbox"]):not([type="
   50% { opacity: 1; scale: 1.15; }
 }
 
-/* Phones: centred in the gap between the mark and the call to action */
+/* Phones: centred in the empty band between the status line and the mark.
+   Below the mark it ran into ENGINEER on short screens */
 @media (max-width: 768px) {
   .swarm-hint {
     left: 50%;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 200px);
+    top: calc(env(safe-area-inset-top, 0px) + 104px);
+    bottom: auto;
     translate: -50% 0;
   }
 }

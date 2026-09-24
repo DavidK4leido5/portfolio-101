@@ -66,8 +66,22 @@ export function ScrollDriver() {
     cacheZones()
     syncZone()
 
+    /*
+     * Once scrolling has stopped and the scrub has had time to land, the hero
+     * exit must agree with where the page is. A refresh can kill the scrub
+     * tween mid-flight, and back at the very top that left the mark zoomed in.
+     */
+    let settleTo: ReturnType<typeof setTimeout> | undefined
+    const settle = () => {
+      const y = window.scrollY
+      if (y <= 1) store().setHeroExitProgress(0)
+      else if (y >= traceTop) store().setHeroExitProgress(1)
+    }
+
     let ticking = false
     const onScroll = () => {
+      clearTimeout(settleTo)
+      settleTo = setTimeout(settle, 600)
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => { ticking = false; syncZone() })
@@ -76,10 +90,12 @@ export function ScrollDriver() {
 
     const ctx = gsap.context(() => {
       // Hero exit — the trace rising over the hero opens the mask and takes the
-      // FULL / STACK mark with it
+      // FULL / STACK mark with it. Starts at the top of the page, not at
+      // 'top bottom': that one moves with the phone's address bar, and a stale
+      // value left the exit a few percent in at scrollY 0
       ScrollTrigger.create({
         trigger: trace,
-        start: 'top bottom',
+        start: 0,
         end: 'top top',
         scrub: reduced ? true : 0.4,
         onUpdate: (self) => store().setHeroExitProgress(self.progress),
@@ -146,6 +162,7 @@ export function ScrollDriver() {
     return () => {
       clearTimeout(resizeTo)
       clearTimeout(layoutTo)
+      clearTimeout(settleTo)
       ro?.disconnect()
       removeEventListener('resize', onResize)
       removeEventListener('scroll', onScroll)
