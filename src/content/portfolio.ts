@@ -114,25 +114,15 @@ export const profile = {
       { value: "80%", label: "More leads at The Palace Manila" },
       { value: "35%", label: "Core Web Vitals gain at Codebility" },
     ] satisfies Stat[],
-    /**
-     * Drop a square crop at `src/content/assets/about.jpg`.
-     * The circle applies `object-fit: cover` and `filter: grayscale(1)`,
-     * so a colour photo goes black and white with no extra editing.
-     */
     image: {
       cdnUrl: "",
-      localPath: "/src/content/assets/about.jpg",
+      localPath: "/src/content/assets/about.png",
       alt: "David Remus Tribugenia",
     } satisfies ImageSource,
   },
 };
 
-/**
- * Client work shown in the Projects sector and walked through in the
- * scroll journey below it. Adding one is five fields: `slug` must match the
- * `client-work/` filename prefix so the screenshots attach themselves.
- * Story copy for the journey lives in `./projects.ts`.
- */
+
 export const projects: Project[] = [
   {
     id: "palace",
