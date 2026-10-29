@@ -90,15 +90,23 @@ function writeStageCamera(id: SectionId, destOut: Vector3, lookOut: Vector3, tie
   lookOut.set(0, 0, 0)
 }
 
-/** Waypoint 0 = home framing; 1..N = trace stages */
+/**
+ * Waypoint 0 = home framing; 1..N = trace stages.
+ *
+ * The stage names its own hotspot, so the flight follows the copy rather than
+ * the order the portfolio sections happen to sit in. Reading the hotspot off
+ * `SECTION_IDS[index - 1]` tied the two together: move a section and every
+ * stage below it flew to the wrong lobe.
+ */
 function writeWaypoint(index: number, destOut: Vector3, lookOut: Vector3, tier: Parameters<typeof sceneFraming>[0]) {
-  if (index <= 0) {
+  const stage = traceStages[index - 1]
+  if (index <= 0 || !stage) {
     const home = sceneFraming(tier).cam
     destOut.set(home.x, home.y, home.z)
     lookOut.set(0, 0, 0)
     return
   }
-  writeStageCamera(SECTION_IDS[index - 1], destOut, lookOut, tier)
+  writeStageCamera(stage.hotspot, destOut, lookOut, tier)
 }
 
 function idleOrbit(
@@ -134,7 +142,7 @@ export function CameraRig() {
     if (s.loadPhase !== 'ready') return
 
     if (s.scrollZone === 'trace' || s.scrollZone === 'sections') {
-      const n = SECTION_IDS.length
+      const n = traceStages.length
       const t = Math.min(1, Math.max(0, s.traceProgress)) * n
       const clamped = Math.min(t, n - 1e-6)
       const i0 = Math.floor(clamped)

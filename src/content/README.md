@@ -50,7 +50,7 @@ Drop image files into `assets/client-work/` — they appear automatically (no UR
 | `revivepharmacy (2).png` | Revive Pharmacy | 2nd shot |
 | `agentsly (1).avif` | Agentsly | … |
 
-Shots are grouped by project, sorted by `(n)`, then split across the two slider rows (first half of projects on top, second half on bottom). Each group shows the project name plus the matching role from `experience`, so companies you add here should use the same name in both places.
+Shots are grouped by project, sorted by `(n)`, then split across the two slider rows (first half of projects on top, second half on bottom). Each group shows the project name and its first shot.
 
 Supported: `.png` `.jpg` `.webp` `.avif` `.svg` `.gif`
 
@@ -103,33 +103,49 @@ Tune timing via `holdSec`, `morphSec`, `textInSec`, `textOutSec` on the same obj
 Each `tech` entry: `{ name, score (0–10), icon }`. Bar width = `score * 10%`.
 Keep about **6 primary skills per category** so the detail card fits without scrolling.
 
+## Projects vs Experience
+
+Two lists, two sections, and they do not borrow from each other.
+
+| List | Section | Holds |
+|------|---------|-------|
+| `experience` | Experience | Jobs held: role, company, period, what the role did, plus its walkthrough chapter |
+| `projects` | Projects | Client work outside those jobs. One entry today: TapUp |
+
+Anything shipped *inside* a job (Palace, Revive, Volatility, Agentsly,
+Codebility) is an `experience` entry and gets its chapter in the Experience
+walkthrough. It is not also a project. `projects` is only for client work you
+never held a job for, which is why it holds TapUp alone. A project row links
+straight to its live domain and shows no role or dates.
+
+### Role chapters (the scroll journey)
+
+The walkthrough closes the **Experience** section, one chapter per role that has
+copy in `projects.ts`, in `experience` order. Each block is keyed by the role's
+`id` (`exp-revive`), not by company name, so renaming a company cannot silently
+move a chapter onto a different job. Copy is three blocks (`intro`, `tech`,
+`build`) plus `stack` chips and an optional `domain`. The journey renders one
+viewport-tall beat per block and crossfades that role's screenshots across its
+three beats, in filename order.
+
+Adding a chapter is one edit: a `STORIES` block in `projects.ts` under the
+role's id. A role with no block is skipped by the walkthrough, which is how
+COMELEC stays an Experience row with no product story.
+
 ## Projects
 
-`projects` is the client work. Each entry:
+`projects` is the client work outside the roles. Each entry:
 
 | Field | Use |
 |-------|-----|
-| `id` | Stable key, and the key into `STORIES` in `projects.ts` |
-| `title` | Project name. Must match the `company` in `experience` |
-| `description` | Short blurb for the sector card |
+| `id` | Stable key |
+| `title` | Project name |
+| `description` | Short blurb for the index row |
 | `skills` | String chips (e.g. `['React', 'Next.js']`) |
 | `domain` | Optional live client URL. Omit when the work is not public |
-| `slug` | `client-work/` filename prefix, e.g. `revivepharmacy` |
+| `slug` | `client-work/` filename prefix, e.g. `tapup` |
 
-No repo links. Client repositories are private or company-owned, so a card links
+No repo links. Client repositories are private or company-owned, so a row links
 the live domain or nothing.
 
-`slug` is what attaches the screenshots. Get it right and the sector card, the
-Experience card, and the scroll walkthrough all pick up images with no other
-edits.
-
-### Project walkthrough (scroll journey)
-
-`projects.ts` holds three copy blocks per project (`intro`, `tech`, `build`),
-keyed by the project's `id`. The walkthrough below the brain journey renders one
-viewport-tall beat per block and crossfades that project's screenshots across
-its three beats, in filename order.
-
-Adding a project is two edits: the entry in `projects` here, and three copy
-blocks in `projects.ts` under the same id. A project with no copy blocks is
-skipped by the walkthrough but still shows in the Projects sector.
+`slug` is what attaches the screenshots.

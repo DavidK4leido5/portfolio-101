@@ -3,7 +3,7 @@
      makes text arrive rather than snap */
   --ease-osmo: cubic-bezier(0.625, 0.05, 0, 1);
   --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
-  --accent: #8b5cf6;
+  --accent: #97f1f7;
   /* Type on the dark ground */
   --cream: #ece9f2;
   --scroll-track: rgba(255, 255, 255, 0.04);
@@ -2686,21 +2686,6 @@ canvas { display: block; }
 
 .spine-title__dot {
   color: var(--section-color);
-}
-
-/* Projects: the word is a window onto a client screenshot. The hairline keeps
-   the letterforms legible where the image runs dark */
-.spine-title__line.is-filled {
-  color: transparent;
-  background-size: cover;
-  background-position: center 30%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-stroke: 0.008em rgba(244, 237, 228, 0.55);
-}
-
-.spine-title__line.is-filled .spine-title__dot {
-  -webkit-text-stroke: 0;
 }
 
 /* At this scale a fade reads as nothing happening, so the line rides up from

@@ -1,8 +1,7 @@
 import { renderToString } from 'react-dom/server'
 import { SectionsSpine } from './ui/SectionsSpine'
 import { SiteFooter } from './ui/SiteFooter'
-import { profile, projects } from './content/portfolio'
-import { projectStories } from './content/projects'
+import { experience, profile, projects } from './content/portfolio'
 import { traceOpening, traceStages } from './content/requestTrace'
 
 /**
@@ -25,9 +24,9 @@ export function render() {
  * black, so the swap to the live hero is not seen.
  */
 export function renderHero() {
-  const summary = `React, Node and PostgreSQL systems for ${projects
+  const summary = `React, Node and PostgreSQL systems for ${experience
     .slice(0, 3)
-    .map((p) => p.title)
+    .map((e) => e.company)
     .join(', ')} and more, from ${profile.about.location}.`
   return renderToString(
     <header
@@ -60,22 +59,18 @@ export function projectsLd() {
     '@type': 'ItemList',
     '@id': `${SITE}#projects`,
     name: `Client projects by ${profile.fullName}`,
-    itemListElement: projects.map((p, i) => {
-      const story = projectStories.find((s) => s.id === p.id)
-      return {
-        '@type': 'ListItem',
-        position: i + 1,
-        item: {
-          '@type': 'CreativeWork',
-          '@id': `${SITE}#project-${p.id}`,
-          name: p.title,
-          description: p.description,
-          ...(p.domain ? { url: p.domain } : {}),
-          keywords: p.skills.join(', '),
-          creator: { '@id': `${SITE}#person` },
-          ...(story?.period ? { temporalCoverage: story.period } : {}),
-        },
-      }
-    }),
+    itemListElement: projects.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'CreativeWork',
+        '@id': `${SITE}#project-${p.id}`,
+        name: p.title,
+        description: p.description,
+        ...(p.domain ? { url: p.domain } : {}),
+        keywords: p.skills.join(', '),
+        creator: { '@id': `${SITE}#person` },
+      },
+    })),
   }
 }

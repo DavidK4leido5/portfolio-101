@@ -345,7 +345,9 @@ vec3 nodePalette(vec3 pos, float seed, float aff, float depth){
   col=mix(col*0.52,col*1.02,1.0-d);
   col*=0.72+0.22*seed;
   col=mix(col,uAccent,0.06);
-  if(aff>=0.0) col=mix(col,sectionColor(aff),0.52);
+  // The five regions read as colour, not as a tint: most of the node's colour
+  // comes from the section it belongs to, so each area holds its hue.
+  if(aff>=0.0) col=mix(col,sectionColor(aff),0.82);
   return col;
 }
 `

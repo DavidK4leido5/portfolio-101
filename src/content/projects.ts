@@ -1,13 +1,15 @@
 import { clientWorkGroups, type ClientWork } from './clientWorks'
-import { experience, projects, type Project } from './portfolio'
+import { experience, type Experience } from './portfolio'
 
 /**
- * Long-form walkthrough for the projects scroll journey.
+ * Long-form walkthrough for the Experience scroll journey.
  *
- * Add a project by adding it to `projects` in `./portfolio.ts`, then adding
- * three copy blocks here under the same id. Screenshots attach themselves from
- * `assets/client-work/` via the project's `slug`, split across the three blocks
- * in filename order, so there are no image paths to maintain here.
+ * One chapter per role that has copy here, in `experience` order. Key the copy
+ * by the role's `id` (`exp-revive`) so a chapter can never drift onto a
+ * different job. A role with no block is skipped, which is how a job with no
+ * product story (COMELEC) stays off the timeline. Screenshots attach
+ * themselves from `assets/client-work/` via the role's `slug`, split across
+ * the three blocks in filename order, so there are no image paths here.
  */
 
 export type ProjectBeatId = 'intro' | 'tech' | 'build'
@@ -20,60 +22,67 @@ const BEAT_LABELS: Record<ProjectBeatId, string> = {
 
 const BEAT_ORDER: ProjectBeatId[] = ['intro', 'tech', 'build']
 
-type StoryCopy = Record<ProjectBeatId, string>
+/** Three copy blocks, plus the chips and the link the chapter shows. */
+type StoryCopy = Record<ProjectBeatId, string> & {
+  /** Shown under "Technologies used" */
+  stack: string[]
+  /** Live product URL, linked at the end of "Design & implementation" */
+  domain?: string
+}
 
-/** One colour per project for the timeline line, comet, node and numeral. */
+/** One colour per chapter for the timeline line, comet, node and numeral. */
 const ACCENTS: Record<string, string> = {
-  palace: '#e8b86b',
-  revive: '#35e0c8',
-  volatility: '#ff5c7a',
-  agentsly: '#8b7bff',
-  tapup: '#4da6ff',
-  codebility: '#7ee08a',
+  'exp-palace': '#e8b86b',
+  'exp-revive': '#35e0c8',
+  'exp-volatility': '#ff5c7a',
+  'exp-agentsly': '#8b7bff',
+  'exp-codebility': '#7ee08a',
 }
 
 const STORIES: Record<string, StoryCopy> = {
-  palace: {
+  'exp-palace': {
     intro:
       "The Palace Manila needed a site that sells the venue: rooms, event types, booking enquiries, and a way to capture leads that doesn't end in an inbox nobody reads. I built it as a prototype the marketing team can keep running without me.",
     tech: 'Webflow CMS holds the content model, so venues and events are entries rather than hand-built pages. On-page SEO covers metadata, heading structure, and how the content is organised. Python scripts pull competitor and locator data straight into the CMS instead of someone typing it in.',
     build:
       'I rebuilt the booking, inquiry, and newsletter paths so each one is a short route to a single form, and moved customer reviews onto the pages where people actually decide. Lead volume rose about 80%.',
+    stack: ['Webflow CMS', 'SEO', 'Python', 'Content modelling'],
+    domain: 'https://the-palace-manila-prototype.webflow.io/',
   },
-  revive: {
+  'exp-revive': {
     intro:
       'Revive Pharmacy ran as one system where a single failure took everything with it. My job was to split it up, lock it down, and make deploying something we could do in the middle of the day.',
     tech: 'Node.js microservices on PostgreSQL and Redis, each able to deploy and fail on its own. Nginx sits in front on a Linux VPS with rate limiting and DDoS controls. Docker and Git run CI/CD directly on the VPS.',
     build:
       'I profiled the queries on the paths customers actually hit and added the indexes they were missing, cutting API response times about 40%. Automating the Docker pipeline cut deploy time about 75%.',
+    stack: ['Node.js', 'PostgreSQL', 'Redis', 'Nginx', 'Docker', 'Linux'],
+    domain: 'https://revivepharmacy.com.au/',
   },
-  volatility: {
+  'exp-volatility': {
     intro:
       'Volatility sells trading education, and the whole funnel ran through a landing page and a webinar. Both had to convert, and the marketing team needed to change them without waiting on a pull request.',
     tech: 'React on the front end, built in Agile sprints against the marketing calendar. Strapi CMS wired into the frontend to power the blog with ongoing editorial updates. A video platform built to host recurring live events.',
     build:
       'I rebuilt the landing page around one call to action and shortened the path to signup, raising engagement and conversions about 22%. The video platform hosted the recurring live webinars the sales team ran.',
+    stack: ['React', 'Strapi', 'Video', 'SEO'],
+    domain: 'https://volatility.com.au/',
   },
-  agentsly: {
+  'exp-agentsly': {
     intro:
       'Agentsly puts an LLM in front of real customers, which makes the plumbing around the model matter as much as the prompt. I built the full-stack features and kept production up while people were using it.',
     tech: 'React and Node with Express REST APIs and GraphQL over PostgreSQL. The LLM work runs on the Vercel AI SDK and the OpenAI API. GoHighLevel is integrated so the team can track a lead from capture through follow-up.',
     build:
       'Rolling ShadCN UI patterns across the app cut frontend delivery time about 30%, because new screens stopped being built from scratch. Production ran on AWS and held 99.9% uptime across live user traffic.',
+    stack: ['React', 'Node.js', 'GraphQL', 'PostgreSQL', 'Vercel AI SDK', 'AWS'],
   },
-  tapup: {
-    intro:
-      'TapUp is a card platform where an account is a card. It started as a developer card, somewhere to put your work and your links, and grew into something closer to a social network: profiles, portfolios, and connections between them.',
-    tech: 'Next.js on the front and Firebase underneath, using auth, storage, and the database. Cards, portfolios, and social features all read from the same account model, so one profile can be shown as a card, a portfolio, or a feed entry.',
-    build:
-      'I ran scope and delivery as well as building. That meant agreeing what a card actually is, splitting it into work a team could build in parallel, and shipping the platform with them.',
-  },
-  codebility: {
+  'exp-codebility': {
     intro:
       'Codebility runs digital delivery teams, and the platform behind it manages both employees and clients. I worked on the platform and on the juniors building it.',
     tech: 'Next.js and TypeScript on the product, Jest for the tests, and code review on every pull request with the test scripts run before each merge.',
     build:
       'I improved Next.js rendering on the production pages and Core Web Vitals rose about 35%. Unit tests on the critical flows cut manual regression work about 50%.',
+    stack: ['Next.js', 'TypeScript', 'Jest', 'Tailwind'],
+    domain: 'https://www.codebility.tech/',
   },
 }
 
@@ -83,6 +92,7 @@ export type ProjectBeat = {
   body: string
 }
 
+/** One role, told as the chapter it gets on the timeline. */
 export type ProjectStory = {
   id: string
   title: string
@@ -92,31 +102,29 @@ export type ProjectStory = {
   accent: string
   stack: string[]
   beats: ProjectBeat[]
-  /** Every shot for the project, in order — the stage crossfades through these */
+  /** Every shot for the chapter, in order — the stage crossfades through these */
   shots: ClientWork[]
 }
 
 const shotsBySlug = new Map(clientWorkGroups.map((g) => [g.key, g.shots]))
-const roleByCompany = new Map(experience.map((e) => [e.company, e]))
 
-function toStory(project: Project): ProjectStory | null {
-  const copy = STORIES[project.id]
+function toStory(role: Experience): ProjectStory | null {
+  const copy = STORIES[role.id]
   if (!copy) return null
-  const role = roleByCompany.get(project.title)
   return {
-    id: project.id,
-    title: project.title,
-    role: role?.role ?? '',
-    period: role?.period ?? '',
-    domain: project.domain,
-    accent: ACCENTS[project.id] ?? '#8b5cf6',
-    stack: project.skills,
-    shots: shotsBySlug.get(project.slug) ?? [],
+    id: role.id,
+    title: role.company,
+    role: role.role,
+    period: role.period,
+    domain: copy.domain,
+    accent: ACCENTS[role.id] ?? '#8b5cf6',
+    stack: copy.stack,
+    shots: (role.slug && shotsBySlug.get(role.slug)) || [],
     beats: BEAT_ORDER.map((id) => ({ id, label: BEAT_LABELS[id], body: copy[id] })),
   }
 }
 
-export const projectStories: ProjectStory[] = projects
+export const projectStories: ProjectStory[] = experience
   .map(toStory)
   .filter((s): s is ProjectStory => s !== null)
 

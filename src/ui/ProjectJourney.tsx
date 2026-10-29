@@ -548,10 +548,13 @@ export function ProjectJourney() {
                       <h3 className="project-beat__title" id={`project-${s.id}-title`} data-row>
                         <span className="mask-line">{s.title}</span>
                       </h3>
-                      <p className="project-beat__role" data-row>
-                        {s.role}
-                        {s.period ? ` · ${s.period}` : ''}
-                      </p>
+                      {(s.role || s.period) && (
+                        <p className="project-beat__role" data-row>
+                          {s.role}
+                          {s.role && s.period ? ' · ' : ''}
+                          {s.period}
+                        </p>
+                      )}
                     </header>
                   )}
                   <p className="project-beat__label" data-row>{b.label}</p>
@@ -662,7 +665,9 @@ export function ProjectJourney() {
             key={s.id}
             style={{ color: s.accent }}
           >
-            <span className="journey-line__node-label">{s.period.split(' - ')[0]}</span>
+            {s.period && (
+              <span className="journey-line__node-label">{s.period.split(' - ')[0]}</span>
+            )}
           </span>
         ))}
         {/* Track from the first beat to the last; the pin inside it is

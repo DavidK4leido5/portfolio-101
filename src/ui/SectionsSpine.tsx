@@ -10,16 +10,8 @@ import { SkillsPanel } from './SkillsPanel'
 import { ContactPanel } from './ContactPanel'
 import { ClientWorkStrip, TestimonialStrip } from './WorkStrips'
 import { ProjectJourney } from './ProjectJourney'
-import { projectStories } from '../content/projects'
-import { useSoftFill } from './softFill'
 
 const pad = (n: number) => String(n).padStart(2, '0')
-
-/**
- * The Projects title is filled with a client screenshot. Revive's dashboard,
- * because it is light: a dark shot inside the letters sinks into the ground.
- */
-const projectsFill = (projectStories.find((s) => s.id === 'revive') ?? projectStories[0])?.shots[0]?.src
 
 const prefersReduced = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -78,7 +70,7 @@ function SectionBody({ id }: { id: SectionId }) {
 /** Full-bleed extras that belong to a section but break out of its column. */
 function SectionExtras({ id }: { id: SectionId }): ReactNode {
   if (id === 'projects') return <ClientWorkStrip />
-  // The walkthrough closes Experience: each client build told as the job it was
+  // The walkthrough closes Experience: every role told as the build it was
   if (id === 'experience') {
     return (
       <>
@@ -100,8 +92,6 @@ function SectionExtras({ id }: { id: SectionId }): ReactNode {
  */
 export function SectionsSpine() {
   const rootRef = useRef<HTMLElement>(null)
-  // Softened client-side; until then (and in the prerendered page) the title is solid
-  const projectsSoft = useSoftFill(projectsFill, sections[SECTION_IDS.indexOf('projects')].color)
 
   useEffect(() => {
     const root = rootRef.current
@@ -153,17 +143,7 @@ export function SectionsSpine() {
                   of itself to trigger, so the title stays hidden forever.
                 */}
                 <span className="spine-title__mask" data-reveal>
-                  <span
-                    className={`spine-title__line${id === 'projects' && projectsSoft ? ' is-filled' : ''}`}
-                    data-fit
-                    // Inline so the url() resolves against the document, not
-                    // the stylesheet in assets/
-                    style={
-                      id === 'projects' && projectsSoft
-                        ? { backgroundImage: `url("${projectsSoft}")` }
-                        : undefined
-                    }
-                  >
+                  <span className="spine-title__line" data-fit>
                     {sectionCopy[id].headline}
                     <span className="spine-title__dot" aria-hidden>.</span>
                   </span>

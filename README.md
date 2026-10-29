@@ -16,7 +16,7 @@ An interactive 3D portfolio built as a cinematic neural brain. Thousands of part
 - **Section spine** — the five portfolio sections as full-bleed editorial blocks below the brain, each opening on its index and a display word fitted to the column measure
 - **Ambient brain activity** — subtle accent-colored waves fire from random surface points on a slow cycle
 - **Neural density slider** — adjust active node count at runtime (quality-tier aware)
-- **Project walkthrough** — inside the Projects section: a sticky CSS-3D deck of browser-framed screenshots, advanced by scroll across three copy beats per project
+- **Experience walkthrough** — inside the Experience section: a sticky CSS-3D deck of browser-framed screenshots, advanced by scroll across three copy beats per role
 - **Scroll reveals** — copy resolves word by word as it reaches the sweet spot, headings ride up from under their own mask, and one-shot reveals bring each section in
 - **Scene suspend** — an IntersectionObserver stops the render loop the moment the brain is covered, then unmounts the Canvas if the reader stays down the page, releasing the WebGL context
 - **Responsive quality tiers** — desktop, tablet, and mobile presets for particles, connections, and post-processing

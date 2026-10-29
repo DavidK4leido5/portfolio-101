@@ -1,37 +1,30 @@
-import type { MouseEvent } from 'react'
 import { projects } from '../content/portfolio'
-import { projectStories } from '../content/projects'
+import { clientWorkGroups } from '../content/clientWorks'
 import { useSoftFill } from './softFill'
-import { glideTo } from '../scroll/traceNav'
 
-const storyById = new Map(projectStories.map((s) => [s.id, s]))
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** Glide to the project's chapter in the timeline instead of jumping there. */
-function toChapter(e: MouseEvent<HTMLAnchorElement>, id: string) {
-  const el = document.getElementById(`project-${id}`)
-  if (!el) return
-  e.preventDefault()
-  glideTo(el.getBoundingClientRect().top + scrollY)
-  history.replaceState(null, '', `#project-${id}`)
-}
+/** TapUp's accent. One project, so a per-project palette would be noise. */
+const ACCENT = '#4da6ff'
+
+const shotBySlug = new Map(clientWorkGroups.map((g) => [g.key, g.shots]))
 
 type Row = (typeof projects)[number]
 
 function IndexRow({ p, i }: { p: Row; i: number }) {
-  const story = storyById.get(p.id)
   // Softened so the screenshot's own copy does not read through the letters
-  const shot = useSoftFill(story?.shots[0]?.src, story?.accent)
+  const shot = useSoftFill(shotBySlug.get(p.slug)?.[0]?.src, ACCENT)
   return (
     <li
       className="project-index__row"
       data-reveal
-      style={{ '--row-accent': story?.accent } as React.CSSProperties}
+      style={{ '--row-accent': ACCENT } as React.CSSProperties}
     >
       <a
         className="project-index__link"
-        href={`#project-${p.id}`}
-        onClick={(e) => toChapter(e, p.id)}
+        href={p.domain}
+        target="_blank"
+        rel="noreferrer"
       >
         <span className="project-index__num">{pad(i + 1)}</span>
         <span
@@ -48,24 +41,20 @@ function IndexRow({ p, i }: { p: Row; i: number }) {
         </span>
         <span className="project-index__meta">
           <span className="project-index__desc">{p.description}</span>
-          {story?.role && (
-            <span className="project-index__role">
-              {story.role}
-              {story.period ? ` · ${story.period}` : ''}
-            </span>
-          )}
         </span>
-        <span className="project-index__arrow" aria-hidden>↘</span>
+        <span className="project-index__arrow" aria-hidden>↗</span>
       </a>
     </li>
   )
 }
 
 /**
- * The project index: one row per client build, the name set at display scale.
- * Each row links to its chapter in the timeline under Experience. On hover the
- * name fills with the project's first screenshot, softened, wiped in by
- * shrinking a flat cover layer stacked over it inside the same
+ * The project index: one row per client build that is not one of the roles,
+ * the name set at display scale, linking out to the live site. Roles and their
+ * walkthrough chapters live under Experience.
+ *
+ * On hover the name fills with the project's first screenshot, softened, wiped
+ * in by shrinking a flat cover layer stacked over it inside the same
  * `background-clip: text`.
  */
 export function ProjectsPanel() {

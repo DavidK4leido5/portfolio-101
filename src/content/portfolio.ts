@@ -123,42 +123,11 @@ export const profile = {
 };
 
 
+/**
+ * Client work that is not one of the roles below. Everything shipped inside a
+ * job lives in `experience` and gets its chapter in the walkthrough there.
+ */
 export const projects: Project[] = [
-  {
-    id: "palace",
-    title: "The Palace Manila",
-    description:
-      "Events venue site on Webflow CMS: rooms, event types, booking enquiries, and lead capture, with an on-page SEO campaign behind it.",
-    skills: ["Webflow CMS", "SEO", "Python", "Content modelling"],
-    domain: "https://the-palace-manila-prototype.webflow.io/",
-    slug: "thepalacemanila",
-  },
-  {
-    id: "revive",
-    title: "Revive Pharmacy",
-    description:
-      "Pharmacy platform split into Node.js microservices on PostgreSQL and Redis, hardened behind Nginx and deployed by Docker CI/CD.",
-    skills: ["Node.js", "PostgreSQL", "Redis", "Nginx", "Docker", "Linux"],
-    domain: "https://revivepharmacy.com.au/",
-    slug: "revivepharmacy",
-  },
-  {
-    id: "volatility",
-    title: "Volatility",
-    description:
-      "Marketing funnel for a trading education business: React landing pages, a Strapi-driven blog, and a live webinar video platform.",
-    skills: ["React", "Strapi", "Video", "SEO"],
-    domain: "https://volatility.com.au/",
-    slug: "volatility",
-  },
-  {
-    id: "agentsly",
-    title: "Agentsly",
-    description:
-      "AI product with LLM features on the Vercel AI SDK and OpenAI, GraphQL and REST over PostgreSQL, running on AWS at 99.9% uptime.",
-    skills: ["React", "Node.js", "GraphQL", "PostgreSQL", "Vercel AI SDK", "AWS"],
-    slug: "agentsly",
-  },
   {
     id: "tapup",
     title: "TapUp",
@@ -167,15 +136,6 @@ export const projects: Project[] = [
     skills: ["Next.js", "Firebase Auth", "Firestore", "Firebase Storage", "TypeScript"],
     domain: "https://www.tapup.tech/",
     slug: "tapup",
-  },
-  {
-    id: "codebility",
-    title: "Codebility",
-    description:
-      "Employee and client management platform for a digital delivery team, tuned for Next.js rendering and Core Web Vitals.",
-    skills: ["Next.js", "TypeScript", "Jest", "Tailwind"],
-    domain: "https://www.codebility.tech/",
-    slug: "codebility",
   },
 ];
 
@@ -279,7 +239,7 @@ export const experience: Experience[] = [
   },
   {
     id: "exp-revive",
-    role: "Systems Engineer",
+    role: "Lead Engineer (Full Stack)",
     company: "Revive Pharmacy",
     period: "Mar 2025 - Aug 2026",
     description:
@@ -290,14 +250,14 @@ export const experience: Experience[] = [
     id: "exp-volatility",
     role: "Full Stack Engineer",
     company: "Volatility",
-    period: "Oct 2024 - Feb 2025",
+    period: "Oct 2024 - Mar 2025",
     description:
       "Responsive React landing pages for the marketing funnel, Strapi CMS wired into the frontend for the blog, and a video platform hosting recurring live webinars. Conversions rose about 22%.",
     slug: "volatility",
   },
   {
     id: "exp-agentsly",
-    role: "Full Stack Engineer",
+    role: "Lead Engineer (Full Stack)",
     company: "Agentsly",
     period: "May 2024 - Oct 2024",
     description:
@@ -305,19 +265,10 @@ export const experience: Experience[] = [
     slug: "agentsly",
   },
   {
-    id: "exp-tapup",
-    role: "Fullstack Developer & Project Manager",
-    company: "TapUp",
-    period: "Nov 2023 - May 2024",
-    description:
-      "A card platform where every account is a card: developer profiles, portfolios, and social features on Next.js and Firebase. I ran scope and delivery as well as building it.",
-    slug: "tapup",
-  },
-  {
     id: "exp-codebility",
     role: "Full Stack Engineer / Mentor",
     company: "Codebility",
-    period: "Nov 2023 - May 2024",
+    period: "Nov 2023 - Present",
     description:
       "Mentored juniors on Next.js, TypeScript, and Jest, ran code review on every pull request, and wrote unit tests for the critical flows. Core Web Vitals improved about 35%.",
     slug: "codebility",
@@ -412,12 +363,12 @@ export const sectionCopy = {
   projects: {
     headline: "Projects",
     intro:
-      "Six client builds, from a Manila events venue on Webflow to an LLM product on AWS. Each has its own chapter under Experience.",
+      "Client work outside the roles below: a card platform where an account is a card.",
   },
   experience: {
     headline: "Experience",
     intro:
-      "Seven full-stack and systems roles since 2021, newest first, with the numbers that came out of them.",
+      "Six full-stack and systems roles since 2021, newest first, with the numbers that came out of them.",
   },
   skills: {
     headline: "Skills",

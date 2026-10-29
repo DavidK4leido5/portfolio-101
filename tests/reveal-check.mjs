@@ -246,9 +246,9 @@ else if (bare.pending === 0) {
 // —— Projects walkthrough: word stagger and masked heading ——
 /*
  * Scroll off the beats' own centres rather than the walkthrough's top. The
- * walkthrough sits nested inside the projects section now, so its top is no
- * longer one viewport above the first beat's centre, and ProjectJourney drives
- * everything from `scrollY + vh/2` against those centres.
+ * walkthrough sits nested inside the experience section, so its top is not one
+ * viewport above the first beat's centre, and ProjectJourney drives everything
+ * from `scrollY + vh/2` against those centres.
  */
 const beatCentres = await page.evaluate(() =>
   [...document.querySelectorAll('[data-beat]')].map((el) => {
@@ -273,8 +273,8 @@ const readWords = (beat) => page.evaluate((b) => {
 /*
  * Not beat 0: ProjectJourney clamps its position to >= 0 so the first beat is
  * already settled when you arrive rather than sitting dim, which means it can
- * never show an approach. Beat 6 opens the third project, so it has the masked
- * heading as well as the word body.
+ * never show an approach. Beat 6 opens the third role's chapter, so it has the
+ * masked heading as well as the word body.
  */
 const PROBE_BEAT = 6
 

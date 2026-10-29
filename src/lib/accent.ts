@@ -1,7 +1,12 @@
 import { Color } from 'three'
 
 const CYCLE = 300
-const HUE_STOPS = [270, 315, 230, 185, 270]
+/**
+ * Hue journey over one cycle. Starts on the cyan stop rather than the violet
+ * one, so the page opens cool and drifts into warm instead of opening purple.
+ * Same stops as authored, just rotated one place.
+ */
+const HUE_STOPS = [185, 270, 315, 230, 185]
 
 function accentHue(t: number): number {
   const p = ((t % CYCLE) + CYCLE) % CYCLE / CYCLE * (HUE_STOPS.length - 1)
