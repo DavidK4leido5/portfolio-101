@@ -2,6 +2,7 @@ import { renderToString } from 'react-dom/server'
 import { SectionsSpine } from './ui/SectionsSpine'
 import { SiteFooter } from './ui/SiteFooter'
 import { experience, profile, projects } from './content/portfolio'
+import { projectStories } from './content/projects'
 import { traceOpening, traceStages } from './content/requestTrace'
 
 /**
@@ -53,23 +54,59 @@ export function renderHero() {
 
 const SITE = 'https://stackwithdavid.is-a.dev/'
 
-/** Projects as schema.org CreativeWork, from the same data the page renders. */
+type ClientWorkLd = {
+  id: string
+  name: string
+  description: string
+  url?: string
+  keywords: string
+  period?: string
+}
+
+/**
+ * Every client build the page carries, from both halves of the content: the
+ * chapters told under each role, then the standalone projects. The Projects
+ * section shows only the second half, but a crawler should still find the six,
+ * and the chapter list is what makes that list complete.
+ */
+function clientWorkLd(): ClientWorkLd[] {
+  return [
+    ...projectStories.map((story) => ({
+      id: story.id,
+      name: story.title,
+      description: story.beats[0].body,
+      url: story.domain,
+      keywords: story.stack.join(', '),
+      period: story.period,
+    })),
+    ...projects.map((p) => ({
+      id: p.id,
+      name: p.title,
+      description: p.description,
+      url: p.domain,
+      keywords: p.skills.join(', '),
+    })),
+  ]
+}
+
+/** Client work as schema.org CreativeWork, from the same data the page renders. */
 export function projectsLd() {
   return {
     '@type': 'ItemList',
     '@id': `${SITE}#projects`,
     name: `Client projects by ${profile.fullName}`,
-    itemListElement: projects.map((p, i) => ({
+    itemListElement: clientWorkLd().map((w, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       item: {
         '@type': 'CreativeWork',
-        '@id': `${SITE}#project-${p.id}`,
-        name: p.title,
-        description: p.description,
-        ...(p.domain ? { url: p.domain } : {}),
-        keywords: p.skills.join(', '),
+        '@id': `${SITE}#project-${w.id}`,
+        name: w.name,
+        description: w.description,
+        ...(w.url ? { url: w.url } : {}),
+        keywords: w.keywords,
         creator: { '@id': `${SITE}#person` },
+        ...(w.period ? { temporalCoverage: w.period } : {}),
       },
     })),
   }
