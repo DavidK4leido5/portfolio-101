@@ -102,9 +102,7 @@ export const profile = {
     ],
     facts: [
       { label: "Based", value: "Negros Occidental, PH" },
-      { label: "Experience", value: "5 years (3 shipping product)" },
       { label: "Hours", value: "AU business hours" },
-      { label: "Focus", value: "React · Node · Postgres" },
       { label: "Status", value: "Open to work" },
       { label: "Education", value: "BS Computer Engineering, TUP" },
     ] satisfies Fact[],
