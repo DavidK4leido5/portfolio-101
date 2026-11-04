@@ -110,13 +110,13 @@ Two lists, two sections, and they do not borrow from each other.
 | List | Section | Holds |
 |------|---------|-------|
 | `experience` | Experience | Jobs held: role, company, period, what the role did, plus its walkthrough chapter |
-| `projects` | Projects | Client work outside those jobs. One entry today: TapUp |
+| `projects` | Projects | Work outside those jobs, client or self-directed. Six entries today: Dalorro, Swiftcart, Aero, Formix, Nexora, TapUp |
 
 Anything shipped *inside* a job (Palace, Revive, Volatility, Agentsly,
 Codebility) is an `experience` entry and gets its chapter in the Experience
 walkthrough. It is not also a project. `projects` is only for client work you
-never held a job for, which is why it holds TapUp alone. A project row links
-straight to its live domain and shows no role or dates.
+never held a job for. A project row links straight to its live domain and
+shows no role or dates.
 
 ### Role chapters (the scroll journey)
 

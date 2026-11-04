@@ -127,6 +127,51 @@ export const profile = {
  */
 export const projects: Project[] = [
   {
+    id: "dalorro",
+    title: "Dalorro",
+    description:
+      "A personal finance app: accounts, transactions, budgets, goals, and recurring bills in one ledger. Cron reminders fire before a bill, reports export to PDF, and the tables filter server-side.",
+    skills: ["Next.js", "TypeScript", "Neon Postgres", "Neon Auth", "Drizzle", "TanStack Table", "Recharts", "Vercel Cron"],
+    domain: "https://spendwise-three-omega.vercel.app/",
+    slug: "dalorro",
+  },
+  {
+    id: "swiftcart",
+    title: "Swiftcart",
+    description:
+      "A multi-vendor marketplace where independent stores list, price, and track stock. Sellers build variants as a graph, and the catalogue runs on cached reads, infinite scroll, and a virtualised grid.",
+    skills: ["Next.js", "TypeScript", "Neon Postgres", "Neon Auth", "Drizzle", "Cloudinary", "TanStack Virtual"],
+    domain: "https://swiftcart-ashy.vercel.app/",
+    slug: "swiftcart",
+  },
+  {
+    id: "aero",
+    title: "Aero",
+    description:
+      "A product page for a professional aerial system, driven entirely by scroll: 239 frames scrubbed on canvas, preloaded behind a gate, with the engineering copy landing frame by frame.",
+    skills: ["JavaScript", "Canvas", "Scroll-driven animation", "WebP", "GitHub Pages"],
+    domain: "https://davidk4leido5.github.io/AERO/",
+    slug: "aero",
+  },
+  {
+    id: "formix",
+    title: "Formix",
+    description:
+      "A brand studio page that unrolls a 240-frame sequence as you scroll, the copy turning with the shot. Vanilla JS and a canvas, no framework, motion off when the OS asks.",
+    skills: ["JavaScript", "Canvas", "Scroll-driven animation", "CSS"],
+    domain: "https://davidk4leido5.github.io/Formix/",
+    slug: "formix",
+  },
+  {
+    id: "nexora",
+    title: "Nexora",
+    description:
+      "A gadget commerce page, plus the case study of how it was built: a scroll-scrubbed flythrough, one tokenised type system, and every component annotated with its reason.",
+    skills: ["JavaScript", "Canvas", "Scroll-driven animation", "Design tokens"],
+    domain: "https://davidk4leido5.github.io/nexora/",
+    slug: "nexora",
+  },
+  {
     id: "tapup",
     title: "TapUp",
     description:
@@ -361,7 +406,7 @@ export const sectionCopy = {
   projects: {
     headline: "Projects",
     intro:
-      "Client work outside the roles below: a card platform where an account is a card.",
+      "Builds outside the roles below: two full-stack apps, three scroll-driven product pages, and a card platform.",
   },
   experience: {
     headline: "Experience",
